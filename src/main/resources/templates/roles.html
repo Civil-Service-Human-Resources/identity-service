@@ -9,7 +9,6 @@
                 <th>Description</th>
             </tr>
             <tr th:each="role : ${roles}">
-                <td th:text="${role.toString()}"></td>
                 <td th:text="${role.name}"></td>
                 <td th:text="${role.description}"></td>
                 <td><a th:href="@{|/mgt/roles/edit/${role.roleId}|}">Edit</a></td>
