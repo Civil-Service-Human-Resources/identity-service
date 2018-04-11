@@ -39,6 +39,10 @@ public class Role {
         this.description = description;
     }
 
+    public long getRoleId() {
+        return id;
+    }
+
     @Override
     public String toString() {
         return "Role{" +

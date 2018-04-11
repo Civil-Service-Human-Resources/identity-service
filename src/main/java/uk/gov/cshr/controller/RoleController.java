@@ -33,12 +33,24 @@ public class RoleController {
         return "roles";
     }
 
+
+    @GetMapping("/roles/edit/{id}")
+    public String roleEdit(Model model) {
+        LOGGER.debug("Editing role new role ${id}");
+
+        Iterable<Role> roles = roleService.findAll();
+
+
+        return "roles";
+    }
+
     @PostMapping("/roles/create")
-    public String roleSubmit(@ModelAttribute("role") Role role){
+    public String roleSubmit(@ModelAttribute("role") Role role) {
         LOGGER.debug("Creating new role {}", role.toString());
 
         roleService.createNewRole(role);
 
         return "redirect:/mgt/roles";
     }
+
 }
