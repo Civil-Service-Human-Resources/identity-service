@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/webjars/bootstrap/4.0.0-2/css/bootstrap-theme.min.css"/>
+</head>
+<body>
+<div class="container">
+    <div layout:fragment="content" class="col col-8 align-self-center">
+        <h1>List of Roles</h1>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+            </tr>
+            <tr th:each="role : ${roles}">
+                <td th:text="${role.name}"></td>
+                <td th:text="${role.description}"></td>
+            </tr>
+        </table>
+        <form action="#" th:action="@{/mgt/roles/create}" th:object="${role}" method="post">
+            <p>Name: <input type="text" th:field="*{name}" /></p>
+            <p>Description: <input type="text" th:field="*{description}" /></p>
+            <p><input type="submit" value="Submit" /></p>
+        </form>
+    </div>
+</div>
+<th:block layout:fragment="scripts"></th:block>
+</body>
+</html>
