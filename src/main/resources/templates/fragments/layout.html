@@ -1,0 +1,22 @@
+<html th:fragment="page(title,content)" ang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+    <head>
+        <meta charset="UTF-8"/>
+        <title th:replace="${title}">Title</title>
+        <link rel="stylesheet" href="/webjars/bootstrap/4.0.0-2/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="/webjars/bootstrap/4.0.0-2/css/bootstrap-theme.min.css"/>
+    </head>
+
+    <body>
+        <div id="content">
+            <th:block th:include="${content}" />
+        </div>
+    </body>
+</html>
+
+
+
+
+
