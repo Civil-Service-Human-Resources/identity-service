@@ -13,7 +13,7 @@ import uk.gov.cshr.domain.Role;
 import uk.gov.cshr.service.RoleService;
 
 @Controller
-@RequestMapping("/mgt")
+@RequestMapping("/management")
 public class RoleController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RoleController.class);
@@ -50,7 +50,7 @@ public class RoleController {
 
         roleService.createNewRole(role);
 
-        return "redirect:/mgt/roles";
+        return "redirect:/management/roles";
     }
 
 }
