@@ -30,7 +30,7 @@ public class RoleController {
         model.addAttribute("roles", roles);
         model.addAttribute("role", new Role());
 
-        return "default";
+        return "roles";
     }
 
     @PostMapping("/roles/create")
