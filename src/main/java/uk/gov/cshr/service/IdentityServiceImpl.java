@@ -39,4 +39,11 @@ public class IdentityServiceImpl implements IdentityService {
     public Boolean isValidCredentials(Identity identity, String password) {
         return passwordEncoder.matches(password, identity.getPassword());
     }
+
+    @Override
+    public Iterable<Identity> findAll() {
+        return identityRepository.findAll();
+    }
 }
+
+

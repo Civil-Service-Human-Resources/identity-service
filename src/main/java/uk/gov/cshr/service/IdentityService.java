@@ -6,4 +6,5 @@ public interface IdentityService {
     Identity createNewIdentity(String email, String password, boolean status);
     Identity findActiveIdentity(String email);
     Boolean isValidCredentials(Identity identity, String password);
+    Iterable<Identity> findAll();
 }

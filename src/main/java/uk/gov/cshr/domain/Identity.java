@@ -25,7 +25,7 @@ public class Identity {
     @ManyToMany(cascade = CascadeType.ALL, mappedBy = "identities")
     private Set<Role> roles;
 
-    protected Identity() {
+    public Identity() {
     }
 
     public Identity(String uid, String email, String password, boolean active, Set<Role> roles) {
