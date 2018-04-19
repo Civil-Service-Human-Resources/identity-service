@@ -14,6 +14,8 @@ import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.service.AuthenticationDetails;
 import uk.gov.cshr.service.RoleService;
 import uk.gov.cshr.service.security.IdentityDetails;
+import uk.gov.cshr.service.IdentityService;
+import uk.gov.cshr.service.RoleService;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -46,6 +48,7 @@ public class IdentityController {
         LOGGER.info("Listing all identities");
 
         Iterable<Identity> identities = identityRepository.findAll();
+
         model.addAttribute("identities", identities);
         return "identityList";
     }
@@ -57,6 +60,7 @@ public class IdentityController {
         LOGGER.info("{} editing identity for uid {}", authenticationDetails.getCurrentUsername(), uid);
 
         Optional<Identity> optionalIdentity = identityRepository.findFirstByUid(uid);
+
         Iterable<Role> roles = roleService.findAll();
 
         if (optionalIdentity.isPresent()) {

@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Role;
 import uk.gov.cshr.repository.IdentityRepository;
-import uk.gov.cshr.service.AuthenticationDetails;
 import uk.gov.cshr.service.RoleService;
 
 import javax.transaction.Transactional;
@@ -61,7 +60,7 @@ public class IndentityControllerTest {
     private RoleService roleService;
     @Mock
     private AuthenticationDetails authenticationDetails;
-
+  
     @Before
     public void setup() {
 
@@ -75,11 +74,13 @@ public class IndentityControllerTest {
 
         ArrayList<Identity> identities = new ArrayList<>();
 
+
         identities.add(new Identity(UID, EMAIL, PASSWORD, ACTIVE, ROLES));
         ArrayList<Role> roles = new ArrayList<>();
 
         roles.add(new Role(NAME, DESCRIPTION));
         when(identityRepository.findAll()).thenReturn(identities);
+
         when(authenticationDetails.getCurrentUsername()).thenReturn(USERNAME);
         when(roleService.findAll()).thenReturn(roles);
 
@@ -90,7 +91,9 @@ public class IndentityControllerTest {
     public void shouldLoadIdentitiesSuccessfully() throws Exception {
         this.mockMvc.perform(get("/management/identities"))
                 .andExpect(status().is2xxSuccessful())
+
                 .andExpect(model().attribute("identities", hasItem(allOf(hasProperty("email", is(EMAIL))))))
+
                 .andDo(print());
     }
 
@@ -103,6 +106,7 @@ public class IndentityControllerTest {
     @Test
     public void shouldLoadIdentityToEdit() throws Exception {
 
+
         Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, ROLES);
         when(identityRepository.findFirstByUid(UID)).thenReturn(Optional.of(identity));
         this.mockMvc.perform(get("/management/identities/update/uid"))
@@ -111,6 +115,7 @@ public class IndentityControllerTest {
 
     @Test
     public void shouldSaveEditedIdentity() throws Exception {
+
 
         Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, ROLES);
         when(identityRepository.findFirstByUid(UID)).thenReturn(Optional.of(identity));
@@ -129,10 +134,12 @@ public class IndentityControllerTest {
         identity = identityCaptor.getValue();
         assertThat(identity.getUid(), equalTo(UID));
         assertThat(identity.getEmail(), equalTo(EMAIL));
+
     }
 
     @Test
     public void shouldInsertRolesByIDForEditedIdentity() throws Exception {
+
 
         Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, ROLES);
         when(identityRepository.findFirstByUid(UID)).thenReturn(Optional.of(identity));
@@ -148,10 +155,13 @@ public class IndentityControllerTest {
 
         verify(identityRepository).save(identityCaptor.capture());
 
+
         identity = identityCaptor.getValue();
         ArrayList<Role> roles = new ArrayList(identity.getRoles());
 
+
         assertThat(roles.get(0).getName(), equalTo(NAME));
+
 
     }
 
