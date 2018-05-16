@@ -35,7 +35,7 @@ public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter
                 .and()
                     .authorizeRequests()
                         .requestMatchers(request -> serverPort != -1 && request.getServerPort() != serverPort).denyAll()
-                        .antMatchers("/**").access("hasRole('USER')")
+                        .antMatchers("/**").authenticated()
                 .and()
                     .exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler());
     }
