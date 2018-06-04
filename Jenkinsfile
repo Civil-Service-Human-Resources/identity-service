@@ -23,7 +23,7 @@ pipeline {
                 azureWebAppPublish appName: 'lpg-deply', azureCredentialsId: 'azure_service_principal',
                         dockerImageName: 'google/nodejs-hello', dockerImageTag: 'test',
                         publishType: 'docker', resourceGroup: 'lpg-jenkins',
-                        dockerRegistryEndpoint: [credentialsId: '', url: "https://hub.docker.com/r/cshr/identity-service/"]
+                        dockerRegistryEndpoint: [credentialsId: '', url: "https://index.docker.io/v1/"]
             }
         }
     }
