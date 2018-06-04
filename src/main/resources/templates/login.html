@@ -18,10 +18,7 @@
                         You have been logged out.
                     </div>
 
-
                     <h1 class="heading-large">Sign in</h1>
-
-                    <a href="/reset">Forgotten your password?</a>
 
                     <form autocomplete="nope" th:action="@{/login}" method="post" class="push-bottom">
                         <div class="form-group">
@@ -40,6 +37,8 @@
                             <input type="submit" class="button" value="Continue">
                         </div>
                     </form>
+
+                    <a href="/reset">Forgotten your password?</a>
                 </div>
             </div>
         </div>
