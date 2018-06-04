@@ -14,7 +14,7 @@ pipeline {
         }
         stage('Deploy To Int') {
             steps {
-                azureWebAppPublish appName: 'lpg-deply', azureCredentialsId: 'azure_service_principal', dockerImageName: 'google/nodejs-hello', dockerImageTag: 'test', dockerRegistryEndpoint: [], filePath: '', publishType: 'docker', resourceGroup: 'lpg-jenkins', slotName: '', sourceDirectory: '', targetDirectory: ''
+                azureWebAppPublish appName: 'lpg-deply', azureCredentialsId: 'azure_service_principal', dockerImageName: 'google/nodejs-hello', dockerImageTag: 'test', publishType: 'docker', resourceGroup: 'lpg-jenkins'
             }
         }
     }
