@@ -9,12 +9,21 @@ pipeline {
         }
         stage('Test') {
             steps {
-                publishHTML([allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/tests/test', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: ''])
+                publishHTML([allowMissing: false,
+                             alwaysLinkToLastBuild: true,
+                             keepAll: true,
+                             reportDir: 'build/reports/tests/test',
+                             reportFiles: 'index.html',
+                             reportName: 'HTML Report',
+                             reportTitles: ''])
             }
         }
         stage('Deploy To Int') {
             steps {
-                azureWebAppPublish appName: 'lpg-deply', azureCredentialsId: 'azure_service_principal', dockerImageName: 'google/nodejs-hello', dockerImageTag: 'test', publishType: 'docker', resourceGroup: 'lpg-jenkins'
+                azureWebAppPublish appName: 'lpg-deply', azureCredentialsId: 'azure_service_principal',
+                        dockerImageName: 'google/nodejs-hello', dockerImageTag: 'test',
+                        publishType: 'docker', resourceGroup: 'lpg-jenkins',
+                        dockerRegistryEndpoint: [credentialsId: '', url: "https://hub.docker.com/r/cshr/identity-service/"]
             }
         }
     }
