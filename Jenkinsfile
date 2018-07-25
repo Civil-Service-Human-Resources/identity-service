@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        dockerfile: true
-    }
+    agent any
     stages {
         stage('Build') {
             steps {
@@ -22,9 +20,11 @@ pipeline {
         }
         stage('Push To Docker') {
             steps {
-                docker.withRegistry("${env.DOCKER_REGISTRY_URL}", 'docker_registry_credentials') {
-                    def customImage = docker.build("identity-service:${env.BUILD_ID}")
-                    customImage.push()
+                script {
+                    docker.withRegistry("${env.DOCKER_REGISTRY_URL}", 'docker_registry_credentials') {
+                        def customImage = docker.build("identity-service:${env.BUILD_ID}")
+                        customImage.push()
+                    }
                 }
             }
         }
