@@ -18,12 +18,12 @@ pipeline {
                              reportTitles: ''])
             }
         }
-        stage('Deploy To Int') {
+        stage('Push To Docker') {
             steps {
-                azureWebAppPublish appName: 'lpg-deply', azureCredentialsId: 'azure_service_principal',
-                        dockerImageName: 'cshr/identity-service', dockerImageTag: 'test',
-                        publishType: 'docker', resourceGroup: 'lpg-jenkins',
-                        dockerRegistryEndpoint: [credentialsId: '86d3c40b-df14-4e5b-9a6c-9a940ab2fa4f', url: "https://index.docker.io/v1/"]
+                docker.withRegistry("${env.DOCKER_REGISTRY_URL}", 'docker_registry_credentials') {
+                    def customImage = docker.build("identity-service:${env.BUILD_ID}")
+                    customImage.push()
+                }
             }
         }
     }
