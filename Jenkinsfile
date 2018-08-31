@@ -1,5 +1,5 @@
 pipeline {
-    agent none
+    agent any
     stages {
         stage('Build') {
             agent any
@@ -9,7 +9,7 @@ pipeline {
             }
         }
         stage('Publish HTML') {
-            agent any
+            //agent any
             steps {
                 publishHTML([allowMissing: false,
                              alwaysLinkToLastBuild: true,
@@ -21,7 +21,7 @@ pipeline {
             }
         }
         stage('Build Container & Push to ACR') {
-            agent any
+            //agent any
             steps {
                 script {
                     docker.withRegistry("${env.DOCKER_REGISTRY_URL}", 'docker_registry_credentials') {
@@ -32,7 +32,7 @@ pipeline {
             }
         }
         stage('Deploy to Integration?') {
-            agent none
+            //agent none
             steps {
                 script {
                     def deployToStaging = input(message: 'Deploy to Staging?', ok: 'Yes',
@@ -43,7 +43,7 @@ pipeline {
             }
         }
         stage('Deploy to Integration') {
-            agent any
+            //agent any
             steps {
                 script {
                     def tfHome = tool name: 'Terraform', type: 'com.cloudbees.jenkins.plugins.customtools.CustomTool'
