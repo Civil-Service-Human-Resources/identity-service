@@ -1,6 +1,7 @@
 pipeline {
     agent none
     stages {
+        agent any
         stage('Build') {
             steps {
                 sh './gradlew clean'
@@ -8,6 +9,7 @@ pipeline {
             }
         }
         stage('Publish HTML') {
+            agent any
             steps {
                 publishHTML([allowMissing: false,
                              alwaysLinkToLastBuild: true,
