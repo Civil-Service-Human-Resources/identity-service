@@ -21,6 +21,9 @@ public class UserSecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${server.port}")
     private int serverPort;
 
+    @Value("${lpg.uiUrl}")
+    private String lpgUiUrl;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -30,18 +33,19 @@ public class UserSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/login", "/webjars/**", "/assets/**", "/signup/**", "/reset/**").permitAll()
                 .anyRequest().authenticated().and()
                 .formLogin()
-                .loginPage("/login")
-                .failureUrl("/login?error=true").and()
+                .loginPage("/login").defaultSuccessUrl(lpgUiUrl)
+                .failureHandler(new CustomAuthenticationFailureHandler())
+                .and()
                 .logout()
-                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                    .logoutSuccessHandler((request, response, authentication) -> {
-                        String redirectUrl = request.getParameter("returnTo");
-                        if (redirectUrl == null) {
-                            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                        } else {
-                            response.sendRedirect(redirectUrl);
-                        }
-                    }).and()
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    String redirectUrl = request.getParameter("returnTo");
+                    if (redirectUrl == null) {
+                        response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                    } else {
+                        response.sendRedirect(redirectUrl);
+                    }
+                }).and()
                 .exceptionHandling()
                 .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"));
     }

@@ -53,7 +53,7 @@ public class IdentityService implements UserDetailsService {
     }
 
     @ReadOnlyProperty
-    public boolean inviteExistsByEmail(String email) {
+    public boolean existsByEmail(String email) {
         return identityRepository.existsByEmail(email);
     }
 
@@ -61,7 +61,7 @@ public class IdentityService implements UserDetailsService {
         Invite invite = inviteService.findByCode(code);
 
         Set<Role> newRoles = new HashSet<>(invite.getForRoles());
-        Identity identity = new Identity(UUID.randomUUID().toString(), invite.getForEmail(), passwordEncoder.encode(password), true, newRoles);
+        Identity identity = new Identity(UUID.randomUUID().toString(), invite.getForEmail(), passwordEncoder.encode(password), true, false, newRoles);
         identityRepository.save(identity);
 
         LOGGER.info("New identity {} successfully created", identity.getEmail());
@@ -69,6 +69,12 @@ public class IdentityService implements UserDetailsService {
 
     public void updatePassword(Identity identity, String password) {
         identity.setPassword(passwordEncoder.encode(password));
+        identityRepository.save(identity);
+    }
+
+    public void lockIdentity(String email) {
+        Identity identity = identityRepository.findFirstByActiveTrueAndEmailEquals(email);
+        identity.setLocked(true);
         identityRepository.save(identity);
     }
 }
