@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import uk.gov.cshr.controller.form.UpdateEmailForm;
 import uk.gov.cshr.controller.form.UpdatePasswordForm;
 import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
@@ -43,5 +44,21 @@ public class AccountController {
         identityService.updatePasswordAndRevokeTokens(((IdentityDetails) authentication.getPrincipal()).getIdentity(), form.getNewPassword());
 
         return "redirect:/account/passwordUpdated";
+    }
+
+    @GetMapping("/email")
+    public String updateEmailForm(Model model, @ModelAttribute UpdateEmailForm form) {
+        model.addAttribute("updateEmailForm", form);
+        return "account/updateEmail";
+    }
+
+    @PostMapping("/email")
+    public String sendEmailVerification(Model model, @Valid @ModelAttribute UpdateEmailForm form, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("updateEmailForm", form);
+            return "account/updateEmail";
+        }
+
+        return "account/emailVerificationSent";
     }
 }
