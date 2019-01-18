@@ -4,9 +4,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import uk.gov.cshr.controller.form.UpdateEmailForm;
 import uk.gov.cshr.controller.form.UpdatePasswordForm;
+import uk.gov.cshr.service.EmailUpdateService;
 import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
 
@@ -17,9 +21,11 @@ import javax.validation.Valid;
 public class AccountController {
 
     private final IdentityService identityService;
+    private final EmailUpdateService emailUpdateService;
 
-    public AccountController(IdentityService identityService) {
+    public AccountController(IdentityService identityService, EmailUpdateService emailUpdateService) {
         this.identityService = identityService;
+        this.emailUpdateService = emailUpdateService;
     }
 
     @GetMapping("/password")
@@ -53,11 +59,13 @@ public class AccountController {
     }
 
     @PostMapping("/email")
-    public String sendEmailVerification(Model model, @Valid @ModelAttribute UpdateEmailForm form, BindingResult bindingResult) {
+    public String sendEmailVerification(Model model, @Valid @ModelAttribute UpdateEmailForm form, BindingResult bindingResult, Authentication authentication) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("updateEmailForm", form);
             return "account/updateEmail";
         }
+
+        emailUpdateService.saveEmailUpdateAndNotify(((IdentityDetails) authentication.getPrincipal()).getIdentity(), form.getEmail());
 
         return "account/emailVerificationSent";
     }

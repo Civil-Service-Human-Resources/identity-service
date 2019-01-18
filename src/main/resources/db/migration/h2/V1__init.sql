@@ -75,3 +75,13 @@ CREATE TABLE `token` (
   `user_name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
+
+CREATE TABLE `email_update` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `code` char(36) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `identity_id` mediumint(8) unsigned NOT NULL,
+  `timestamp` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_email_update_identity_id` FOREIGN KEY (`identity_id`) REFERENCES `identity` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+);

@@ -42,6 +42,10 @@ reset:
   url: ${RESET_URL:http://localhost:8080/reset/%s}
   validityInSeconds: ${RESET_VALIDITY:86400}
 
+emailUpdate:
+  url: ${EMAIL_UPDATE_URL:http://localhost:8080/account/email/verify/}
+  templateId: ${GOV_NOTIFY_EMAIL_UPDATE_TEMPLATE_ID:template}
+
 accountValidation:
   passwordPattern: ${PASSWORD_PATTERN:^(?:(?=.*[a-z])(?:(?=.*[A-Z])(?=.*[\\d\\W]))).{8,}$}
 
@@ -51,6 +55,7 @@ account:
 
 lpg:
   uiUrl: ${LPG_UI_URL:http://localhost:3001}
+
 
 ---
 

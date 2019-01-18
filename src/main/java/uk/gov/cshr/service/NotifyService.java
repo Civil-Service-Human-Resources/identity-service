@@ -2,6 +2,7 @@ package uk.gov.cshr.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cshr.exception.NotificationException;
@@ -21,9 +22,19 @@ public class NotifyService {
     private static final String ACTIVATION_URL_PERMISSION = "activationUrl";
 
     private final NotificationClient notificationClient;
+    private final String emailUpdateUrl;
+    private final String emailUpdateTemplateId;
+    private final EmailNotificationFactory emailNotificationFactory;
 
-    public NotifyService(NotificationClient notificationClient) {
+    public NotifyService(NotificationClient notificationClient,
+                         @Value("${emailUpdate.url}") String emailUpdateUrl,
+                         @Value("${emailUpdate.templateId}") String emailUpdateTemplateId,
+                         EmailNotificationFactory emailNotificationFactory
+    ) {
         this.notificationClient = notificationClient;
+        this.emailUpdateUrl = emailUpdateUrl;
+        this.emailUpdateTemplateId = emailUpdateTemplateId;
+        this.emailNotificationFactory = emailNotificationFactory;
     }
 
     public void notify(String email, String code, String templateId, String actionUrl) throws NotificationClientException {
@@ -44,6 +55,20 @@ public class NotifyService {
             SendEmailResponse response =
                     notificationClient.sendEmail(templateId, email, Collections.emptyMap(), null);
             LOGGER.info("Update password notification sent to: {}", response.getBody());
+        } catch (NotificationClientException e) {
+            throw new NotificationException(e);
+        }
+    }
+
+    public void sendEmailUpdateVerification(String email, String code) {
+        notify(emailNotificationFactory.createEmailAddressUpdateVerification(email, code));
+    }
+
+    private void notify(EmailNotification notification) {
+        try {
+            SendEmailResponse response = notificationClient.sendEmail(notification.getTemplateId(), notification.getEmailAddress(),
+                            notification.getPersonalisation(), notification.getReference());
+            LOGGER.info("Notification sent: {}", response.getBody());
         } catch (NotificationClientException e) {
             throw new NotificationException(e);
         }
