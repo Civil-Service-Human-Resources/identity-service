@@ -31,6 +31,7 @@ govNotify:
     reset: ${GOV_NOTIFY_RESET_TEMPLATE_ID:template}
     resetSuccessful: ${GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID:template}
     passwordUpdate: ${GOV_NOTIFY_PASSWORD_UPDATE_TEMPLATE_ID:13c2b9ac-4ad0-449f-b43b-57c04fc88b1d}
+    emailUpdate: ${GOV_NOTIFY_EMAIL_UPDATE_TEMPLATE_ID:template}
 
 invite:
   url: ${INVITE_SIGNUP_URL:http://localhost:8080/signup/%s}
@@ -44,7 +45,6 @@ reset:
 
 emailUpdate:
   url: ${EMAIL_UPDATE_URL:http://localhost:8080/account/email/verify/}
-  templateId: ${GOV_NOTIFY_EMAIL_UPDATE_TEMPLATE_ID:template}
 
 accountValidation:
   passwordPattern: ${PASSWORD_PATTERN:^(?:(?=.*[a-z])(?:(?=.*[A-Z])(?=.*[\\d\\W]))).{8,}$}

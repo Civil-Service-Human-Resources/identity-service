@@ -9,8 +9,9 @@ public class EmailNotificationFactoryTest {
 
     private final String emailUpdateUrl = "email-update-url";
     private final String emailUpdateTemplateId = "email-update-template-id";
+    private final String passwordUpdateTemplateId = "password-update-template-id";
 
-    private final EmailNotificationFactory factory = new EmailNotificationFactory(emailUpdateUrl, emailUpdateTemplateId);
+    private final EmailNotificationFactory factory = new EmailNotificationFactory(emailUpdateUrl, emailUpdateTemplateId, passwordUpdateTemplateId);
 
     @Test
     public void shouldReturnEmailAddressUpdateVerification() {
@@ -23,5 +24,17 @@ public class EmailNotificationFactoryTest {
         assertEquals(email, notification.getEmailAddress());
         assertEquals(emailUpdateTemplateId, notification.getTemplateId());
         assertNull(notification.getReference());
+    }
+
+    @Test
+    public void shouldReturnPasswordUpdateNotification() {
+        String email = "learner@domain.com";
+
+        EmailNotification notification = factory.createPasswordUpdateNotification(email);
+
+        assertEquals(passwordUpdateTemplateId, notification.getTemplateId());
+        assertEquals(email, notification.getEmailAddress());
+        assertNull(notification.getReference());
+        assertNull(notification.getPersonalisation());
     }
 }

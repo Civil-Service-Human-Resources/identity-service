@@ -220,7 +220,7 @@ public class IdentityServiceTest {
         verify(tokenServices).revokeToken(accessToken1Value);
         verify(tokenServices).revokeToken(accessToken2Value);
 
-        verify(notifyService).notify(email, updatePasswordEmailTemplateId);
+        verify(notifyService).sendPasswordUpdateNotification(email);
     }
 
     @Test

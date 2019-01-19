@@ -107,7 +107,7 @@ public class IdentityService implements UserDetailsService {
         identity.setPassword(passwordEncoder.encode(password));
         identityRepository.save(identity);
         revokeAccessTokens(identity);
-        notifyService.notify(identity.getEmail(), updatePasswordEmailTemplateId );
+        notifyService.sendPasswordUpdateNotification(identity.getEmail());
     }
 
     public void revokeAccessTokens(Identity identity) {

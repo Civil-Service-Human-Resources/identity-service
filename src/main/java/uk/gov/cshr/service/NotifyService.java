@@ -2,7 +2,6 @@ package uk.gov.cshr.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cshr.exception.NotificationException;
@@ -10,7 +9,6 @@ import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
 import uk.gov.service.notify.SendEmailResponse;
 
-import java.util.Collections;
 import java.util.HashMap;
 
 @Service
@@ -22,18 +20,10 @@ public class NotifyService {
     private static final String ACTIVATION_URL_PERMISSION = "activationUrl";
 
     private final NotificationClient notificationClient;
-    private final String emailUpdateUrl;
-    private final String emailUpdateTemplateId;
     private final EmailNotificationFactory emailNotificationFactory;
 
-    public NotifyService(NotificationClient notificationClient,
-                         @Value("${emailUpdate.url}") String emailUpdateUrl,
-                         @Value("${emailUpdate.templateId}") String emailUpdateTemplateId,
-                         EmailNotificationFactory emailNotificationFactory
-    ) {
+    public NotifyService(NotificationClient notificationClient, EmailNotificationFactory emailNotificationFactory) {
         this.notificationClient = notificationClient;
-        this.emailUpdateUrl = emailUpdateUrl;
-        this.emailUpdateTemplateId = emailUpdateTemplateId;
         this.emailNotificationFactory = emailNotificationFactory;
     }
 
@@ -49,15 +39,8 @@ public class NotifyService {
         LOGGER.info("Notify email sent to: {}", response.getBody());
     }
 
-
-    public void notify(String email, String templateId) {
-        try {
-            SendEmailResponse response =
-                    notificationClient.sendEmail(templateId, email, Collections.emptyMap(), null);
-            LOGGER.info("Update password notification sent to: {}", response.getBody());
-        } catch (NotificationClientException e) {
-            throw new NotificationException(e);
-        }
+    public void sendPasswordUpdateNotification(String email) {
+        notify(emailNotificationFactory.createPasswordUpdateNotification(email));
     }
 
     public void sendEmailUpdateVerification(String email, String code) {

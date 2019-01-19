@@ -10,7 +10,6 @@ import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
 import uk.gov.service.notify.SendEmailResponse;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,19 +30,25 @@ public class NotifyServiceTest {
     private NotifyService notifyService;
 
     @Test
-    public void shouldSendNotificationWithEmailAddressAndTemplateId() throws NotificationClientException {
+    public void shouldSendPasswordUpdateNotification() throws NotificationClientException {
         String email = "learner@domain.com";
         String templateId = "template-id";
         String body = "response-body";
 
+        EmailNotification notification = new EmailNotification();
+        notification.setTemplateId(templateId);
+        notification.setEmailAddress(email);
+
+        when(emailNotificationFactory.createPasswordUpdateNotification(email)).thenReturn(notification);
+
         SendEmailResponse response = mock(SendEmailResponse.class);
         when(response.getBody()).thenReturn(body);
 
-        when(notificationClient.sendEmail(templateId, email, Collections.emptyMap(), null)).thenReturn(response);
+        when(notificationClient.sendEmail(templateId, email, null, null)).thenReturn(response);
 
-        notifyService.notify(email, templateId);
+        notifyService.sendPasswordUpdateNotification(email);
 
-        verify(notificationClient).sendEmail(templateId, email, Collections.emptyMap(), null);
+        verify(notificationClient).sendEmail(templateId, email, null, null);
     }
 
     @Test
@@ -51,12 +56,18 @@ public class NotifyServiceTest {
         String email = "learner@domain.com";
         String templateId = "template-id";
 
+        EmailNotification notification = new EmailNotification();
+        notification.setTemplateId(templateId);
+        notification.setEmailAddress(email);
+
+        when(emailNotificationFactory.createPasswordUpdateNotification(email)).thenReturn(notification);
+
         NotificationClientException exception = mock(NotificationClientException.class);
 
-        doThrow(exception).when(notificationClient).sendEmail(templateId, email, Collections.emptyMap(), null);
+        doThrow(exception).when(notificationClient).sendEmail(templateId, email, null, null);
 
         try {
-            notifyService.notify(email, templateId);
+            notifyService.sendPasswordUpdateNotification(email);
             fail("Expected NotificationException");
         } catch (NotificationException e) {
             assertEquals(exception, e.getCause());
