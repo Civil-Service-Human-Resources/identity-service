@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Invite;
 import uk.gov.cshr.domain.Role;
+import uk.gov.cshr.exception.IdentityNotFoundException;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.InviteService;
@@ -112,5 +113,14 @@ public class IdentityService implements UserDetailsService {
     public void revokeAccessTokens(Identity identity) {
         tokenRepository.findAllByUserName(identity.getUid())
                 .forEach(token -> tokenServices.revokeToken(token.getToken().getValue()));
+    }
+
+    public void updateEmailAddress(Identity identity, String email) {
+        Identity savedIdentity = identityRepository.findById(identity.getId())
+                .orElseThrow(() -> new IdentityNotFoundException("No such identity: " + identity.getId()));
+
+        savedIdentity.setEmail(email);
+
+        identityRepository.save(savedIdentity);
     }
 }

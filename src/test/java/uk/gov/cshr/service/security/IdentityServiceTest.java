@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,6 +14,7 @@ import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Invite;
 import uk.gov.cshr.domain.Role;
 import uk.gov.cshr.domain.Token;
+import uk.gov.cshr.exception.IdentityNotFoundException;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.InviteService;
@@ -22,11 +22,13 @@ import uk.gov.cshr.service.NotifyService;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Collections.emptySet;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -219,5 +221,43 @@ public class IdentityServiceTest {
         verify(tokenServices).revokeToken(accessToken2Value);
 
         verify(notifyService).notify(email, updatePasswordEmailTemplateId);
+    }
+
+    @Test
+    public void shouldUpdateEmailAddress() {
+        String email = "learner@domain.com";
+        long id = 99L;
+        Identity identity = mock(Identity.class);
+        when(identity.getId()).thenReturn(id);
+
+        Identity savedIdentity = mock(Identity.class);
+
+        when(identityRepository.findById(id)).thenReturn(Optional.of(savedIdentity));
+
+        identityService.updateEmailAddress(identity, email);
+
+        InOrder inOrder = inOrder(savedIdentity, identityRepository);
+
+        inOrder.verify(savedIdentity).setEmail(email);
+        inOrder.verify(identityRepository).save(savedIdentity);
+    }
+
+    @Test
+    public void shouldThrowIdentityNotFoundException() {
+        String email = "learner@domain.com";
+        long id = 99L;
+        Identity identity = mock(Identity.class);
+        when(identity.getId()).thenReturn(id);
+
+        Identity savedIdentity = mock(Identity.class);
+
+        when(identityRepository.findById(id)).thenReturn(Optional.empty());
+
+        try {
+            identityService.updateEmailAddress(identity, email);
+            fail("Expected IdentityNotFoundException");
+        } catch (IdentityNotFoundException e) {
+            assertEquals("No such identity: 99", e.getMessage());
+        }
     }
 }

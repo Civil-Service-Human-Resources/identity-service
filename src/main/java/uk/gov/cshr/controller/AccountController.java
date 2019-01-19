@@ -4,12 +4,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.cshr.controller.form.UpdateEmailForm;
 import uk.gov.cshr.controller.form.UpdatePasswordForm;
+import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.service.EmailUpdateService;
 import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
@@ -68,5 +66,14 @@ public class AccountController {
         emailUpdateService.saveEmailUpdateAndNotify(((IdentityDetails) authentication.getPrincipal()).getIdentity(), form.getEmail());
 
         return "account/emailVerificationSent";
+    }
+
+    @GetMapping("/email/verify/{code}")
+    public String verifyEmail(@PathVariable String code, Authentication authentication) {
+        Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
+
+        emailUpdateService.updateEmailAddress(identity, code);
+
+        return "redirect:/account/passwordUpdated";
     }
 }

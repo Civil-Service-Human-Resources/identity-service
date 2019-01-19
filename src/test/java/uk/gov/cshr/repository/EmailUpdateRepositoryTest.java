@@ -29,7 +29,7 @@ public class EmailUpdateRepositoryTest {
     private IdentityRepository identityRepository;
 
     @Test
-    public void shouldFindEmailUpdateByCode() {
+    public void shouldFindEmailUpdateByIdentityAndCode() {
         String uid = UUID.randomUUID().toString();
         String email = "tester@domain.com";
         String updatedEmail = "updated@domain.com";
@@ -50,7 +50,7 @@ public class EmailUpdateRepositoryTest {
 
         emailUpdateRepository.save(emailUpdate);
 
-        EmailUpdate saved = emailUpdateRepository.findByCode(emailUpdate.getCode()).orElseThrow(
+        EmailUpdate saved = emailUpdateRepository.findByIdentityAndCode(identity, emailUpdate.getCode()).orElseThrow(
                 () -> new RuntimeException("EmailUpdate not found")
         );
 

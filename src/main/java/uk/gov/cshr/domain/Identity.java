@@ -45,6 +45,10 @@ public class Identity implements Serializable {
         this.locked = locked;
     }
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public boolean isActive() {
         return active;
     }
