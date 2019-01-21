@@ -8,18 +8,43 @@ import java.util.Map;
 
 @Component
 public class EmailNotificationFactory {
+    private static final String EMAIL_PERSONALISATION_KEY = "email";
+    private static final String ACTIVATION_URL_PERSONALISATION_KEY = "activationUrl";
 
     private final String emailUpdateUrlFormat;
     private final String emailUpdateTemplateId;
     private final String passwordUpdateTemplateId;
+    private final String inviteTemplateId;
+    private final String inviteUrlFormat;
+
 
     public EmailNotificationFactory(@Value("${emailUpdate.urlFormat}") String emailUpdateUrlFormat,
                         @Value("${govNotify.template.emailUpdate}") String emailUpdateTemplateId,
-                        @Value("${govNotify.template.passwordUpdate}") String passwordUpdateTemplateId
+                        @Value("${govNotify.template.passwordUpdate}") String passwordUpdateTemplateId,
+                        @Value("${govNotify.template.invite}") String inviteTemplateId,
+                        @Value("${invite.urlFormat}") String inviteUrlFormat
     ) {
         this.emailUpdateUrlFormat = emailUpdateUrlFormat;
         this.emailUpdateTemplateId = emailUpdateTemplateId;
         this.passwordUpdateTemplateId = passwordUpdateTemplateId;
+        this.inviteTemplateId = inviteTemplateId;
+        this.inviteUrlFormat = inviteUrlFormat;
+
+    }
+
+    public EmailNotification createInviteVerification(String email, String code) {
+        String activationUrl = String.format(inviteUrlFormat, code);
+
+        HashMap<String, String> personalisation = new HashMap<>();
+        personalisation.put(EMAIL_PERSONALISATION_KEY, email);
+        personalisation.put(ACTIVATION_URL_PERSONALISATION_KEY, activationUrl);
+
+        EmailNotification notification = new EmailNotification();
+        notification.setEmailAddress(email);
+        notification.setPersonalisation(personalisation);
+        notification.setTemplateId(inviteTemplateId);
+
+        return notification;
     }
 
     public EmailNotification createEmailAddressUpdateVerification(String emailAddress, String code) {

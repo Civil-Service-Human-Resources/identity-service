@@ -39,16 +39,8 @@ public class NotifyService {
         LOGGER.info("Notify email sent to: {}", response.getBody());
     }
 
-    public void sendInviteVerification(String email, String code, String templateId, String actionUrl) throws NotificationClientException {
-        String activationUrl = String.format(actionUrl, code);
-
-        HashMap<String, String> personalisation = new HashMap<>();
-        personalisation.put(EMAIL_PERMISSION, email);
-        personalisation.put(ACTIVATION_URL_PERMISSION, activationUrl);
-
-        SendEmailResponse response = notificationClient.sendEmail(templateId, email, personalisation, "");
-
-        LOGGER.info("Notify email sent to: {}", response.getBody());
+    public void sendInviteVerification(String email, String code) {
+        notify(emailNotificationFactory.createInviteVerification(email, code));
     }
 
 

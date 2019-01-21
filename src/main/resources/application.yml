@@ -34,7 +34,7 @@ govNotify:
     emailUpdate: ${GOV_NOTIFY_EMAIL_UPDATE_TEMPLATE_ID:template}
 
 invite:
-  url: ${INVITE_SIGNUP_URL:http://localhost:8080/signup/%s}
+  urlFormat: ${INVITE_SIGNUP_URL:http://localhost:8080/signup/%s}
   validityInSeconds: ${INVITE_VALIDITY:259200}
   whitelist:
     domains: kainos.com, domain.com, gov.uk

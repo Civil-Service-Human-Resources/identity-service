@@ -5,34 +5,41 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Invite;
 import uk.gov.cshr.domain.InviteStatus;
+import uk.gov.cshr.domain.Role;
+import uk.gov.cshr.domain.factory.InviteFactory;
 import uk.gov.cshr.repository.InviteRepository;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class InviteServiceTest {
-
-    @InjectMocks
+    private int validityInSeconds = 99;
     private InviteService inviteService;
 
     @Mock
     private InviteRepository inviteRepository;
 
+    @Mock
+    private InviteFactory inviteFactory;
+
+    @Mock
+    private NotifyService notifyService;
+
     @Before
     public void setUp() {
-        ReflectionTestUtils.setField(inviteService, "validityInSeconds", 86400);
+        inviteService = new InviteService(notifyService, inviteRepository, inviteFactory, validityInSeconds);
     }
 
     @Test
@@ -78,5 +85,22 @@ public class InviteServiceTest {
         invite = inviteArgumentCaptor.getValue();
         MatcherAssert.assertThat(invite.getCode(), equalTo(code));
         MatcherAssert.assertThat(invite.getStatus(), equalTo(InviteStatus.ACCEPTED));
+    }
+
+    @Test
+    public void shouldCreateInvite() {
+        String email = "learner@domain.com";
+        Set<Role> roleSet = new HashSet<>(Collections.singletonList(new Role()));
+        Identity inviter = new Identity();
+
+        Invite invite = new Invite();
+        invite.setForEmail(email);
+
+        when(inviteFactory.create(email, roleSet, inviter)).thenReturn(invite);
+
+        inviteService.createNewInviteForEmailAndRoles(email, roleSet, inviter);
+
+        verify(notifyService).sendInviteVerification(email, invite.getCode());
+        verify(inviteRepository).save(invite);
     }
 }
