@@ -65,7 +65,7 @@ public class ResetService {
         reset.setResetStatus(ResetStatus.PENDING);
         reset.setCode(RandomStringUtils.random(40, true, true));
 
-        notifyService.notify(reset.getEmail(), reset.getCode(), govNotifyResetTemplateId, resetUrlFormat);
+        notifyService.sendResetVerification(reset.getEmail(), reset.getCode(), govNotifyResetTemplateId, resetUrlFormat);
 
         resetRepository.save(reset);
 
@@ -76,7 +76,7 @@ public class ResetService {
         reset.setResetAt(new Date());
         reset.setResetStatus(ResetStatus.RESET);
 
-        notifyService.notify(reset.getEmail(), reset.getCode(), govNotifySuccessfulResetTemplateId, resetUrlFormat);
+        notifyService.sendResetVerification(reset.getEmail(), reset.getCode(), govNotifySuccessfulResetTemplateId, resetUrlFormat);
 
         resetRepository.save(reset);
 

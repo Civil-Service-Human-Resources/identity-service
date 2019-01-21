@@ -76,7 +76,7 @@ public class InviteService {
         invite.setStatus(InviteStatus.PENDING);
         invite.setCode(RandomStringUtils.random(40, true, true));
 
-        notifyService.notify(invite.getForEmail(), invite.getCode(), govNotifyInviteTemplateId, signupUrlFormat);
+        notifyService.sendInviteVerification(invite.getForEmail(), invite.getCode(), govNotifyInviteTemplateId, signupUrlFormat);
 
         inviteRepository.save(invite);
     }

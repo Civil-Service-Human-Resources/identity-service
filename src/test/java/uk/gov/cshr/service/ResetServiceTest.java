@@ -44,7 +44,7 @@ public class ResetServiceTest {
 
     @Test
     public void shouldSaveNewResetWhenCreateNewResetForEmail() throws NotificationClientException {
-        doNothing().when(notifyService).notify(EMAIL, CODE, TEMPLATE_ID, URL);
+        doNothing().when(notifyService).sendResetVerification(EMAIL, CODE, TEMPLATE_ID, URL);
 
         resetService.notifyForResetRequest(EMAIL);
 
@@ -60,7 +60,7 @@ public class ResetServiceTest {
 
     @Test
     public void shouldModifyExistingResetWhenResetSuccessFor() throws NotificationClientException {
-        doNothing().when(notifyService).notify(EMAIL, CODE, TEMPLATE_ID, URL);
+        doNothing().when(notifyService).sendResetVerification(EMAIL, CODE, TEMPLATE_ID, URL);
 
         Reset expectedReset = new Reset();
         expectedReset.setEmail(EMAIL);

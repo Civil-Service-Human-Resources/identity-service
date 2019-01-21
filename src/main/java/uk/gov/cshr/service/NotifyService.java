@@ -27,7 +27,7 @@ public class NotifyService {
         this.emailNotificationFactory = emailNotificationFactory;
     }
 
-    public void notify(String email, String code, String templateId, String actionUrl) throws NotificationClientException {
+    public void sendResetVerification(String email, String code, String templateId, String actionUrl) throws NotificationClientException {
         String activationUrl = String.format(actionUrl, code);
 
         HashMap<String, String> personalisation = new HashMap<>();
@@ -38,6 +38,19 @@ public class NotifyService {
 
         LOGGER.info("Notify email sent to: {}", response.getBody());
     }
+
+    public void sendInviteVerification(String email, String code, String templateId, String actionUrl) throws NotificationClientException {
+        String activationUrl = String.format(actionUrl, code);
+
+        HashMap<String, String> personalisation = new HashMap<>();
+        personalisation.put(EMAIL_PERMISSION, email);
+        personalisation.put(ACTIVATION_URL_PERMISSION, activationUrl);
+
+        SendEmailResponse response = notificationClient.sendEmail(templateId, email, personalisation, "");
+
+        LOGGER.info("Notify email sent to: {}", response.getBody());
+    }
+
 
     public void sendPasswordUpdateNotification(String email) {
         notify(emailNotificationFactory.createPasswordUpdateNotification(email));
