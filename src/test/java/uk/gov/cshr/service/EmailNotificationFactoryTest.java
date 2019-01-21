@@ -7,20 +7,20 @@ import static org.junit.Assert.assertNull;
 
 public class EmailNotificationFactoryTest {
 
-    private final String emailUpdateUrl = "email-update-url";
+    private final String emailUpdateUrlFormat = "http://localhost:8080/account/email/verify/%s?redirect=true";
     private final String emailUpdateTemplateId = "email-update-template-id";
     private final String passwordUpdateTemplateId = "password-update-template-id";
 
-    private final EmailNotificationFactory factory = new EmailNotificationFactory(emailUpdateUrl, emailUpdateTemplateId, passwordUpdateTemplateId);
+    private final EmailNotificationFactory factory = new EmailNotificationFactory(emailUpdateUrlFormat, emailUpdateTemplateId, passwordUpdateTemplateId);
 
     @Test
     public void shouldReturnEmailAddressUpdateVerification() {
-        String code = "verification-code";
+        String code = "xxx";
         String email = "learner@domain.com";
 
         EmailNotification notification = factory.createEmailAddressUpdateVerification(email, code);
 
-        assertEquals(emailUpdateUrl + code, notification.getPersonalisation().get("link"));
+        assertEquals("http://localhost:8080/account/email/verify/xxx?redirect=true", notification.getPersonalisation().get("link"));
         assertEquals(email, notification.getEmailAddress());
         assertEquals(emailUpdateTemplateId, notification.getTemplateId());
         assertNull(notification.getReference());

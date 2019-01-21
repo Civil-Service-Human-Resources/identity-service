@@ -9,22 +9,22 @@ import java.util.Map;
 @Component
 public class EmailNotificationFactory {
 
-    private final String emailUpdateUrl;
+    private final String emailUpdateUrlFormat;
     private final String emailUpdateTemplateId;
     private final String passwordUpdateTemplateId;
 
-    public EmailNotificationFactory(@Value("${emailUpdate.url}") String emailUpdateUrl,
+    public EmailNotificationFactory(@Value("${emailUpdate.urlFormat}") String emailUpdateUrlFormat,
                         @Value("${govNotify.template.emailUpdate}") String emailUpdateTemplateId,
                         @Value("${govNotify.template.passwordUpdate}") String passwordUpdateTemplateId
     ) {
-        this.emailUpdateUrl = emailUpdateUrl;
+        this.emailUpdateUrlFormat = emailUpdateUrlFormat;
         this.emailUpdateTemplateId = emailUpdateTemplateId;
         this.passwordUpdateTemplateId = passwordUpdateTemplateId;
     }
 
     public EmailNotification createEmailAddressUpdateVerification(String emailAddress, String code) {
         EmailNotification notification = new EmailNotification();
-        String link = emailUpdateUrl + code;
+        String link = String.format(emailUpdateUrlFormat, code);
 
         Map<String, String> personalisation = new HashMap<>();
         personalisation.put("link", link);

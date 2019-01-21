@@ -44,7 +44,7 @@ reset:
   validityInSeconds: ${RESET_VALIDITY:86400}
 
 emailUpdate:
-  url: ${EMAIL_UPDATE_URL:http://localhost:8080/account/email/verify/}
+  urlFormat: ${EMAIL_UPDATE_URL_FORMAT:http://localhost:8080/account/email/verify/%s?redirect=true}
 
 accountValidation:
   passwordPattern: ${PASSWORD_PATTERN:^(?:(?=.*[a-z])(?:(?=.*[A-Z])(?=.*[\\d\\W]))).{8,}$}
