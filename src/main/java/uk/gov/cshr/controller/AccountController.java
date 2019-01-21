@@ -1,5 +1,7 @@
 package uk.gov.cshr.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,6 +19,7 @@ import javax.validation.Valid;
 @Controller
 @RequestMapping("/account")
 public class AccountController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccountController.class);
 
     private final IdentityService identityService;
     private final EmailUpdateService emailUpdateService;
@@ -72,8 +75,13 @@ public class AccountController {
     public String verifyEmail(@PathVariable String code, Authentication authentication) {
         Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
 
+        if(!emailUpdateService.verifyCode(identity, code)) {
+            LOGGER.error("Unable to verify email update code: {} {}", code, identity);
+            return "redirect:/account/email?invalidCode=true";
+        }
+
         emailUpdateService.updateEmailAddress(identity, code);
 
-        return "redirect:/account/passwordUpdated";
+        return "redirect:/account/emailUpdated";
     }
 }

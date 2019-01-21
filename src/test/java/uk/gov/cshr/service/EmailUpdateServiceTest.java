@@ -13,7 +13,7 @@ import uk.gov.cshr.service.security.IdentityService;
 
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -85,4 +85,24 @@ public class EmailUpdateServiceTest {
                     "email='null', password='null', active=false, locked=false, roles=null}", e.getMessage());
         }
     }
+
+    @Test
+    public void shouldVerifyCodeIfIdentityAndCodeExist() {
+        Identity identity = mock(Identity.class);
+        String code = "_code";
+
+        when(emailUpdateRepository.findByIdentityAndCode(identity, code)).thenReturn(Optional.of(new EmailUpdate()));
+
+        assertTrue(emailUpdateService.verifyCode(identity, code));
+    }
+
+    @Test
+    public void shouldNotVerifyCodeIfIdentityAndCodeDontExist() {
+        Identity identity = mock(Identity.class);
+        String code = "_code";
+
+        when(emailUpdateRepository.findByIdentityAndCode(identity, code)).thenReturn(Optional.empty());
+        assertFalse(emailUpdateService.verifyCode(identity, code));
+    }
+
 }

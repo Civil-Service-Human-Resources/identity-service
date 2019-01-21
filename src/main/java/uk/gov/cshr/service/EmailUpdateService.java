@@ -40,4 +40,8 @@ public class EmailUpdateService {
 
         emailUpdateRepository.delete(emailUpdate);
     }
+
+    public boolean verifyCode(Identity identity, String code) {
+        return emailUpdateRepository.findByIdentityAndCode(identity, code).isPresent();
+    }
 }
