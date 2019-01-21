@@ -35,7 +35,7 @@ public class EmailNotificationFactoryTest {
         EmailNotification notification = factory.createEmailAddressUpdateVerification(email, code);
 
         assertEquals("http://localhost:8080/account/email/verify/xxx?redirect=true", notification.getPersonalisation().get("link"));
-        assertEquals(email, notification.getEmailAddress());
+        assertEquals(email, notification.getRecipient());
         assertEquals(emailUpdateTemplateId, notification.getTemplateId());
         assertNull(notification.getReference());
     }
@@ -47,7 +47,7 @@ public class EmailNotificationFactoryTest {
         EmailNotification notification = factory.createPasswordUpdateNotification(email);
 
         assertEquals(passwordUpdateTemplateId, notification.getTemplateId());
-        assertEquals(email, notification.getEmailAddress());
+        assertEquals(email, notification.getRecipient());
         assertNull(notification.getReference());
         assertNull(notification.getPersonalisation());
     }
@@ -59,7 +59,7 @@ public class EmailNotificationFactoryTest {
 
         EmailNotification notification = factory.createInviteVerification(email, code);
 
-        assertEquals(email, notification.getEmailAddress());
+        assertEquals(email, notification.getRecipient());
         assertEquals(inviteTemplateId, notification.getTemplateId());
         assertEquals(String.format(inviteUrlFormat, code), notification.getPersonalisation().get("activationUrl"));
         assertEquals(email, notification.getPersonalisation().get("email"));
@@ -73,7 +73,7 @@ public class EmailNotificationFactoryTest {
 
         EmailNotification notification = factory.createPasswordResetVerification(email, code);
 
-        assertEquals(email, notification.getEmailAddress());
+        assertEquals(email, notification.getRecipient());
         assertEquals(passwordResetVerificationTemplateId, notification.getTemplateId());
         assertEquals(String.format(passwordResetActivationUrlFormat, code), notification.getPersonalisation().get("activationUrl"));
         assertEquals(email, notification.getPersonalisation().get("email"));
@@ -86,7 +86,7 @@ public class EmailNotificationFactoryTest {
 
         EmailNotification notification = factory.createPasswordResetNotification(email);
 
-        assertEquals(email, notification.getEmailAddress());
+        assertEquals(email, notification.getRecipient());
         assertEquals(passwordResetNotificationTemplateId, notification.getTemplateId());
         assertEquals(email, notification.getPersonalisation().get("email"));
         assertNull(notification.getReference());

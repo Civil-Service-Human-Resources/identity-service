@@ -1,5 +1,6 @@
 package uk.gov.cshr;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -33,5 +34,10 @@ public class Application {
     @Bean
     public NotificationClient notificationClient(@Value("${govNotify.key}") String key) {
         return new NotificationClient(key);
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 }

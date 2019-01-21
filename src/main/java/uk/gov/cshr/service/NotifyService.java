@@ -42,7 +42,7 @@ public class NotifyService {
 
     private void notify(EmailNotification notification) {
         try {
-            SendEmailResponse response = notificationClient.sendEmail(notification.getTemplateId(), notification.getEmailAddress(),
+            SendEmailResponse response = notificationClient.sendEmail(notification.getTemplateId(), notification.getRecipient(),
                             notification.getPersonalisation(), notification.getReference());
             LOGGER.info("Notification sent: {}", response.getBody());
         } catch (NotificationClientException e) {

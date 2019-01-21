@@ -48,7 +48,7 @@ public class EmailNotificationFactory {
         personalisation.put(ACTIVATION_URL_PERSONALISATION_KEY, activationUrl);
 
         EmailNotification notification = new EmailNotification();
-        notification.setEmailAddress(email);
+        notification.setRecipient(email);
         notification.setPersonalisation(personalisation);
         notification.setTemplateId(resetPasswordVerificationTemplateId);
 
@@ -63,7 +63,7 @@ public class EmailNotificationFactory {
         personalisation.put(ACTIVATION_URL_PERSONALISATION_KEY, activationUrl);
 
         EmailNotification notification = new EmailNotification();
-        notification.setEmailAddress(email);
+        notification.setRecipient(email);
         notification.setPersonalisation(personalisation);
         notification.setTemplateId(inviteTemplateId);
 
@@ -78,7 +78,7 @@ public class EmailNotificationFactory {
         personalisation.put("link", link);
 
         notification.setTemplateId(emailUpdateTemplateId);
-        notification.setEmailAddress(emailAddress);
+        notification.setRecipient(emailAddress);
         notification.setPersonalisation(personalisation);
 
         return notification;
@@ -87,7 +87,7 @@ public class EmailNotificationFactory {
     public EmailNotification createPasswordUpdateNotification(String email) {
         EmailNotification notification = new EmailNotification();
         notification.setTemplateId(passwordUpdateTemplateId);
-        notification.setEmailAddress(email);
+        notification.setRecipient(email);
         return notification;
     }
 
@@ -96,7 +96,7 @@ public class EmailNotificationFactory {
         personalisation.put(EMAIL_PERSONALISATION_KEY, email);
 
         EmailNotification notification = new EmailNotification();
-        notification.setEmailAddress(email);
+        notification.setRecipient(email);
         notification.setPersonalisation(personalisation);
         notification.setTemplateId(resetPasswordNotificationTemplateId);
 

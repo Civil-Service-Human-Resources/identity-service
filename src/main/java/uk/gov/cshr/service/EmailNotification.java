@@ -7,7 +7,7 @@ import java.util.Map;
 @Data
 public class EmailNotification {
     private String templateId;
-    private String emailAddress;
+    private String recipient;
     private Map<String, String> personalisation;
     private String reference;
 }

@@ -37,7 +37,7 @@ public class NotifyServiceTest {
 
         EmailNotification notification = new EmailNotification();
         notification.setTemplateId(templateId);
-        notification.setEmailAddress(email);
+        notification.setRecipient(email);
 
         when(emailNotificationFactory.createPasswordUpdateNotification(email)).thenReturn(notification);
 
@@ -58,7 +58,7 @@ public class NotifyServiceTest {
 
         EmailNotification notification = new EmailNotification();
         notification.setTemplateId(templateId);
-        notification.setEmailAddress(email);
+        notification.setRecipient(email);
 
         when(emailNotificationFactory.createPasswordUpdateNotification(email)).thenReturn(notification);
 
@@ -84,7 +84,7 @@ public class NotifyServiceTest {
         String reference = "ref";
 
         EmailNotification notification = new EmailNotification();
-        notification.setEmailAddress(email);
+        notification.setRecipient(email);
         notification.setPersonalisation(personalisation);
         notification.setTemplateId(templateId);
         notification.setReference(reference);
