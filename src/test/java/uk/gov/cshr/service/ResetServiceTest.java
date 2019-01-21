@@ -5,31 +5,28 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.cshr.domain.Reset;
 import uk.gov.cshr.domain.ResetStatus;
+import uk.gov.cshr.domain.factory.ResetFactory;
 import uk.gov.cshr.repository.ResetRepository;
-import uk.gov.service.notify.NotificationClientException;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.mockito.Mockito.doNothing;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
+@RunWith(MockitoJUnitRunner.class)
 public class ResetServiceTest {
 
     public static final String EMAIL = "test@example.com";
     public static final String CODE = "abc123";
-    public static final String TEMPLATE_ID = "template123";
-    public static final String URL = "localhost:8080";
 
-    @InjectMocks
+    private final int validityInSeconds = 99;
     private ResetService resetService;
 
     @Mock
@@ -38,44 +35,42 @@ public class ResetServiceTest {
     @Mock
     private NotifyService notifyService;
 
+    @Mock
+    private ResetFactory resetFactory;
+
     @Before
     public void setUp() {
+        resetService = new ResetService(resetRepository, notifyService, resetFactory, validityInSeconds);
     }
 
     @Test
-    public void shouldSaveNewResetWhenCreateNewResetForEmail() throws NotificationClientException {
-        doNothing().when(notifyService).sendResetVerification(EMAIL, CODE, TEMPLATE_ID, URL);
+    public void shouldSaveNewResetWhenCreateNewResetForEmail() {
+        Reset reset = new Reset();
+        reset.setEmail(EMAIL);
+        reset.setCode(CODE);
 
+        when(resetFactory.create(EMAIL)).thenReturn(reset);
         resetService.notifyForResetRequest(EMAIL);
 
-        ArgumentCaptor<Reset> resetArgumentCaptor = ArgumentCaptor.forClass(Reset.class);
-
-        verify(resetRepository).save(resetArgumentCaptor.capture());
-
-        Reset reset = resetArgumentCaptor.getValue();
-        MatcherAssert.assertThat(reset.getEmail(), equalTo(EMAIL));
-        MatcherAssert.assertThat(reset.getResetStatus(), equalTo(ResetStatus.PENDING));
-
+        verify(notifyService).sendPasswordResetVerification(EMAIL, CODE);
+        verify(resetRepository).save(reset);
     }
 
     @Test
-    public void shouldModifyExistingResetWhenResetSuccessFor() throws NotificationClientException {
-        doNothing().when(notifyService).sendResetVerification(EMAIL, CODE, TEMPLATE_ID, URL);
+    public void shouldModifyExistingResetWhenResetSuccessFor() {
+        Reset reset = new Reset();
+        reset.setEmail(EMAIL);
+        reset.setResetStatus(ResetStatus.PENDING);
 
-        Reset expectedReset = new Reset();
-        expectedReset.setEmail(EMAIL);
-        expectedReset.setResetStatus(ResetStatus.PENDING);
+        resetService.notifyOfSuccessfulReset(reset);
 
-        resetService.notifyOfSuccessfulReset(expectedReset);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-        ArgumentCaptor<Reset> resetArgumentCaptor = ArgumentCaptor.forClass(Reset.class);
+        assertEquals(dateFormat.format(new Date()), dateFormat.format(reset.getResetAt()));
+        assertEquals(ResetStatus.RESET, reset.getResetStatus());
 
-        verify(resetRepository).save(resetArgumentCaptor.capture());
-
-        Reset actualReset = resetArgumentCaptor.getValue();
-        MatcherAssert.assertThat(actualReset.getEmail(), equalTo(EMAIL));
-        MatcherAssert.assertThat(actualReset.getResetStatus(), equalTo(ResetStatus.RESET));
-
+        verify(notifyService).sendPasswordResetNotification(EMAIL);
+        verify(resetRepository).save(reset);
     }
 
     @Test

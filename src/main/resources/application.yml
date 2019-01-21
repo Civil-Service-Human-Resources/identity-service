@@ -40,7 +40,7 @@ invite:
     domains: kainos.com, domain.com, gov.uk
 
 reset:
-  url: ${RESET_URL:http://localhost:8080/reset/%s}
+  urlFormat: ${RESET_URL:http://localhost:8080/reset/%s}
   validityInSeconds: ${RESET_VALIDITY:86400}
 
 emailUpdate:

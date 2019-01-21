@@ -1,45 +1,36 @@
 package uk.gov.cshr.service;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cshr.domain.Reset;
 import uk.gov.cshr.domain.ResetStatus;
+import uk.gov.cshr.domain.factory.ResetFactory;
 import uk.gov.cshr.repository.ResetRepository;
-import uk.gov.service.notify.NotificationClientException;
 
 import java.util.Date;
 
 @Service
 @Transactional
 public class ResetService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ResetService.class);
 
-    @Value("${govNotify.template.reset}")
-    private String govNotifyResetTemplateId;
+    private final ResetRepository resetRepository;
+    private final NotifyService notifyService;
+    private final ResetFactory resetFactory;
+    private final int validityInSeconds;
 
-    @Value("${govNotify.template.resetSuccessful}")
-    private String govNotifySuccessfulResetTemplateId;
-
-    @Value("${reset.url}")
-    private String resetUrlFormat;
-
-    @Value("${reset.validityInSeconds}")
-    private int validityInSeconds;
-
-    private ResetRepository resetRepository;
-
-    private NotifyService notifyService;
-
-    @Autowired
-    public ResetService(ResetRepository resetRepository, NotifyService notifyService) {
+    public ResetService(ResetRepository resetRepository,
+                        NotifyService notifyService,
+                        ResetFactory resetFactory,
+                        @Value("${reset.validityInSeconds}") int validityInSeconds
+    ) {
         this.resetRepository = resetRepository;
         this.notifyService = notifyService;
+        this.resetFactory = resetFactory;
+        this.validityInSeconds = validityInSeconds;
     }
 
     public boolean isResetExpired(Reset reset) {
@@ -58,25 +49,21 @@ public class ResetService {
         return reset.getResetStatus().equals(ResetStatus.PENDING);
     }
 
-    public void notifyForResetRequest(String email) throws NotificationClientException {
-        Reset reset = new Reset();
-        reset.setEmail(email);
-        reset.setRequestedAt(new Date());
-        reset.setResetStatus(ResetStatus.PENDING);
-        reset.setCode(RandomStringUtils.random(40, true, true));
+    public void notifyForResetRequest(String email) {
+        Reset reset = resetFactory.create(email);
 
-        notifyService.sendResetVerification(reset.getEmail(), reset.getCode(), govNotifyResetTemplateId, resetUrlFormat);
+        notifyService.sendPasswordResetVerification(reset.getEmail(), reset.getCode());
 
         resetRepository.save(reset);
 
         LOGGER.info("Reset request sent to {} ", email);
     }
 
-    public void notifyOfSuccessfulReset(Reset reset) throws NotificationClientException {
+    public void notifyOfSuccessfulReset(Reset reset) {
         reset.setResetAt(new Date());
         reset.setResetStatus(ResetStatus.RESET);
 
-        notifyService.sendResetVerification(reset.getEmail(), reset.getCode(), govNotifySuccessfulResetTemplateId, resetUrlFormat);
+        notifyService.sendPasswordResetNotification(reset.getEmail());
 
         resetRepository.save(reset);
 

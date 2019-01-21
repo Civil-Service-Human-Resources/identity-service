@@ -16,20 +16,43 @@ public class EmailNotificationFactory {
     private final String passwordUpdateTemplateId;
     private final String inviteTemplateId;
     private final String inviteUrlFormat;
+    private final String resetPasswordVerificationTemplateId;
+    private final String resetPasswordVerificationUrlFormat;
+    private final String resetPasswordNotificationTemplateId;
 
 
     public EmailNotificationFactory(@Value("${emailUpdate.urlFormat}") String emailUpdateUrlFormat,
-                        @Value("${govNotify.template.emailUpdate}") String emailUpdateTemplateId,
-                        @Value("${govNotify.template.passwordUpdate}") String passwordUpdateTemplateId,
-                        @Value("${govNotify.template.invite}") String inviteTemplateId,
-                        @Value("${invite.urlFormat}") String inviteUrlFormat
+                                    @Value("${govNotify.template.emailUpdate}") String emailUpdateTemplateId,
+                                    @Value("${govNotify.template.passwordUpdate}") String passwordUpdateTemplateId,
+                                    @Value("${govNotify.template.invite}") String inviteTemplateId,
+                                    @Value("${invite.urlFormat}") String inviteUrlFormat,
+                                    @Value("${govNotify.template.reset}") String resetPasswordVerificationTemplateId,
+                                    @Value("${reset.urlFormat}") String resetPasswordVerificationUrlFormat,
+                                    @Value("${govNotify.template.resetSuccessful}") String resetPasswordNotificationTemplateId
     ) {
         this.emailUpdateUrlFormat = emailUpdateUrlFormat;
         this.emailUpdateTemplateId = emailUpdateTemplateId;
         this.passwordUpdateTemplateId = passwordUpdateTemplateId;
         this.inviteTemplateId = inviteTemplateId;
         this.inviteUrlFormat = inviteUrlFormat;
+        this.resetPasswordVerificationTemplateId = resetPasswordVerificationTemplateId;
+        this.resetPasswordVerificationUrlFormat = resetPasswordVerificationUrlFormat;
+        this.resetPasswordNotificationTemplateId = resetPasswordNotificationTemplateId;
+    }
 
+    public EmailNotification createPasswordResetVerification(String email, String code) {
+        String activationUrl = String.format(resetPasswordVerificationUrlFormat, code);
+
+        HashMap<String, String> personalisation = new HashMap<>();
+        personalisation.put(EMAIL_PERSONALISATION_KEY, email);
+        personalisation.put(ACTIVATION_URL_PERSONALISATION_KEY, activationUrl);
+
+        EmailNotification notification = new EmailNotification();
+        notification.setEmailAddress(email);
+        notification.setPersonalisation(personalisation);
+        notification.setTemplateId(resetPasswordVerificationTemplateId);
+
+        return notification;
     }
 
     public EmailNotification createInviteVerification(String email, String code) {
@@ -65,6 +88,18 @@ public class EmailNotificationFactory {
         EmailNotification notification = new EmailNotification();
         notification.setTemplateId(passwordUpdateTemplateId);
         notification.setEmailAddress(email);
+        return notification;
+    }
+
+    public EmailNotification createPasswordResetNotification(String email) {
+        HashMap<String, String> personalisation = new HashMap<>();
+        personalisation.put(EMAIL_PERSONALISATION_KEY, email);
+
+        EmailNotification notification = new EmailNotification();
+        notification.setEmailAddress(email);
+        notification.setPersonalisation(personalisation);
+        notification.setTemplateId(resetPasswordNotificationTemplateId);
+
         return notification;
     }
 }
