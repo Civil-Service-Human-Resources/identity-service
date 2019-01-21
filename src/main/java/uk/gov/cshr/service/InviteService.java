@@ -28,7 +28,7 @@ public class InviteService {
     private final int validityInSeconds;
 
     public InviteService(NotifyService notifyService, InviteRepository inviteRepository, InviteFactory inviteFactory,
-                         @Value("${invite.validityInSeconds}") int validityInSeconds) {
+                         @Value("${notifications.invite.validityInSeconds}") int validityInSeconds) {
         this.notifyService = notifyService;
         this.inviteRepository = inviteRepository;
         this.inviteFactory = inviteFactory;

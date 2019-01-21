@@ -21,14 +21,14 @@ public class EmailNotificationFactory {
     private final String resetPasswordNotificationTemplateId;
 
 
-    public EmailNotificationFactory(@Value("${emailUpdate.urlFormat}") String emailUpdateUrlFormat,
-                                    @Value("${govNotify.template.emailUpdate}") String emailUpdateTemplateId,
-                                    @Value("${govNotify.template.passwordUpdate}") String passwordUpdateTemplateId,
-                                    @Value("${govNotify.template.invite}") String inviteTemplateId,
-                                    @Value("${invite.urlFormat}") String inviteUrlFormat,
-                                    @Value("${govNotify.template.reset}") String resetPasswordVerificationTemplateId,
-                                    @Value("${reset.urlFormat}") String resetPasswordVerificationUrlFormat,
-                                    @Value("${govNotify.template.resetSuccessful}") String resetPasswordNotificationTemplateId
+    public EmailNotificationFactory(@Value("${notifications.email.urlFormat}") String emailUpdateUrlFormat,
+                                    @Value("${notifications.email.template}") String emailUpdateTemplateId,
+                                    @Value("${notifications.password.template}") String passwordUpdateTemplateId,
+                                    @Value("${notifications.invite.template}") String inviteTemplateId,
+                                    @Value("${notifications.invite.urlFormat}") String inviteUrlFormat,
+                                    @Value("${notifications.reset.templates.verification}") String resetPasswordVerificationTemplateId,
+                                    @Value("${notifications.reset.templates.notification}") String resetPasswordNotificationTemplateId,
+                                    @Value("${notifications.reset.urlFormat}") String resetPasswordVerificationUrlFormat
     ) {
         this.emailUpdateUrlFormat = emailUpdateUrlFormat;
         this.emailUpdateTemplateId = emailUpdateTemplateId;

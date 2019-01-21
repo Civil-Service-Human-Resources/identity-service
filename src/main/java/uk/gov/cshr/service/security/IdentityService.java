@@ -3,7 +3,6 @@ package uk.gov.cshr.service.security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,8 +29,6 @@ public class IdentityService implements UserDetailsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IdentityService.class);
 
-    private final String updatePasswordEmailTemplateId;
-
     private final IdentityRepository identityRepository;
 
     private InviteService inviteService;
@@ -44,13 +41,11 @@ public class IdentityService implements UserDetailsService {
 
     private final NotifyService notifyService;
 
-    public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
-                           IdentityRepository identityRepository,
+    public IdentityService(IdentityRepository identityRepository,
                            PasswordEncoder passwordEncoder,
                            TokenServices tokenServices,
                            TokenRepository tokenRepository,
                            NotifyService notifyService) {
-        this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.identityRepository = identityRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenServices = tokenServices;

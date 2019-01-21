@@ -59,6 +59,23 @@ lpg:
 
 notifications:
   url: ${NOTIFICATION_SERVICE_URL:http://localhost:9005/notifications/email}
+  invite:
+    template: ${GOV_NOTIFY_INVITE_TEMPLATE_ID:template}
+    urlFormat: ${INVITE_SIGNUP_URL:http://localhost:8080/signup/%s}
+    validityInSeconds: ${INVITE_VALIDITY:259200}
+    whitelist:
+      domains: kainos.com, domain.com, gov.uk
+  reset:
+    urlFormat: ${RESET_URL:http://localhost:8080/reset/%s}
+    validityInSeconds: ${RESET_VALIDITY:86400}
+    templates:
+      verification: ${GOV_NOTIFY_RESET_TEMPLATE_ID:template}
+      notification: ${GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID:template}
+  password:
+    template: ${GOV_NOTIFY_PASSWORD_UPDATE_TEMPLATE_ID:template}
+  email:
+    template: ${GOV_NOTIFY_EMAIL_UPDATE_TEMPLATE_ID:template}
+    urlFormat: ${EMAIL_UPDATE_URL_FORMAT:http://localhost:8080/account/email/verify/%s?redirect=true}
 
 oauth:
   serviceUrl: ${OAUTH_SERVICE_URL:http://localhost:8080}

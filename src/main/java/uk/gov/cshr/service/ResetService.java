@@ -25,7 +25,7 @@ public class ResetService {
     public ResetService(ResetRepository resetRepository,
                         NotifyService notifyService,
                         ResetFactory resetFactory,
-                        @Value("${reset.validityInSeconds}") int validityInSeconds
+                        @Value("${notifications.reset.validityInSeconds}") int validityInSeconds
     ) {
         this.resetRepository = resetRepository;
         this.notifyService = notifyService;

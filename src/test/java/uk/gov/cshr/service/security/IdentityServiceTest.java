@@ -34,8 +34,6 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class IdentityServiceTest {
 
-    private final String updatePasswordEmailTemplateId = "template-id";
-
     private IdentityService identityService;
 
     @Mock
@@ -59,7 +57,6 @@ public class IdentityServiceTest {
     @Before
     public void setUp() throws Exception {
         identityService = new IdentityService(
-                updatePasswordEmailTemplateId,
                 identityRepository,
                 passwordEncoder,
                 tokenServices,

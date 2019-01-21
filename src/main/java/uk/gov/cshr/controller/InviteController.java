@@ -17,7 +17,6 @@ import uk.gov.cshr.repository.RoleRepository;
 import uk.gov.cshr.service.AuthenticationDetails;
 import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.security.IdentityService;
-import uk.gov.service.notify.NotificationClientException;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -57,7 +56,7 @@ public class InviteController {
     }
 
     @PostMapping
-    public String invited(@RequestParam(value = "forEmail") String forEmail, @RequestParam(value = "roleId", required = false) ArrayList<String> roleId, RedirectAttributes redirectAttributes) throws NotificationClientException {
+    public String invited(@RequestParam(value = "forEmail") String forEmail, @RequestParam(value = "roleId", required = false) ArrayList<String> roleId, RedirectAttributes redirectAttributes) {
         LOGGER.info("{} inviting {} ", authenticationDetails.getCurrentUsername(), forEmail);
 
         if (inviteRepository.existsByForEmailAndStatus(forEmail, InviteStatus.PENDING)) {

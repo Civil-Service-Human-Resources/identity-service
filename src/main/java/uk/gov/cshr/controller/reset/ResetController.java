@@ -17,7 +17,6 @@ import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.ResetRepository;
 import uk.gov.cshr.service.ResetService;
 import uk.gov.cshr.service.security.IdentityService;
-import uk.gov.service.notify.NotificationClientException;
 
 import javax.validation.Valid;
 
@@ -82,7 +81,7 @@ public class ResetController {
 
 
     @PostMapping("/{code}")
-    public String resetPassword(@PathVariable(value = "code") String code, @ModelAttribute @Valid ResetForm resetForm, BindingResult bindingResult, Model model) throws NotificationClientException {
+    public String resetPassword(@PathVariable(value = "code") String code, @ModelAttribute @Valid ResetForm resetForm, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("resetForm", resetForm);
             return "reset/passwordForm";

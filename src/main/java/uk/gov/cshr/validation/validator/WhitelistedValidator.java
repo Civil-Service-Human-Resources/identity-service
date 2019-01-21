@@ -12,7 +12,7 @@ import java.util.Arrays;
 public class WhitelistedValidator implements ConstraintValidator<Whitelisted, String> {
    private final String[] whitelistedDomains;
 
-   public WhitelistedValidator(@Value("${invite.whitelist.domains}") String[] whitelistedDomains) {
+   public WhitelistedValidator(@Value("${notifications.invite.whitelist.domains}") String[] whitelistedDomains) {
       this.whitelistedDomains = whitelistedDomains;
    }
 

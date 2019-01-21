@@ -23,8 +23,8 @@ public class EmailNotificationFactoryTest {
             inviteTemplateId,
             inviteUrlFormat,
             passwordResetVerificationTemplateId,
-            passwordResetActivationUrlFormat,
-            passwordResetNotificationTemplateId
+            passwordResetNotificationTemplateId,
+            passwordResetActivationUrlFormat
     );
 
     @Test
