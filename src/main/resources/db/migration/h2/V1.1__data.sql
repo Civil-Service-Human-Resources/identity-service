@@ -10,6 +10,9 @@ INSERT INTO `role` (name) VALUES
 ('ORGANISATION_REPORTER'),
 ('PROFESSION_REPORTER'),
 ('CSHR_REPORTER'),
+('KPMG_SUPPLIER_REPORTER'),
+('KORNFERRY_SUPPLIER_REPORTER'),
+('KNOWLEDGEPOOL_SUPPLIER_REPORTER'),
 ('ORGANISATION_MANAGER'),
 ('PROFESSION_MANAGER'),
 ('LEARNING_CREATE'),
@@ -31,7 +34,10 @@ INSERT INTO `identity` (active, locked, email, uid, password) VALUES
 (true, false, 'identity-manager@domain.com', '65313ea4-59ea-4802-a521-71f9a92c85cd', '$2a$10$sGfnyPnJ8a0b9R.vqIphKu5vjetS3.Bvi6ISv39bOphq5On0U2m36'),
 (true, false, 'organisation-reporter@domain.com', 'ef422d43-53f1-492a-a159-54b8c5348df8', '$2a$10$sGfnyPnJ8a0b9R.vqIphKu5vjetS3.Bvi6ISv39bOphq5On0U2m36'),
 (true, false, 'profession-reporter@domain.com', '5b1a0e11-12f5-47a8-9fe2-e272184defc9', '$2a$10$sGfnyPnJ8a0b9R.vqIphKu5vjetS3.Bvi6ISv39bOphq5On0U2m36'),
-(true, false, 'cshr-reporter@domain.com', 'c4cb1208-eca7-46a6-b496-0f6f354c6eac', '$2a$10$sGfnyPnJ8a0b9R.vqIphKu5vjetS3.Bvi6ISv39bOphq5On0U2m36')
+(true, false, 'cshr-reporter@domain.com', 'c4cb1208-eca7-46a6-b496-0f6f354c6eac', '$2a$10$sGfnyPnJ8a0b9R.vqIphKu5vjetS3.Bvi6ISv39bOphq5On0U2m36'),
+(true, false, 'kpmg-supplier-reporter@domain.com', 'e2be82b6-6193-4f8d-a871-4b7ab78c70a1', '$2a$10$sGfnyPnJ8a0b9R.vqIphKu5vjetS3.Bvi6ISv39bOphq5On0U2m36'),
+(true, false, 'kornferry-supplier-reporter@domain.com', '2ce537c3-a321-4fa0-8ba2-2430361033ab', '$2a$10$sGfnyPnJ8a0b9R.vqIphKu5vjetS3.Bvi6ISv39bOphq5On0U2m36'),
+(true, false, 'knowledgepool-supplier-reporter@domain.com', '30462f19-dfd6-4ed9-9ddc-e8480dc17839', '$2a$10$sGfnyPnJ8a0b9R.vqIphKu5vjetS3.Bvi6ISv39bOphq5On0U2m36')
 ;
 
 INSERT INTO `identity_role` (identity_id, role_id) VALUES
@@ -51,7 +57,10 @@ INSERT INTO `identity_role` (identity_id, role_id) VALUES
 ((SELECT id FROM identity WHERE email = 'identity-manager@domain.com'), (SELECT id FROM role WHERE name = 'IDENTITY_MANAGER')),
 ((SELECT id FROM identity WHERE email = 'organisation-reporter@domain.com'), (SELECT id FROM role WHERE name = 'ORGANISATION_REPORTER')),
 ((SELECT id FROM identity WHERE email = 'profession-reporter@domain.com'), (SELECT id FROM role WHERE name = 'PROFESSION_REPORTER')),
-((SELECT id FROM identity WHERE email = 'cshr-reporter@domain.com'), (SELECT id FROM role WHERE name = 'CSHR_REPORTER'))
+((SELECT id FROM identity WHERE email = 'cshr-reporter@domain.com'), (SELECT id FROM role WHERE name = 'CSHR_REPORTER')),
+((SELECT id FROM identity WHERE email = 'kpmg-supplier-reporter@domain.com'), (SELECT id FROM role WHERE name = 'KPMG_SUPPLIER_REPORTER')),
+((SELECT id FROM identity WHERE email = 'kornferry-supplier-reporter@domain.com'), (SELECT id FROM role WHERE name = 'KORNFERRY_SUPPLIER_REPORTER')),
+((SELECT id FROM identity WHERE email = 'knowledgepool-supplier-reporter@domain.com'), (SELECT id FROM role WHERE name = 'KNOWLEDGEPOOL_SUPPLIER_REPORTER'))
 ;
 
 INSERT INTO `client` (active, uid, password, redirect_uri)
