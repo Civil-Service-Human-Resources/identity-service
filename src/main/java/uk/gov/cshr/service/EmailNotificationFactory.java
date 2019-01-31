@@ -72,10 +72,10 @@ public class EmailNotificationFactory {
 
     public EmailNotification createEmailAddressUpdateVerification(String emailAddress, String code) {
         EmailNotification notification = new EmailNotification();
-        String link = String.format(emailUpdateUrlFormat, code);
+        String activationUrl = String.format(emailUpdateUrlFormat, code);
 
         Map<String, String> personalisation = new HashMap<>();
-        personalisation.put("link", link);
+        personalisation.put(ACTIVATION_URL_PERSONALISATION_KEY, activationUrl);
 
         notification.setTemplateId(emailUpdateTemplateId);
         notification.setRecipient(emailAddress);

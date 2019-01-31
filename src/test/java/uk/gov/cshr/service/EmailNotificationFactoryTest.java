@@ -34,7 +34,7 @@ public class EmailNotificationFactoryTest {
 
         EmailNotification notification = factory.createEmailAddressUpdateVerification(email, code);
 
-        assertEquals("http://localhost:8080/account/email/verify/xxx?redirect=true", notification.getPersonalisation().get("link"));
+        assertEquals("http://localhost:8080/account/email/verify/xxx?redirect=true", notification.getPersonalisation().get("activationUrl"));
         assertEquals(email, notification.getRecipient());
         assertEquals(emailUpdateTemplateId, notification.getTemplateId());
         assertNull(notification.getReference());

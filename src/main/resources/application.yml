@@ -72,9 +72,9 @@ notifications:
       verification: ${GOV_NOTIFY_RESET_TEMPLATE_ID:template}
       notification: ${GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID:template}
   password:
-    template: ${GOV_NOTIFY_PASSWORD_UPDATE_TEMPLATE_ID:template}
+    template: ${GOV_NOTIFY_PASSWORD_UPDATE_TEMPLATE_ID:13c2b9ac-4ad0-449f-b43b-57c04fc88b1d}
   email:
-    template: ${GOV_NOTIFY_EMAIL_UPDATE_TEMPLATE_ID:template}
+    template: ${GOV_NOTIFY_EMAIL_UPDATE_TEMPLATE_ID:f4c2ece1-5159-4736-92cb-4fe0df719308}
     urlFormat: ${EMAIL_UPDATE_URL_FORMAT:http://localhost:8080/account/email/verify/%s?redirect=true}
 
 oauth:
