@@ -3,6 +3,7 @@ package uk.gov.cshr.service.security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,7 +15,9 @@ import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Invite;
 import uk.gov.cshr.domain.Role;
 import uk.gov.cshr.repository.IdentityRepository;
+import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.InviteService;
+import uk.gov.cshr.service.NotifyService;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,16 +29,32 @@ public class IdentityService implements UserDetailsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IdentityService.class);
 
-    private IdentityRepository identityRepository;
+    private final String updatePasswordEmailTemplateId;
+
+    private final IdentityRepository identityRepository;
 
     private InviteService inviteService;
 
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    public IdentityService(IdentityRepository identityRepository, PasswordEncoder passwordEncoder) {
+    private final TokenServices tokenServices;
+
+    private final TokenRepository tokenRepository;
+
+    private final NotifyService notifyService;
+
+    public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
+                           IdentityRepository identityRepository,
+                           PasswordEncoder passwordEncoder,
+                           TokenServices tokenServices,
+                           TokenRepository tokenRepository,
+                           NotifyService notifyService) {
+        this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.identityRepository = identityRepository;
         this.passwordEncoder = passwordEncoder;
+        this.tokenServices = tokenServices;
+        this.tokenRepository = tokenRepository;
+        this.notifyService = notifyService;
     }
 
     @Autowired
@@ -76,5 +95,22 @@ public class IdentityService implements UserDetailsService {
         Identity identity = identityRepository.findFirstByActiveTrueAndEmailEquals(email);
         identity.setLocked(true);
         identityRepository.save(identity);
+    }
+
+    public boolean checkPassword(String username, String password) {
+        UserDetails userDetails = loadUserByUsername(username);
+        return passwordEncoder.matches(password, userDetails.getPassword());
+    }
+
+    public void updatePasswordAndRevokeTokens(Identity identity, String password) {
+        identity.setPassword(passwordEncoder.encode(password));
+        identityRepository.save(identity);
+        revokeAccessTokens(identity);
+        notifyService.notify(identity.getEmail(), updatePasswordEmailTemplateId );
+    }
+
+    public void revokeAccessTokens(Identity identity) {
+        tokenRepository.findAllByUserName(identity.getUid())
+                .forEach(token -> tokenServices.revokeToken(token.getToken().getValue()));
     }
 }
