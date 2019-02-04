@@ -49,6 +49,9 @@ account:
 lpg:
   uiUrl: ${LPG_UI_URL:http://localhost:3001}
 
+learnerRecord:
+  deleteUrl: ${LEARNER_RECORD_URL:http://localhost:9000/records/%s/delete}
+
 ---
 
 spring:

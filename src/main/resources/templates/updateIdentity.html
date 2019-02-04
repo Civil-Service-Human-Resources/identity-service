@@ -42,5 +42,10 @@
             </table>
 
         </form>
+
+        <form autocomplete="nope" action="#" th:action="@{/management/identities/delete}" th:object="${identity}" method="POST">
+            <input type="hidden" th:field="*{uid}" />
+            <button type="submit" class="btn btn-primary">Delete User</button>
+        </form>
     </content>
 </page>

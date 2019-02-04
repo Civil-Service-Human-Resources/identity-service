@@ -13,6 +13,7 @@ import uk.gov.cshr.dto.IdentityDTO;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.RoleRepository;
 import uk.gov.cshr.service.AuthenticationDetails;
+import uk.gov.cshr.service.learnerRecord.LearnerRecordService;
 import uk.gov.cshr.service.security.IdentityDetails;
 
 import java.util.ArrayList;
@@ -34,6 +35,9 @@ public class IdentityController {
 
     @Autowired
     private AuthenticationDetails authenticationDetails;
+
+    @Autowired
+    private LearnerRecordService learnerRecordService;
 
     @RequestMapping(value = "/identity", method = RequestMethod.GET)
     public IdentityDTO getIdentityDetailsfromAccessToken(Authentication authentication) {
@@ -120,4 +124,9 @@ public class IdentityController {
         return "redirect:/management/identities";
     }
 
+    @PostMapping("/identities/delete")
+    public void identityDelete(@RequestParam("uid") String uid) {
+        learnerRecordService.deleteRecord(uid);
+
+    }
 }
