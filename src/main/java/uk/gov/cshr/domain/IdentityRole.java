@@ -1,30 +1,47 @@
 package uk.gov.cshr.domain;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.OneToOne;
+import java.util.Objects;
 
 @Entity
 public class IdentityRole {
 
-    @OneToOne(optional = false)
-    private Identity identity;
+    @JsonIgnore
+    @EmbeddedId
+    private IdentityRoleIdentity id;
 
-    @OneToOne(optional = false)
-    private Role role;
-
-    public Identity getIdentity() {
-        return identity;
+    public IdentityRole(Long identityId, Long roleId) {
+        this.id = new IdentityRoleIdentity(identityId, roleId);
     }
 
-    public void setIdentity(Identity identity) {
-        this.identity = identity;
+    public IdentityRoleIdentity getId() {
+        return id;
     }
 
-    public Role getRole() {
-        return role;
+    public void setId(IdentityRoleIdentity id) {
+        this.id = id;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IdentityRole that = (IdentityRole) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "IdentityRole{" +
+                "id=" + id +
+                '}';
     }
 }

@@ -15,11 +15,15 @@ import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Invite;
 import uk.gov.cshr.domain.Role;
 import uk.gov.cshr.repository.IdentityRepository;
+import uk.gov.cshr.repository.IdentityRoleRepository;
 import uk.gov.cshr.repository.TokenRepository;
+import uk.gov.cshr.service.CSRSService;
 import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.NotifyService;
+import uk.gov.cshr.service.learnerRecord.LearnerRecordService;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -33,6 +37,8 @@ public class IdentityService implements UserDetailsService {
 
     private final IdentityRepository identityRepository;
 
+    private final IdentityRoleRepository identityRoleRepository;
+
     private InviteService inviteService;
 
     private final PasswordEncoder passwordEncoder;
@@ -43,18 +49,30 @@ public class IdentityService implements UserDetailsService {
 
     private final NotifyService notifyService;
 
+    private final LearnerRecordService learnerRecordService;
+
+    private final CSRSService csrsService;
+
+
+
     public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
                            IdentityRepository identityRepository,
+                           IdentityRoleRepository identityRoleRepository,
                            PasswordEncoder passwordEncoder,
                            TokenServices tokenServices,
                            TokenRepository tokenRepository,
-                           NotifyService notifyService) {
+                           NotifyService notifyService,
+                           LearnerRecordService learnerRecordService,
+                           CSRSService csrsService) {
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.identityRepository = identityRepository;
+        this.identityRoleRepository = identityRoleRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenServices = tokenServices;
         this.tokenRepository = tokenRepository;
         this.notifyService = notifyService;
+        this.learnerRecordService = learnerRecordService;
+        this.csrsService = csrsService;
     }
 
     @Autowired
@@ -112,5 +130,18 @@ public class IdentityService implements UserDetailsService {
     public void revokeAccessTokens(Identity identity) {
         tokenRepository.findAllByUserName(identity.getUid())
                 .forEach(token -> tokenServices.revokeToken(token.getToken().getValue()));
+    }
+
+    @Transactional
+    public void deleteIdentity(String uid) {
+//        learnerRecordService.deleteCivilServant(uid);
+//        csrsService.deleteCivilServant(uid);
+
+        Optional<Identity> identity = identityRepository.findFirstByUid(uid);
+
+        if(identity.isPresent()) {
+            identityRoleRepository.deleteById(identity.get().getId());
+            identityRepository.delete(identity.get());
+        }
     }
 }
