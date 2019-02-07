@@ -128,9 +128,9 @@ public class IdentityController {
 
     @Transactional
     @PostMapping("/identities/delete")
-    public ResponseEntity identityDelete(@RequestParam("uid") String uid) {
+    public String identityDelete(@RequestParam("uid") String uid) {
         identityService.deleteIdentity(uid);
 
-        return ResponseEntity.noContent().build();
+        return "redirect:/management/identities";
     }
 }
