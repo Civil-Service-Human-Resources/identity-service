@@ -12,12 +12,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Role;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.RoleRepository;
 import uk.gov.cshr.service.AuthenticationDetails;
+import uk.gov.cshr.service.security.IdentityService;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -66,6 +69,9 @@ public class IdentityControllerTest {
 
     @Mock
     private AuthenticationDetails authenticationDetails;
+
+    @Mock
+    private IdentityService identityService;
 
     @Before
     public void setup() {
@@ -162,5 +168,12 @@ public class IdentityControllerTest {
 
     }
 
+    @Test
+    public void shouldCallDeleteIdentityAndRedirect() throws Exception {
+        this.mockMvc.perform(post("/management/identities/delete")
+                .param("uid", UID))
+                .andExpect(redirectedUrl("/management/identities"));
 
+        verify(identityService).deleteIdentity(UID);
+    }
 }

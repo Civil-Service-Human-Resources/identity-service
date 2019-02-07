@@ -8,6 +8,7 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -17,11 +18,14 @@ import uk.gov.cshr.domain.Role;
 import uk.gov.cshr.domain.Token;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
+import uk.gov.cshr.service.CSRSService;
 import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.NotifyService;
+import uk.gov.cshr.service.learnerRecord.LearnerRecordService;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Collections.emptySet;
@@ -54,6 +58,12 @@ public class IdentityServiceTest {
     @Mock
     private NotifyService notifyService;
 
+    @Mock
+    private LearnerRecordService learnerRecordService;
+
+    @Mock
+    private CSRSService csrsService;
+
     @Before
     public void setUp() throws Exception {
         identityService = new IdentityService(
@@ -62,8 +72,12 @@ public class IdentityServiceTest {
                 passwordEncoder,
                 tokenServices,
                 tokenRepository,
-                notifyService
+                notifyService,
+                learnerRecordService,
+                csrsService
         );
+
+        identityService.setInviteService(inviteService);
     }
 
     @Test
@@ -219,5 +233,38 @@ public class IdentityServiceTest {
         verify(tokenServices).revokeToken(accessToken2Value);
 
         verify(notifyService).notify(email, updatePasswordEmailTemplateId);
+    }
+
+    @Test
+    public void shouldDeleteIdentityAndLearnerRecordAndCSRSProfile() {
+        String uid = "identity-uid";
+        Identity identity = new Identity();
+
+        when(learnerRecordService.deleteCivilServant(uid)).thenReturn(ResponseEntity.noContent().build());
+        when(csrsService.deleteCivilServant(uid)).thenReturn(ResponseEntity.noContent().build());
+        when(identityRepository.findFirstByUid(uid)).thenReturn(Optional.of(identity));
+
+        identityService.deleteIdentity(uid);
+
+        verify(learnerRecordService).deleteCivilServant(uid);
+        verify(csrsService).deleteCivilServant(uid);
+        verify(identityRepository).findFirstByUid(uid);
+        verify(inviteService).deleteInvitesByIdentity(identity);
+        verify(identityRepository).delete(identity);
+    }
+
+    @Test
+    public void shouldOnlyDeleteLearningRecordAndCSRSProfileIfNoIdentityIsFound() {
+        String uid = "identity-uid";
+
+        when(learnerRecordService.deleteCivilServant(uid)).thenReturn(ResponseEntity.noContent().build());
+        when(csrsService.deleteCivilServant(uid)).thenReturn(ResponseEntity.noContent().build());
+        when(identityRepository.findFirstByUid(uid)).thenReturn(Optional.empty());
+
+        identityService.deleteIdentity(uid);
+
+        verify(learnerRecordService).deleteCivilServant(uid);
+        verify(csrsService).deleteCivilServant(uid);
+        verify(identityRepository).findFirstByUid(uid);
     }
 }

@@ -1,8 +1,15 @@
 package uk.gov.cshr.service;
 
 import org.hamcrest.MatcherAssert;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Invite;
 import uk.gov.cshr.domain.InviteStatus;
@@ -15,6 +22,8 @@ import java.util.Date;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.mockito.Mockito.*;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class InviteServiceTest {
 
     private InviteRepository inviteRepository = mock(InviteRepository.class);
@@ -86,5 +95,16 @@ public class InviteServiceTest {
 
         verify(notifyService).notify(email, code, govNotifyTemplateId, signupUrlFormat);
         verify(inviteRepository).save(invite);
+    }
+
+    @Test
+    public void shouldDeleteInvitesByEmailAndInviterId() {
+        Identity identity = new Identity("identity-uid", "test@domain.com", "", true, false, null);
+        identity.setId((long) 101);
+
+        inviteService.deleteInvitesByIdentity(identity);
+
+        verify(inviteRepository).deleteByForEmail("test@domain.com");
+        verify(inviteRepository).deleteByInviterId((long) 101);
     }
 }
