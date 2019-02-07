@@ -80,4 +80,9 @@ public class InviteService {
 
         inviteRepository.save(invite);
     }
+
+    public void deleteInvitesByIdentity(Identity identity) {
+        inviteRepository.deleteByForEmail(identity.getEmail());
+        inviteRepository.deleteByInviterId(identity.getId());
+    }
 }

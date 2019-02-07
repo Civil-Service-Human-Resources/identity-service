@@ -15,7 +15,6 @@ import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Invite;
 import uk.gov.cshr.domain.Role;
 import uk.gov.cshr.repository.IdentityRepository;
-import uk.gov.cshr.repository.IdentityRoleRepository;
 import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.CSRSService;
 import uk.gov.cshr.service.InviteService;
@@ -37,7 +36,6 @@ public class IdentityService implements UserDetailsService {
 
     private final IdentityRepository identityRepository;
 
-    private final IdentityRoleRepository identityRoleRepository;
 
     private InviteService inviteService;
 
@@ -57,7 +55,6 @@ public class IdentityService implements UserDetailsService {
 
     public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
                            IdentityRepository identityRepository,
-                           IdentityRoleRepository identityRoleRepository,
                            PasswordEncoder passwordEncoder,
                            TokenServices tokenServices,
                            TokenRepository tokenRepository,
@@ -66,7 +63,6 @@ public class IdentityService implements UserDetailsService {
                            CSRSService csrsService) {
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.identityRepository = identityRepository;
-        this.identityRoleRepository = identityRoleRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenServices = tokenServices;
         this.tokenRepository = tokenRepository;
@@ -134,14 +130,16 @@ public class IdentityService implements UserDetailsService {
 
     @Transactional
     public void deleteIdentity(String uid) {
-//        learnerRecordService.deleteCivilServant(uid);
-//        csrsService.deleteCivilServant(uid);
+        learnerRecordService.deleteCivilServant(uid);
+        csrsService.deleteCivilServant(uid);
 
-        Optional<Identity> identity = identityRepository.findFirstByUid(uid);
+        Optional<Identity> result = identityRepository.findFirstByUid(uid);
 
-        if(identity.isPresent()) {
-            identityRoleRepository.deleteById(identity.get().getId());
-            identityRepository.delete(identity.get());
+        if(result.isPresent()) {
+            Identity identity = result.get();
+
+            inviteService.deleteInvitesByIdentity(identity);
+            identityRepository.delete(identity);
         }
     }
 }
