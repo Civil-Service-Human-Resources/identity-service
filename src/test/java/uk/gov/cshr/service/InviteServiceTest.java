@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Invite;
 import uk.gov.cshr.domain.InviteStatus;
 import uk.gov.cshr.repository.InviteRepository;
@@ -78,5 +79,16 @@ public class InviteServiceTest {
         invite = inviteArgumentCaptor.getValue();
         MatcherAssert.assertThat(invite.getCode(), equalTo(code));
         MatcherAssert.assertThat(invite.getStatus(), equalTo(InviteStatus.ACCEPTED));
+    }
+
+    @Test
+    public void shouldDeleteInvitesByEmailAndInviterId() {
+        Identity identity = new Identity("identity-uid", "test@domain.com", "", true, false, null);
+        identity.setId((long) 101);
+
+        inviteService.deleteInvitesByIdentity(identity);
+
+        verify(inviteRepository).deleteByForEmail("test@domain.com");
+        verify(inviteRepository).deleteByInviterId((long) 101);
     }
 }

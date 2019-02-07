@@ -36,7 +36,6 @@ public class IdentityService implements UserDetailsService {
 
     private final IdentityRepository identityRepository;
 
-
     private InviteService inviteService;
 
     private final PasswordEncoder passwordEncoder;

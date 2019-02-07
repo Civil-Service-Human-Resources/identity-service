@@ -1,5 +1,6 @@
 package uk.gov.cshr.repository;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,9 @@ import uk.gov.cshr.domain.InviteStatus;
 
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.Optional;
 
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -81,6 +84,26 @@ public class InviteRepositoryTest {
 
         assertThat(existsByCodeAndStatusForPendingInvite, equalTo(true));
         assertThat(existsByCodeAndStatusForExpiredInvite, equalTo(false));
+    }
+
+    @Test
+    public void shouldDeleteByForEmail() {
+        String forEmail = "test@domain.com";
+
+        inviteRepository.save(createInvite("code", forEmail));
+        inviteRepository.deleteByForEmail(forEmail);
+
+        Assert.assertEquals(inviteRepository.findByForEmail(forEmail), null);
+    }
+
+    @Test
+    public void shouldDeleteByInviterId() {
+        Invite invite = createInvite();
+
+        inviteRepository.save(invite);
+        inviteRepository.deleteByInviterId(invite.getInviter().getId());
+
+        Assert.assertEquals(inviteRepository.findById(invite.getId()), Optional.empty());
     }
 
     private Invite createInvite() {
