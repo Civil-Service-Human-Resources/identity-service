@@ -3,6 +3,7 @@ package uk.gov.cshr.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,7 +14,7 @@ import uk.gov.cshr.dto.IdentityDTO;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.RoleRepository;
 import uk.gov.cshr.service.AuthenticationDetails;
-import uk.gov.cshr.service.learnerRecord.LearnerRecordService;
+import uk.gov.cshr.service.IdentityService;
 import uk.gov.cshr.service.security.IdentityDetails;
 
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class IdentityController {
     private AuthenticationDetails authenticationDetails;
 
     @Autowired
-    private LearnerRecordService learnerRecordService;
+    private IdentityService identityService;
 
     @RequestMapping(value = "/identity", method = RequestMethod.GET)
     public IdentityDTO getIdentityDetailsfromAccessToken(Authentication authentication) {
@@ -125,8 +126,9 @@ public class IdentityController {
     }
 
     @PostMapping("/identities/delete")
-    public void identityDelete(@RequestParam("uid") String uid) {
-        learnerRecordService.deleteRecord(uid);
+    public ResponseEntity identityDelete(@RequestParam("uid") String uid) {
+        identityService.deleteIdentity(uid);
 
+        return ResponseEntity.noContent().build();
     }
 }

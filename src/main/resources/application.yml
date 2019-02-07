@@ -51,7 +51,12 @@ lpg:
   uiUrl: ${LPG_UI_URL:http://localhost:3001}
 
 learnerRecord:
-  deleteUrl: ${LEARNER_RECORD_URL:http://localhost:9000/records/%s/delete}
+  serviceUrl: ${LEARNER_RECORD_URL:http://localhost:9000}
+  deleteUrl: "/learner/%s"
+
+csrs:
+  serviceUrl: ${CSRS_URL:http://localhost:9002}
+  deleteUrl: "/civilServants/%s"
 
 ---
 
