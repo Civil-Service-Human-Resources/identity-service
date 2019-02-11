@@ -5,13 +5,24 @@ VALUES (true, '9fbd4ae2-2db3-44c7-9544-88e80255b56e', '$2a$10$AbxhLGtIx7yv8jhF0B
 
 INSERT INTO `role` (name) VALUES
 ('LEARNER'),
-('COURSE_MANAGER'),
+('LEARNING_MANAGER'),
 ('IDENTITY_MANAGER'),
 ('ORGANISATION_REPORTER'),
 ('PROFESSION_REPORTER'),
 ('CSHR_REPORTER'),
 ('ORGANISATION_MANAGER'),
-('PROFESSION_MANAGER')
+('PROFESSION_MANAGER'),
+('LEARNING_CREATE'),
+('LEARNING_PUBLISH'),
+('LEARNING_EDIT'),
+('LEARNING_ARCHIVE'),
+('LEARNING_DELETE'),
+('CSL_AUTHOR'),
+('ORGANISATION_AUTHOR'),
+('PROFESSION_AUTHOR'),
+('KPMG_SUPPLIER_AUTHOR'),
+('KORNFERRY_SUPPLIER_AUTHOR'),
+('KNOWLEDGEPOOL_SUPPLIER_AUTHOR')
 ;
 
 INSERT INTO `identity` (active, locked, email, uid, password) VALUES
@@ -26,11 +37,11 @@ INSERT INTO `identity` (active, locked, email, uid, password) VALUES
 
 INSERT INTO `identity_role` (identity_id, role_id) VALUES
 ((SELECT id FROM identity WHERE email = 'learner@domain.com'), (SELECT id FROM role WHERE name = 'LEARNER')),
-((SELECT id FROM identity WHERE email = 'learner@domain.com'), (SELECT id FROM role WHERE name = 'COURSE_MANAGER')),
+((SELECT id FROM identity WHERE email = 'learner@domain.com'), (SELECT id FROM role WHERE name = 'LEARNING_MANAGER')),
 ((SELECT id FROM identity WHERE email = 'learner@domain.com'), (SELECT id FROM role WHERE name = 'ORGANISATION_MANAGER')),
 ((SELECT id FROM identity WHERE email = 'learner@domain.com'), (SELECT id FROM role WHERE name = 'PROFESSION_MANAGER')),
 ((SELECT id FROM identity WHERE email = 'learner@domain.com'), (SELECT id FROM role WHERE name = 'IDENTITY_MANAGER')),
-((SELECT id FROM identity WHERE email = 'course-manager@domain.com'), (SELECT id FROM role WHERE name = 'COURSE_MANAGER')),
+((SELECT id FROM identity WHERE email = 'course-manager@domain.com'), (SELECT id FROM role WHERE name = 'LEARNING_MANAGER')),
 ((SELECT id FROM identity WHERE email = 'identity-manager@domain.com'), (SELECT id FROM role WHERE name = 'IDENTITY_MANAGER')),
 ((SELECT id FROM identity WHERE email = 'organisation-reporter@domain.com'), (SELECT id FROM role WHERE name = 'ORGANISATION_REPORTER')),
 ((SELECT id FROM identity WHERE email = 'profession-reporter@domain.com'), (SELECT id FROM role WHERE name = 'PROFESSION_REPORTER')),
