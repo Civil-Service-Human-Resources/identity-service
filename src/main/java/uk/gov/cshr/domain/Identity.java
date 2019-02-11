@@ -3,6 +3,7 @@ package uk.gov.cshr.domain;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Set;
 
 @Entity
@@ -22,6 +23,8 @@ public class Identity implements Serializable {
     @Column(length = 100)
     private String password;
 
+    private Date lastLoggedIn;
+
     private boolean active;
 
     private boolean locked;
@@ -36,13 +39,14 @@ public class Identity implements Serializable {
     public Identity() {
     }
 
-    public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles) {
+    public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles, Date lastLoggedIn) {
         this.uid = uid;
         this.email = email;
         this.password = password;
         this.active = active;
         this.roles = roles;
         this.locked = locked;
+        this.lastLoggedIn = lastLoggedIn;
     }
 
     public boolean isActive() {
@@ -93,6 +97,14 @@ public class Identity implements Serializable {
         this.locked = locked;
     }
 
+    public Date getLastLoggedIn() {
+        return lastLoggedIn;
+    }
+
+    public void setLastLoggedIn(Date lastLoggedIn) {
+        this.lastLoggedIn = lastLoggedIn;
+    }
+
     @Override
     public String toString() {
         return "Identity{" +
@@ -100,6 +112,7 @@ public class Identity implements Serializable {
                 ", uid='" + uid + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
+                ", lastLoggedIn=" + lastLoggedIn +
                 ", active=" + active +
                 ", locked=" + locked +
                 ", roles=" + roles +

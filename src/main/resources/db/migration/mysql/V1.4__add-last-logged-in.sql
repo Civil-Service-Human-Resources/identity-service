@@ -1,0 +1,1 @@
+ALTER TABLE identity ADD `last-logged-in` datetime NOT NULL;

@@ -13,6 +13,7 @@ CREATE TABLE `identity` (
   `active` bit(1) NOT NULL,
   `locked` bit(1) NOT NULL,
   `uid` char(36) NOT NULL UNIQUE,
+  `last-logged-in` datetime NOT NULL,
   `email` varchar(150) NOT NULL UNIQUE,
   `password` varchar(100) NOT NULL,
   PRIMARY KEY (`id`)

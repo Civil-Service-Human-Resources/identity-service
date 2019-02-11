@@ -1,5 +1,6 @@
 package uk.gov.cshr.service.security;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.NotifyService;
 import uk.gov.cshr.service.learnerRecord.LearnerRecordService;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -93,7 +95,7 @@ public class IdentityService implements UserDetailsService {
         Invite invite = inviteService.findByCode(code);
 
         Set<Role> newRoles = new HashSet<>(invite.getForRoles());
-        Identity identity = new Identity(UUID.randomUUID().toString(), invite.getForEmail(), passwordEncoder.encode(password), true, false, newRoles);
+        Identity identity = new Identity(UUID.randomUUID().toString(), invite.getForEmail(), passwordEncoder.encode(password), true, false, newRoles, new Date());
         identityRepository.save(identity);
 
         LOGGER.info("New identity {} successfully created", identity.getEmail());
