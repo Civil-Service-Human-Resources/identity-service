@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.cshr.dto.IdentityDTO;
 import uk.gov.cshr.service.security.IdentityDetails;
+import uk.gov.cshr.service.security.IdentityService;
+import uk.gov.cshr.service.security.TokenServices;
+
+import java.util.Date;
 
 @RestController
 public class AuthenticationController {
@@ -20,9 +24,12 @@ public class AuthenticationController {
 
     private ConsumerTokenServices tokenServices;
 
+    private IdentityService identityService;
+
     @Autowired
-    public AuthenticationController(ConsumerTokenServices tokenServices) {
+    public AuthenticationController(ConsumerTokenServices tokenServices, IdentityService identityService) {
         this.tokenServices = tokenServices;
+        this.identityService = identityService;
     }
 
     @GetMapping("/oauth/revoke")
@@ -41,6 +48,7 @@ public class AuthenticationController {
     @GetMapping("/oauth/resolve")
     public IdentityDTO resolveIdentity(Authentication authentication) {
         IdentityDetails identityDetails = (IdentityDetails) authentication.getPrincipal();
+        identityService.setLastLoggedIn(new Date(), identityDetails.getIdentity());
         return new IdentityDTO(identityDetails.getIdentity());
     }
 }

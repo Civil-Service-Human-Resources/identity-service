@@ -129,6 +129,11 @@ public class IdentityService implements UserDetailsService {
                 .forEach(token -> tokenServices.revokeToken(token.getToken().getValue()));
     }
 
+    public void setLastLoggedIn(Date date, Identity identity) {
+        identity.setLastLoggedIn(date);
+        identityRepository.save(identity);
+    }
+
     @Transactional
     public void deleteIdentity(String uid) {
         learnerRecordService.deleteCivilServant(uid);

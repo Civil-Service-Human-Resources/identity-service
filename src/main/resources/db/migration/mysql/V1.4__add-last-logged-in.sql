@@ -1,1 +1,1 @@
-ALTER TABLE identity ADD `last-logged-in` datetime NOT NULL;
+ALTER TABLE identity ADD `last_logged_in` datetime NOT NULL;
