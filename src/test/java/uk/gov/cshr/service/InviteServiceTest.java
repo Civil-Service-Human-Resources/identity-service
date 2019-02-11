@@ -99,7 +99,7 @@ public class InviteServiceTest {
 
     @Test
     public void shouldDeleteInvitesByEmailAndInviterId() {
-        Identity identity = new Identity("identity-uid", "test@domain.com", "", true, false, null);
+        Identity identity = new Identity("identity-uid", "test@domain.com", "", true, false, null, new Date());
         identity.setId((long) 101);
 
         inviteService.deleteInvitesByIdentity(identity);

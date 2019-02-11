@@ -22,10 +22,7 @@ import uk.gov.cshr.service.AuthenticationDetails;
 import uk.gov.cshr.service.security.IdentityService;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -86,7 +83,7 @@ public class IdentityControllerTest {
 
         ArrayList<Identity> identities = new ArrayList<>();
 
-        identities.add(new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES));
+        identities.add(new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, new Date()));
         ArrayList<Role> roles = new ArrayList<>();
 
         roles.add(new Role(NAME, DESCRIPTION));
@@ -114,7 +111,7 @@ public class IdentityControllerTest {
     @Test
     public void shouldLoadIdentityToEdit() throws Exception {
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES);
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, new Date());
         when(identityRepository.findFirstByUid(UID)).thenReturn(Optional.of(identity));
         this.mockMvc.perform(get("/management/identities/update/uid"))
                 .andExpect(model().attribute("identity", hasProperty("uid", is(UID))));
@@ -123,7 +120,7 @@ public class IdentityControllerTest {
     @Test
     public void shouldSaveEditedIdentity() throws Exception {
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES);
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, new Date());
         when(identityRepository.findFirstByUid(UID)).thenReturn(Optional.of(identity));
 
 
@@ -147,7 +144,7 @@ public class IdentityControllerTest {
     @Test
     public void shouldInsertRolesByIDForEditedIdentity() throws Exception {
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES);
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, new Date());
         when(identityRepository.findFirstByUid(UID)).thenReturn(Optional.of(identity));
 
 

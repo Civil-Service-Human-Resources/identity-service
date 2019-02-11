@@ -129,9 +129,9 @@ public class IdentityService implements UserDetailsService {
                 .forEach(token -> tokenServices.revokeToken(token.getToken().getValue()));
     }
 
-    public void setLastLoggedIn(Date date, Identity identity) {
+    public Identity setLastLoggedIn(Date date, Identity identity) {
         identity.setLastLoggedIn(date);
-        identityRepository.save(identity);
+        return identityRepository.save(identity);
     }
 
     @Transactional

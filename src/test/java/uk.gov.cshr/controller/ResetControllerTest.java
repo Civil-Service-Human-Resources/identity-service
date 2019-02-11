@@ -138,7 +138,7 @@ public class ResetControllerTest {
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES);
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, new Date());
         when(identityRepository.findFirstByActiveTrueAndEmailEquals(EMAIL)).thenReturn(identity);
 
         this.mockMvc.perform(get("/reset/" + CODE))

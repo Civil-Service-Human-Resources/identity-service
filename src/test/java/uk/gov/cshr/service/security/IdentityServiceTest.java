@@ -23,14 +23,13 @@ import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.NotifyService;
 import uk.gov.cshr.service.learnerRecord.LearnerRecordService;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -85,7 +84,7 @@ public class IdentityServiceTest {
 
         final String emailAddress = "test@example.org";
         final String uid = "uid";
-        final Identity identity = new Identity(uid, emailAddress, "password", true, false, emptySet());
+        final Identity identity = new Identity(uid, emailAddress, "password", true, false, emptySet(), new Date());
 
         when(identityRepository.findFirstByActiveTrueAndEmailEquals(emailAddress))
                 .thenReturn(identity);
@@ -266,5 +265,18 @@ public class IdentityServiceTest {
         verify(learnerRecordService).deleteCivilServant(uid);
         verify(csrsService).deleteCivilServant(uid);
         verify(identityRepository).findFirstByUid(uid);
+    }
+
+    @Test
+    public void shouldUpdateLastLoggedIn() {
+        Identity identity = new Identity();
+        Date lastLoggedIn = new Date();
+
+        when(identityRepository.save(identity)).thenReturn(identity);
+
+        assertEquals(identityService.setLastLoggedIn(lastLoggedIn, identity), identity);
+        assertEquals(identity.getLastLoggedIn(), lastLoggedIn);
+
+        verify(identityRepository).save(identity);
     }
 }
