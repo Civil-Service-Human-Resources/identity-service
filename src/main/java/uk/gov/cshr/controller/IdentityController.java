@@ -3,7 +3,7 @@ package uk.gov.cshr.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -128,6 +128,7 @@ public class IdentityController {
 
     @Transactional
     @PostMapping("/identities/delete")
+    @PreAuthorize("hasAnyAuthority('IDENTITY_DELETE')")
     public String identityDelete(@RequestParam("uid") String uid) {
         identityService.deleteIdentity(uid);
 
