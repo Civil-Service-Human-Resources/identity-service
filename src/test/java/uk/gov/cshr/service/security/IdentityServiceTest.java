@@ -15,10 +15,12 @@ import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Invite;
 import uk.gov.cshr.domain.Role;
 import uk.gov.cshr.domain.Token;
+import uk.gov.cshr.notifications.service.NotificationService;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.CSRSService;
 import uk.gov.cshr.service.InviteService;
+import uk.gov.cshr.service.MessageService;
 import uk.gov.cshr.service.NotifyService;
 import uk.gov.cshr.service.learnerRecord.LearnerRecordService;
 
@@ -63,6 +65,12 @@ public class IdentityServiceTest {
     @Mock
     private CSRSService csrsService;
 
+    @Mock
+    private NotificationService notificationService;
+
+    @Mock
+    private MessageService messageService;
+
     @Before
     public void setUp() throws Exception {
         identityService = new IdentityService(
@@ -73,7 +81,9 @@ public class IdentityServiceTest {
                 tokenRepository,
                 notifyService,
                 learnerRecordService,
-                csrsService
+                csrsService,
+                notificationService,
+                messageService
         );
 
         identityService.setInviteService(inviteService);

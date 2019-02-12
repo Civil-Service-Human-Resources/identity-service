@@ -156,8 +156,7 @@ public class IdentityService implements UserDetailsService {
         }
     }
 
-//    @Scheduled(cron = "0 0 13 * * *")
-    @Scheduled(fixedRate = 100000)
+    @Scheduled(cron = "0 0 13 * * *")
     public void trackUserActivity() {
         Iterable<Identity> identities = identityRepository.findAll();
 
@@ -165,8 +164,6 @@ public class IdentityService implements UserDetailsService {
         LocalDateTime deletionDate = LocalDateTime.now().minusMonths(26);
 
         identities.forEach(identity -> {
-            identity.setLastLoggedIn(LocalDateTime.now().minusMonths(14).toInstant(ZoneOffset.UTC));
-
             LocalDateTime lastLoggedIn = LocalDateTime.ofInstant(identity.getLastLoggedIn(), ZoneOffset.UTC);
 
             if (lastLoggedIn.isBefore(deletionDate)) {
