@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.ReadOnlyProperty;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -156,7 +155,7 @@ public class IdentityService implements UserDetailsService {
         }
     }
 
-    @Scheduled(cron = "0 0 13 * * *")
+    @Transactional
     public void trackUserActivity() {
         Iterable<Identity> identities = identityRepository.findAll();
 
