@@ -9,6 +9,7 @@ import uk.gov.cshr.domain.Identity;
 
 import javax.transaction.Transactional;
 
+import java.time.Instant;
 import java.util.Date;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -37,7 +38,7 @@ public class IdentityRepositoryTest {
     }
 
     private Identity createIdentity() {
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, true, false, null, new Date());
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, true, false, null, Instant.now());
         return identity;
     }
 }

@@ -17,6 +17,7 @@ import uk.gov.cshr.domain.factory.InviteFactory;
 import uk.gov.cshr.repository.InviteRepository;
 import uk.gov.service.notify.NotificationClientException;
 
+import java.time.Instant;
 import java.util.Date;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -99,7 +100,7 @@ public class InviteServiceTest {
 
     @Test
     public void shouldDeleteInvitesByEmailAndInviterId() {
-        Identity identity = new Identity("identity-uid", "test@domain.com", "", true, false, null, new Date());
+        Identity identity = new Identity("identity-uid", "test@domain.com", "", true, false, null, Instant.now());
         identity.setId((long) 101);
 
         inviteService.deleteInvitesByIdentity(identity);

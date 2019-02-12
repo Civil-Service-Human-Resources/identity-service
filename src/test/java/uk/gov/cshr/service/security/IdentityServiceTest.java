@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
@@ -23,13 +22,14 @@ import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.NotifyService;
 import uk.gov.cshr.service.learnerRecord.LearnerRecordService;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -84,7 +84,7 @@ public class IdentityServiceTest {
 
         final String emailAddress = "test@example.org";
         final String uid = "uid";
-        final Identity identity = new Identity(uid, emailAddress, "password", true, false, emptySet(), new Date());
+        final Identity identity = new Identity(uid, emailAddress, "password", true, false, emptySet(), Instant.now());
 
         when(identityRepository.findFirstByActiveTrueAndEmailEquals(emailAddress))
                 .thenReturn(identity);
@@ -270,7 +270,7 @@ public class IdentityServiceTest {
     @Test
     public void shouldUpdateLastLoggedIn() {
         Identity identity = new Identity();
-        Date lastLoggedIn = new Date();
+        Instant lastLoggedIn = Instant.now();
 
         when(identityRepository.save(identity)).thenReturn(identity);
 
@@ -278,5 +278,68 @@ public class IdentityServiceTest {
         assertEquals(identity.getLastLoggedIn(), lastLoggedIn);
 
         verify(identityRepository).save(identity);
+    }
+
+    @Test
+    public void shouldDeactivateInactiveAccounts() {
+        Identity activeIdentity = new Identity();
+        activeIdentity.setLastLoggedIn(Instant.now());
+        activeIdentity.setActive(true);
+
+        Identity inactiveIdentity = new Identity();
+        inactiveIdentity.setLastLoggedIn(LocalDateTime.now().minusMonths(14).toInstant(ZoneOffset.UTC));
+        inactiveIdentity.setActive(true);
+
+        ArrayList<Identity> identities = new ArrayList<>();
+        identities.add(activeIdentity);
+        identities.add(inactiveIdentity);
+
+        when(identityRepository.findAll()).thenReturn(identities);
+        when(identityRepository.save(inactiveIdentity)).thenReturn(inactiveIdentity);
+
+        identityService.trackUserActivity();
+
+        assertFalse(inactiveIdentity.isActive());
+        assertTrue(activeIdentity.isActive());
+
+        verify(identityRepository).findAll();
+        verify(identityRepository).save(inactiveIdentity);
+    }
+
+    @Test
+    public void shouldDeleteInactiveAccounts() {
+        Identity activeIdentity = new Identity();
+        activeIdentity.setLastLoggedIn(Instant.now());
+        activeIdentity.setActive(true);
+
+        Identity inactiveIdentity = new Identity(
+                "test-uid",
+                "",
+                "",
+                false,
+                false,
+                new HashSet<>(),
+                LocalDateTime.now().minusMonths(27).toInstant(ZoneOffset.UTC));
+
+        ArrayList<Identity> identities = new ArrayList<>();
+        identities.add(activeIdentity);
+        identities.add(inactiveIdentity);
+
+        when(identityRepository.findAll()).thenReturn(identities);
+        when(learnerRecordService.deleteCivilServant("test-uid")).thenReturn(ResponseEntity.noContent().build());
+        when(csrsService.deleteCivilServant("test-uid")).thenReturn(ResponseEntity.noContent().build());
+        when(identityRepository.findFirstByUid("test-uid")).thenReturn(Optional.of(inactiveIdentity));
+
+        identityService.trackUserActivity();
+
+        assertFalse(inactiveIdentity.isActive());
+        assertTrue(activeIdentity.isActive());
+
+        verify(identityRepository).findAll();
+        verify(learnerRecordService).deleteCivilServant("test-uid");
+        verify(csrsService).deleteCivilServant("test-uid");
+        verify(identityRepository).findFirstByUid("test-uid");
+        verify(inviteService).deleteInvitesByIdentity(inactiveIdentity);
+        verify(identityRepository).delete(inactiveIdentity);
     }
 }

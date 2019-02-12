@@ -22,6 +22,7 @@ import uk.gov.cshr.service.AuthenticationDetails;
 import uk.gov.cshr.service.security.IdentityService;
 
 import javax.transaction.Transactional;
+import java.time.Instant;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -83,7 +84,7 @@ public class IdentityControllerTest {
 
         ArrayList<Identity> identities = new ArrayList<>();
 
-        identities.add(new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, new Date()));
+        identities.add(new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now()));
         ArrayList<Role> roles = new ArrayList<>();
 
         roles.add(new Role(NAME, DESCRIPTION));
@@ -111,7 +112,7 @@ public class IdentityControllerTest {
     @Test
     public void shouldLoadIdentityToEdit() throws Exception {
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, new Date());
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now());
         when(identityRepository.findFirstByUid(UID)).thenReturn(Optional.of(identity));
         this.mockMvc.perform(get("/management/identities/update/uid"))
                 .andExpect(model().attribute("identity", hasProperty("uid", is(UID))));
@@ -120,7 +121,7 @@ public class IdentityControllerTest {
     @Test
     public void shouldSaveEditedIdentity() throws Exception {
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, new Date());
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now());
         when(identityRepository.findFirstByUid(UID)).thenReturn(Optional.of(identity));
 
 
@@ -144,7 +145,7 @@ public class IdentityControllerTest {
     @Test
     public void shouldInsertRolesByIDForEditedIdentity() throws Exception {
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, new Date());
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now());
         when(identityRepository.findFirstByUid(UID)).thenReturn(Optional.of(identity));
 
 
