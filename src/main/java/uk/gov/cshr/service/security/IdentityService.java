@@ -1,11 +1,12 @@
 package uk.gov.cshr.service.security;
 
-import org.joda.time.DateTime;
+import org.apache.tomcat.jni.Local;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.ReadOnlyProperty;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,11 +23,10 @@ import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.NotifyService;
 import uk.gov.cshr.service.learnerRecord.LearnerRecordService;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
 
 @Service
 @Transactional
@@ -95,7 +95,7 @@ public class IdentityService implements UserDetailsService {
         Invite invite = inviteService.findByCode(code);
 
         Set<Role> newRoles = new HashSet<>(invite.getForRoles());
-        Identity identity = new Identity(UUID.randomUUID().toString(), invite.getForEmail(), passwordEncoder.encode(password), true, false, newRoles, new Date());
+        Identity identity = new Identity(UUID.randomUUID().toString(), invite.getForEmail(), passwordEncoder.encode(password), true, false, newRoles, Instant.now());
         identityRepository.save(identity);
 
         LOGGER.info("New identity {} successfully created", identity.getEmail());
@@ -129,8 +129,8 @@ public class IdentityService implements UserDetailsService {
                 .forEach(token -> tokenServices.revokeToken(token.getToken().getValue()));
     }
 
-    public Identity setLastLoggedIn(Date date, Identity identity) {
-        identity.setLastLoggedIn(date);
+    public Identity setLastLoggedIn(Instant datetime, Identity identity) {
+        identity.setLastLoggedIn(datetime);
         return identityRepository.save(identity);
     }
 
@@ -147,5 +147,25 @@ public class IdentityService implements UserDetailsService {
             inviteService.deleteInvitesByIdentity(identity);
             identityRepository.delete(identity);
         }
+    }
+
+    @Scheduled(cron = "0 0 13 * * *")
+    public void trackUserActivity() {
+        Iterable<Identity> identities = identityRepository.findAll();
+
+        LocalDateTime deactivationDate = LocalDateTime.now().minusMonths(13);
+        LocalDateTime deletionDate = LocalDateTime.now().minusMonths(26);
+
+        identities.forEach(identity -> {
+            LocalDateTime lastLoggedIn = LocalDateTime.ofInstant(identity.getLastLoggedIn(), ZoneOffset.UTC);
+
+            if (lastLoggedIn.isBefore(deletionDate)) {
+                deleteIdentity(identity.getUid());
+            } else if (identity.isActive() && lastLoggedIn.isBefore(deactivationDate)) {
+                identity.setActive(false);
+                identityRepository.save(identity);
+                //TODO: Send notification email
+            }
+        });
     }
 }

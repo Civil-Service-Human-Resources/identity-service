@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.cshr.dto.IdentityDTO;
 import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
-import uk.gov.cshr.service.security.TokenServices;
 
-import java.util.Date;
+import java.time.Instant;
 
 @RestController
 public class AuthenticationController {
@@ -48,7 +47,7 @@ public class AuthenticationController {
     @GetMapping("/oauth/resolve")
     public IdentityDTO resolveIdentity(Authentication authentication) {
         IdentityDetails identityDetails = (IdentityDetails) authentication.getPrincipal();
-        identityService.setLastLoggedIn(new Date(), identityDetails.getIdentity());
+        identityService.setLastLoggedIn(Instant.now(), identityDetails.getIdentity());
         return new IdentityDTO(identityDetails.getIdentity());
     }
 }
