@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.ReadOnlyProperty;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -129,16 +131,21 @@ public class IdentityService implements UserDetailsService {
 
     @Transactional
     public void deleteIdentity(String uid) {
-        learnerRecordService.deleteCivilServant(uid);
-        csrsService.deleteCivilServant(uid);
+        ResponseEntity response = learnerRecordService.deleteCivilServant(uid);
 
-        Optional<Identity> result = identityRepository.findFirstByUid(uid);
+        if(response.getStatusCode() == HttpStatus.NO_CONTENT) {
+            response = csrsService.deleteCivilServant(uid);
 
-        if(result.isPresent()) {
-            Identity identity = result.get();
+            if(response.getStatusCode() == HttpStatus.NO_CONTENT) {
+                Optional<Identity> result = identityRepository.findFirstByUid(uid);
 
-            inviteService.deleteInvitesByIdentity(identity);
-            identityRepository.delete(identity);
+                if (result.isPresent()) {
+                    Identity identity = result.get();
+
+                    inviteService.deleteInvitesByIdentity(identity);
+                    identityRepository.delete(identity);
+                }
+            }
         }
     }
 }
