@@ -126,6 +126,23 @@ public class IdentityController {
         return "redirect:/management/identities";
     }
 
+    @GetMapping("/identities/delete/{uid}")
+    public String identityDelete(Model model, @PathVariable("uid") String uid) {
+        LOGGER.info("{} deleting identity for uid {}", authenticationDetails.getCurrentUsername(), uid);
+
+        Optional<Identity> optionalIdentity = identityRepository.findFirstByUid(uid);
+        Iterable<Role> roles = roleRepository.findAll();
+
+        if (optionalIdentity.isPresent()) {
+            Identity identity = optionalIdentity.get();
+            model.addAttribute("identity", identity);
+            return "deleteIdentity";
+        }
+
+        LOGGER.info("No identity found for uid {}", authenticationDetails.getCurrentUsername(), uid);
+        return "redirect:/management/identities";
+    }
+
     @Transactional
     @PostMapping("/identities/delete")
     @PreAuthorize("hasAnyAuthority('IDENTITY_DELETE')")

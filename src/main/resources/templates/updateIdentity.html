@@ -34,6 +34,13 @@
                 </tr>
                 <tr>
                     <td colspan="5">
+                        <a class="btn btn-danger" th:href="@{|/management/identities/delete/${identity.uid}|}">
+                            Delete User
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5">
                         <a class="btn btn-primary" href="/management/identities">
                             Cancel
                         </a>
@@ -41,11 +48,6 @@
                 </tr>
             </table>
 
-        </form>
-
-        <form autocomplete="nope" action="#" th:action="@{/management/identities/delete}" th:object="${identity}" method="POST">
-            <input type="hidden" th:field="*{uid}" />
-            <button type="submit" class="btn btn-primary">Delete User</button>
         </form>
     </content>
 </page>
