@@ -29,4 +29,21 @@ public class RequestEntityFactory {
             throw new RequestEntityException(e);
         }
     }
+
+    public RequestEntity createPostRequest(URI uri, Object body) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails) authentication.getDetails();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + details.getTokenValue());
+        return new RequestEntity(body, headers, HttpMethod.POST, uri);
+    }
+
+    public RequestEntity createPostRequest(String uri, Object body) {
+        try {
+            return createPostRequest(new URI(uri), body);
+        } catch (URISyntaxException e) {
+            throw new RequestEntityException(e);
+        }
+    }
 }

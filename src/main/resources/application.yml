@@ -31,6 +31,7 @@ govNotify:
     reset: ${GOV_NOTIFY_RESET_TEMPLATE_ID:d29b056c-349b-42fc-a453-920cfb58a906}
     resetSuccessful: ${GOV_NOTIFY_RESET_SUCCESSFUL_TEMPLATE_ID:994fb6d4-a57a-49f2-baee-b0c6f6060b63}
     passwordUpdate: ${GOV_NOTIFY_PASSWORD_UPDATE_TEMPLATE_ID:13c2b9ac-4ad0-449f-b43b-57c04fc88b1d}
+    accountSuspension: ${GOV_NOTIFY_ACCOUNT_SUSPENSION_TEMPLATE_ID:de47fe22-96fc-448f-a3f0-d105e9f0e0e6}
 
 invite:
   url: ${INVITE_SIGNUP_URL:http://localhost:8080/signup/%s}
@@ -59,6 +60,10 @@ learnerRecord:
 csrs:
   serviceUrl: ${CSRS_URL:http://localhost:9002}
   deleteUrl: "/civilServants/%s"
+
+notifications:
+  service: ${NOTIFICATION_SERVICE_URL:http://localhost:9005}
+  email: ${notifications.service}/notifications/email/
 
 ---
 

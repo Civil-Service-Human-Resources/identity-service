@@ -1,6 +1,5 @@
 package uk.gov.cshr.service.security;
 
-import org.apache.tomcat.jni.Local;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Invite;
 import uk.gov.cshr.domain.Role;
+import uk.gov.cshr.notifications.service.NotificationService;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.CSRSService;
 import uk.gov.cshr.service.InviteService;
+import uk.gov.cshr.service.MessageService;
 import uk.gov.cshr.service.NotifyService;
 import uk.gov.cshr.service.learnerRecord.LearnerRecordService;
 
@@ -52,7 +53,9 @@ public class IdentityService implements UserDetailsService {
 
     private final CSRSService csrsService;
 
+    private final NotificationService notificationService;
 
+    private final MessageService messageService;
 
     public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
                            IdentityRepository identityRepository,
@@ -61,7 +64,9 @@ public class IdentityService implements UserDetailsService {
                            TokenRepository tokenRepository,
                            NotifyService notifyService,
                            LearnerRecordService learnerRecordService,
-                           CSRSService csrsService) {
+                           CSRSService csrsService,
+                           NotificationService notificationService,
+                           MessageService messageService) {
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.identityRepository = identityRepository;
         this.passwordEncoder = passwordEncoder;
@@ -70,6 +75,8 @@ public class IdentityService implements UserDetailsService {
         this.notifyService = notifyService;
         this.learnerRecordService = learnerRecordService;
         this.csrsService = csrsService;
+        this.notificationService = notificationService;
+        this.messageService = messageService;
     }
 
     @Autowired
@@ -149,7 +156,8 @@ public class IdentityService implements UserDetailsService {
         }
     }
 
-    @Scheduled(cron = "0 0 13 * * *")
+//    @Scheduled(cron = "0 0 13 * * *")
+    @Scheduled(fixedRate = 100000)
     public void trackUserActivity() {
         Iterable<Identity> identities = identityRepository.findAll();
 
@@ -157,6 +165,8 @@ public class IdentityService implements UserDetailsService {
         LocalDateTime deletionDate = LocalDateTime.now().minusMonths(26);
 
         identities.forEach(identity -> {
+            identity.setLastLoggedIn(LocalDateTime.now().minusMonths(14).toInstant(ZoneOffset.UTC));
+
             LocalDateTime lastLoggedIn = LocalDateTime.ofInstant(identity.getLastLoggedIn(), ZoneOffset.UTC);
 
             if (lastLoggedIn.isBefore(deletionDate)) {
@@ -164,7 +174,7 @@ public class IdentityService implements UserDetailsService {
             } else if (identity.isActive() && lastLoggedIn.isBefore(deactivationDate)) {
                 identity.setActive(false);
                 identityRepository.save(identity);
-                //TODO: Send notification email
+                notificationService.send(messageService.createSuspensionMessage(identity));
             }
         });
     }
