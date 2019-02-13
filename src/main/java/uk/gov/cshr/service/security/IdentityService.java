@@ -103,7 +103,7 @@ public class IdentityService implements UserDetailsService {
         Invite invite = inviteService.findByCode(code);
 
         Set<Role> newRoles = new HashSet<>(invite.getForRoles());
-        Identity identity = new Identity(UUID.randomUUID().toString(), invite.getForEmail(), passwordEncoder.encode(password), true, false, newRoles, Instant.now());
+        Identity identity = new Identity(UUID.randomUUID().toString(), invite.getForEmail(), passwordEncoder.encode(password), true, false, newRoles, Instant.now(), false);
         identityRepository.save(identity);
 
         LOGGER.info("New identity {} successfully created", identity.getEmail());
@@ -167,6 +167,7 @@ public class IdentityService implements UserDetailsService {
         Iterable<Identity> identities = identityRepository.findAll();
 
         LocalDateTime deactivationDate = LocalDateTime.now().minusMonths(13);
+        LocalDateTime deletionNotificationDate = LocalDateTime.now().minusMonths(25);
         LocalDateTime deletionDate = LocalDateTime.now().minusMonths(26);
 
         identities.forEach(identity -> {
@@ -174,6 +175,10 @@ public class IdentityService implements UserDetailsService {
 
             if (lastLoggedIn.isBefore(deletionDate)) {
                 deleteIdentity(identity.getUid());
+            } else if (lastLoggedIn.isBefore(deletionNotificationDate) && !identity.isDeletionNotificationSent()) {
+                notificationService.send(messageService.createDeletionMessage(identity));
+                identity.setDeletionNotificationSent(true);
+                identityRepository.save(identity);
             } else if (identity.isActive() && lastLoggedIn.isBefore(deactivationDate)) {
                 identity.setActive(false);
                 identityRepository.save(identity);

@@ -25,6 +25,8 @@ public class Identity implements Serializable {
 
     private Instant lastLoggedIn;
 
+    private boolean deletionNotificationSent;
+
     private boolean active;
 
     private boolean locked;
@@ -39,7 +41,7 @@ public class Identity implements Serializable {
     public Identity() {
     }
 
-    public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles, Instant lastLoggedIn) {
+    public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles, Instant lastLoggedIn, boolean deletionNotificationSent) {
         this.uid = uid;
         this.email = email;
         this.password = password;
@@ -47,6 +49,7 @@ public class Identity implements Serializable {
         this.roles = roles;
         this.locked = locked;
         this.lastLoggedIn = lastLoggedIn;
+        this.deletionNotificationSent = deletionNotificationSent;
     }
 
     public boolean isActive() {
@@ -103,6 +106,14 @@ public class Identity implements Serializable {
 
     public void setLastLoggedIn(Instant lastLoggedIn) {
         this.lastLoggedIn = lastLoggedIn;
+    }
+
+    public boolean isDeletionNotificationSent() {
+        return deletionNotificationSent;
+    }
+
+    public void setDeletionNotificationSent(boolean deletionNotificationSent) {
+        this.deletionNotificationSent = deletionNotificationSent;
     }
 
     @Override

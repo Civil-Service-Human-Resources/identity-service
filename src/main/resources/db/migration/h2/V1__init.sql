@@ -12,6 +12,7 @@ CREATE TABLE `identity` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `active` bit(1) NOT NULL,
   `locked` bit(1) NOT NULL,
+  `deletion_email_sent` bit(1) DEFAULT FALSE,
   `uid` char(36) NOT NULL UNIQUE,
   `last_logged_in` datetime NOT NULL,
   `email` varchar(150) NOT NULL UNIQUE,

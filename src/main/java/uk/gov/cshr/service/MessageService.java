@@ -16,9 +16,15 @@ public class MessageService {
 
     private final String suspensionMessageTemplateId;
 
-    public MessageService(@Value("govNotify.template.accountSuspension") String suspensionMessageTemplateId, MessageDtoFactory messageDtoFactory) {
+    private final String deletionMessageTemplateId;
+
+    public MessageService(@Value("govNotify.template.accountSuspension") String suspensionMessageTemplateId,
+                          @Value("govNotify.template.accountDeletion") String deletionMessageTemplateId,
+                          MessageDtoFactory messageDtoFactory
+    ) {
         this.messageDtoFactory = messageDtoFactory;
         this.suspensionMessageTemplateId = suspensionMessageTemplateId;
+        this.deletionMessageTemplateId = deletionMessageTemplateId;
     }
 
     public MessageDto createSuspensionMessage(Identity identity) {
@@ -27,5 +33,13 @@ public class MessageService {
         map.put("learnerName", identity.getEmail());
 
         return messageDtoFactory.create(identity.getEmail(), suspensionMessageTemplateId, map);
+    }
+
+    public MessageDto createDeletionMessage(Identity identity) {
+        Map<String, String> map = new HashMap<>();
+
+        map.put("learnerName", identity.getEmail());
+
+        return messageDtoFactory.create(identity.getEmail(), deletionMessageTemplateId, map);
     }
 }
