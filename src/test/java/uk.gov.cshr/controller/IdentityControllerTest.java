@@ -84,7 +84,7 @@ public class IdentityControllerTest {
 
         ArrayList<Identity> identities = new ArrayList<>();
 
-        identities.add(new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now()));
+        identities.add(new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now(), false));
         ArrayList<Role> roles = new ArrayList<>();
 
         roles.add(new Role(NAME, DESCRIPTION));
@@ -112,7 +112,7 @@ public class IdentityControllerTest {
     @Test
     public void shouldLoadIdentityToEdit() throws Exception {
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now());
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now(), false);
         when(identityRepository.findFirstByUid(UID)).thenReturn(Optional.of(identity));
         this.mockMvc.perform(get("/management/identities/update/uid"))
                 .andExpect(model().attribute("identity", hasProperty("uid", is(UID))));
@@ -121,7 +121,7 @@ public class IdentityControllerTest {
     @Test
     public void shouldSaveEditedIdentity() throws Exception {
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now());
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now(), false);
         when(identityRepository.findFirstByUid(UID)).thenReturn(Optional.of(identity));
 
 
@@ -145,7 +145,7 @@ public class IdentityControllerTest {
     @Test
     public void shouldInsertRolesByIDForEditedIdentity() throws Exception {
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now());
+        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now(), false);
         when(identityRepository.findFirstByUid(UID)).thenReturn(Optional.of(identity));
 
 

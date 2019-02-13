@@ -21,7 +21,9 @@ public class MessageServiceTest {
 
     private final String suspensionMessageTemplateId = "suspensionMessageTemplateId";
 
-    private final MessageService messageService = new MessageService(suspensionMessageTemplateId, messageDtoFactory);
+    private final String deletionMessageTemplateId = "deletionMessageTemplateId";
+
+    private final MessageService messageService = new MessageService(suspensionMessageTemplateId, deletionMessageTemplateId, messageDtoFactory);
 
     @Test
     public void shouldCreateSuspensionMessage() {
@@ -32,7 +34,8 @@ public class MessageServiceTest {
                 true,
                 false,
                 new HashSet<>(),
-                Instant.now()
+                Instant.now(),
+                false
         );
 
         MessageDto messageDto = new MessageDto();
@@ -40,6 +43,28 @@ public class MessageServiceTest {
         when(messageDtoFactory.create(any(), any(), any())).thenReturn(messageDto);
 
         assertEquals(messageService.createSuspensionMessage(identity), messageDto);
+
+        verify(messageDtoFactory).create(any(), any(), any());
+    }
+
+    @Test
+    public void shouldCreateDeletionMessage() {
+        Identity identity = new Identity(
+                "",
+                "test@domain.com",
+                "",
+                false,
+                false,
+                new HashSet<>(),
+                Instant.now(),
+                false
+        );
+
+        MessageDto messageDto = new MessageDto();
+
+        when(messageDtoFactory.create(any(), any(), any())).thenReturn(messageDto);
+
+        assertEquals(messageService.createDeletionMessage(identity), messageDto);
 
         verify(messageDtoFactory).create(any(), any(), any());
     }

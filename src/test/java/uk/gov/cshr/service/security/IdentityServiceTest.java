@@ -15,6 +15,7 @@ import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Invite;
 import uk.gov.cshr.domain.Role;
 import uk.gov.cshr.domain.Token;
+import uk.gov.cshr.notifications.dto.MessageDto;
 import uk.gov.cshr.notifications.service.NotificationService;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
@@ -94,7 +95,7 @@ public class IdentityServiceTest {
 
         final String emailAddress = "test@example.org";
         final String uid = "uid";
-        final Identity identity = new Identity(uid, emailAddress, "password", true, false, emptySet(), Instant.now());
+        final Identity identity = new Identity(uid, emailAddress, "password", true, false, emptySet(), Instant.now(), false);
 
         when(identityRepository.findFirstByActiveTrueAndEmailEquals(emailAddress))
                 .thenReturn(identity);
@@ -304,8 +305,11 @@ public class IdentityServiceTest {
         identities.add(activeIdentity);
         identities.add(inactiveIdentity);
 
+        MessageDto messageDto = new MessageDto();
+
         when(identityRepository.findAll()).thenReturn(identities);
         when(identityRepository.save(inactiveIdentity)).thenReturn(inactiveIdentity);
+        when(messageService.createSuspensionMessage(inactiveIdentity)).thenReturn(messageDto);
 
         identityService.trackUserActivity();
 
@@ -314,6 +318,33 @@ public class IdentityServiceTest {
 
         verify(identityRepository).findAll();
         verify(identityRepository).save(inactiveIdentity);
+        verify(messageService).createSuspensionMessage(inactiveIdentity);
+        verify(notificationService).send(messageDto);
+    }
+
+    @Test
+    public void shouldNotifyLearnersOfAccountDeletion() {
+        Identity inactiveIdentity = new Identity();
+        inactiveIdentity.setLastLoggedIn(LocalDateTime.now().minusMonths(25).toInstant(ZoneOffset.UTC));
+        inactiveIdentity.setActive(false);
+        inactiveIdentity.setDeletionNotificationSent(false);
+
+        ArrayList<Identity> identities = new ArrayList<>();
+        identities.add(inactiveIdentity);
+
+        MessageDto messageDto = new MessageDto();
+
+        when(identityRepository.findAll()).thenReturn(identities);
+        when(messageService.createDeletionMessage(inactiveIdentity)).thenReturn(messageDto);
+
+        identityService.trackUserActivity();
+
+        assertTrue(inactiveIdentity.isDeletionNotificationSent());
+
+        verify(identityRepository).findAll();
+        verify(identityRepository).save(inactiveIdentity);
+        verify(messageService).createDeletionMessage(inactiveIdentity);
+        verify(notificationService).send(messageDto);
     }
 
     @Test
@@ -329,7 +360,8 @@ public class IdentityServiceTest {
                 false,
                 false,
                 new HashSet<>(),
-                LocalDateTime.now().minusMonths(27).toInstant(ZoneOffset.UTC));
+                LocalDateTime.now().minusMonths(27).toInstant(ZoneOffset.UTC),
+                false);
 
         ArrayList<Identity> identities = new ArrayList<>();
         identities.add(activeIdentity);
