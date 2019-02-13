@@ -21,24 +21,20 @@ public class LearnerRecordService {
 
     private final RequestEntityFactory requestEntityFactory;
 
-    private final String learnerRecordUrl;
-
-    private final String learnerRecordDeletePath;
+    private final String learnerRecordDeleteUrl;
 
     public LearnerRecordService(RestTemplate restTemplate,
                                 RequestEntityFactory requestEntityFactory,
-                                @Value("learnerRecord.url") String learnerRecordUrl,
-                                @Value("learnerRecord.deleteUrl") String learnerRecordDeletePath
+                                @Value("learnerRecord.deleteUrl") String learnerRecordDeleteUrl
     ) {
         this.restTemplate = restTemplate;
         this.requestEntityFactory = requestEntityFactory;
-        this.learnerRecordUrl = learnerRecordUrl;
-        this.learnerRecordDeletePath = learnerRecordDeletePath;
+        this.learnerRecordDeleteUrl = learnerRecordDeleteUrl;
     }
 
     public ResponseEntity deleteCivilServant(String uid) {
         try {
-            RequestEntity requestEntity = requestEntityFactory.createDeleteRequest(String.format(learnerRecordUrl, uid));
+            RequestEntity requestEntity = requestEntityFactory.createDeleteRequest(String.format(learnerRecordDeleteUrl, uid));
             ResponseEntity<Void> reponseEntity = restTemplate.exchange(requestEntity, Void.class);
             return reponseEntity;
         } catch (RequestEntityException | RestClientException e) {

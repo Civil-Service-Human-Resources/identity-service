@@ -19,24 +19,20 @@ public class CSRSService {
 
     private final RequestEntityFactory requestEntityFactory;
 
-    private final String csrsServiceUrl;
+    private final String csrsDeleteUrl;
 
-    private final String csrsDeletePath;
-
-    public CSRSService(@Value("csrs.serviceUrl") String csrsServiceUrl,
-                       @Value("csrs.deleteUrl") String csrsDeletePath,
+    public CSRSService(@Value("csrs.deleteUrl") String csrsDeleteUrl,
                        RestTemplate restTemplate,
                        RequestEntityFactory requestEntityFactory
     ) {
         this.restTemplate = restTemplate;
         this.requestEntityFactory = requestEntityFactory;
-        this.csrsServiceUrl = csrsServiceUrl;
-        this.csrsDeletePath = csrsDeletePath;
+        this.csrsDeleteUrl = csrsDeleteUrl;
     }
 
     public ResponseEntity deleteCivilServant(String uid) {
         try {
-            RequestEntity requestEntity = requestEntityFactory.createDeleteRequest(String.format(csrsServiceUrl + csrsDeletePath, uid));
+            RequestEntity requestEntity = requestEntityFactory.createDeleteRequest(String.format(csrsDeleteUrl, uid));
             ResponseEntity responseEntity = restTemplate.exchange(requestEntity, Void.class);
             return responseEntity;
         } catch(RequestEntityException | RestClientException e) {
