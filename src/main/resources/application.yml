@@ -59,7 +59,7 @@ learnerRecord:
   deleteUrl: "/learner/%s"
 
 csrs:
-  serviceUrl: ${CSRS_URL:http://localhost:9002}
+  serviceUrl: ${REGISTRY_SERVICE_URL:http://localhost:9002}
   deleteUrl: "/civilServants/%s"
 
 notifications:
