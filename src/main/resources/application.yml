@@ -52,11 +52,11 @@ lpg:
 
 learnerRecord:
   serviceUrl: ${LEARNER_RECORD_URL:http://localhost:9000}
-  deleteUrl: "${serviceUrl}/learner/%s"
+  deleteUrl: "${learnerRecord.serviceUrl}/learner/%s"
 
 csrs:
   serviceUrl: ${REGISTRY_SERVICE_URL:http://localhost:9002}
-  deleteUrl: "${serviceUrl}/civilServants/%s"
+  deleteUrl: "${csrs.serviceUrl}/civilServants/%s"
 
 ---
 
