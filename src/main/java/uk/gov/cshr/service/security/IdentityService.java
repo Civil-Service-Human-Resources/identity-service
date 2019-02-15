@@ -58,7 +58,16 @@ public class IdentityService implements UserDetailsService {
 
     private final MessageService messageService;
 
+    private final int deactivationTime;
+
+    private final int deletionNotificationTime;
+
+    private final int deletionTime;
+
     public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
+                           @Value("${account.deactivationTime}") int deactivationTime,
+                           @Value("${account.deletionNotificationTime}") int deletionNotificationTime,
+                           @Value("${account.deletionTime}") int deletionTime,
                            IdentityRepository identityRepository,
                            PasswordEncoder passwordEncoder,
                            TokenServices tokenServices,
@@ -78,6 +87,9 @@ public class IdentityService implements UserDetailsService {
         this.csrsService = csrsService;
         this.notificationService = notificationService;
         this.messageService = messageService;
+        this.deactivationTime = deactivationTime;
+        this.deletionNotificationTime = deletionNotificationTime;
+        this.deletionTime = deletionTime;
     }
 
     @Autowired
@@ -166,9 +178,9 @@ public class IdentityService implements UserDetailsService {
     public void trackUserActivity() {
         Iterable<Identity> identities = identityRepository.findAll();
 
-        LocalDateTime deactivationDate = LocalDateTime.now().minusMonths(13);
-        LocalDateTime deletionNotificationDate = LocalDateTime.now().minusMonths(25);
-        LocalDateTime deletionDate = LocalDateTime.now().minusMonths(26);
+        LocalDateTime deactivationDate = LocalDateTime.now().minusMonths(deactivationTime);
+        LocalDateTime deletionNotificationDate = LocalDateTime.now().minusMonths(deletionNotificationTime);
+        LocalDateTime deletionDate = LocalDateTime.now().minusMonths(deletionTime);
 
         identities.forEach(identity -> {
             LocalDateTime lastLoggedIn = LocalDateTime.ofInstant(identity.getLastLoggedIn(), ZoneOffset.UTC);

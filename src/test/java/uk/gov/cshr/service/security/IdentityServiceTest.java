@@ -76,6 +76,9 @@ public class IdentityServiceTest {
     public void setUp() throws Exception {
         identityService = new IdentityService(
                 updatePasswordEmailTemplateId,
+                13,
+                25,
+                26,
                 identityRepository,
                 passwordEncoder,
                 tokenServices,
