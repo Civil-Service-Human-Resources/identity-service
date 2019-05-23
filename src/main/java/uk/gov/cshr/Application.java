@@ -7,6 +7,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.client.RestTemplate;
 import uk.gov.service.notify.NotificationClient;
 
 import java.util.HashMap;
@@ -35,5 +36,10 @@ public class Application {
     @Bean
     public NotificationClient notificationClient(@Value("${govNotify.key}") String key) {
         return new NotificationClient(key);
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }
