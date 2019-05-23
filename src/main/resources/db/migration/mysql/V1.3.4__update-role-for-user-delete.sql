@@ -1,1 +1,0 @@
-INSERT INTO `role` (name) VALUES ('IDENTITY_DELETE');

@@ -126,7 +126,7 @@ public class IdentityController {
         return "redirect:/management/identities";
     }
 
-    @GetMapping("/identities/delete/{uid}")
+    @DeleteMapping("/identities/delete/{uid}")
     public String identityDelete(Model model, @PathVariable("uid") String uid) {
         LOGGER.info("{} deleting identity for uid {}", authenticationDetails.getCurrentUsername(), uid);
 
