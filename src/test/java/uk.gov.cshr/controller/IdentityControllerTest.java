@@ -32,6 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -168,10 +169,9 @@ public class IdentityControllerTest {
 
     @Test
     public void shouldCallDeleteIdentityAndRedirect() throws Exception {
-        this.mockMvc.perform(post("/management/identities/delete")
-                .param("uid", UID))
+        this.mockMvc.perform(delete("/management/identities/delete/abc"))
                 .andExpect(redirectedUrl("/management/identities"));
 
-        verify(identityService).deleteIdentity(UID);
+        verify(identityService).deleteIdentity("abc");
     }
 }
