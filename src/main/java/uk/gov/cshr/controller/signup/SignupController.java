@@ -75,7 +75,7 @@ public class SignupController {
             return "redirect:/signup/request";
         }
 
-        inviteService.sendSelfSignupInvite(form.getEmail());
+//        inviteService.sendSelfSignupInvite(form.getEmail());
 
         return "inviteSent";
     }
@@ -84,15 +84,15 @@ public class SignupController {
     @GetMapping("/{code}")
     public String signup(Model model, @PathVariable(value = "code") String code) {
         LOGGER.info("User accessing sign up screen with code {}", code);
-
-        if (inviteRepository.existsByCode(code)) {
-            if (!inviteService.isCodeExpired(code)) {
-                model.addAttribute("invite", inviteRepository.findByCode(code));
+//
+//        if (inviteRepository.existsByCode(code)) {
+//            if (!inviteService.isCodeExpired(code)) {
+//                model.addAttribute("invite", inviteRepository.findByCode(code));
                 model.addAttribute("signupForm", new SignupForm());
                 return "signup";
-            }
-        }
-        return "login";
+//            }
+//        }
+//        return "login";
     }
 
     @PostMapping("/{code}")
@@ -101,15 +101,15 @@ public class SignupController {
                          BindingResult bindingResult, Model model) {
         LOGGER.info("User attempting sign up with code {}", code);
 
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("invite", inviteRepository.findByCode(code));
-            return "signup";
-        }
-
-        identityService.createIdentityFromInviteCode(code, form.getPassword());
-        inviteService.updateInviteByCode(code, InviteStatus.ACCEPTED);
-
-        model.addAttribute("lpgUiUrl", lpgUiUrl);
+//        if (bindingResult.hasErrors()) {
+//            model.addAttribute("invite", inviteRepository.findByCode(code));
+//            return "signup";
+//        }
+//
+//        identityService.createIdentityFromInviteCode(code, form.getPassword());
+//        inviteService.updateInviteByCode(code, InviteStatus.ACCEPTED);
+//
+//        model.addAttribute("lpgUiUrl", lpgUiUrl);
 
         return "signupSuccess";
     }
