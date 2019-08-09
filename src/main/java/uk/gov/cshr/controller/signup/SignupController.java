@@ -1,6 +1,5 @@
 package uk.gov.cshr.controller.signup;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +37,9 @@ public class SignupController {
 
     private final String lpgUiUrl;
 
-    public SignupController(InviteService inviteService,
-                            IdentityService identityService,
-                            InviteRepository inviteRepository,
-                            SignupFormValidator signupFormValidator,
-                            @Value("${lpg.uiUrl}") String lpgUiUrl) {
+    public SignupController(InviteService inviteService, IdentityService identityService,
+            InviteRepository inviteRepository, SignupFormValidator signupFormValidator,
+            @Value("${lpg.uiUrl}") String lpgUiUrl) {
 
         this.inviteService = inviteService;
         this.identityService = identityService;
@@ -58,7 +55,8 @@ public class SignupController {
     }
 
     @PostMapping(path = "/request")
-    public String sendInvite(Model model, @ModelAttribute @Valid RequestInviteForm form, BindingResult bindingResult, RedirectAttributes redirectAttributes) throws NotificationClientException {
+    public String sendInvite(Model model, @ModelAttribute @Valid RequestInviteForm form, BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) throws NotificationClientException {
         if (bindingResult.hasErrors()) {
             model.addAttribute("requestInviteForm", form);
             return "requestInvite";
@@ -75,41 +73,40 @@ public class SignupController {
             return "redirect:/signup/request";
         }
 
-//        inviteService.sendSelfSignupInvite(form.getEmail());
+        inviteService.sendSelfSignupInvite(form.getEmail());
 
         return "inviteSent";
     }
 
-
     @GetMapping("/{code}")
     public String signup(Model model, @PathVariable(value = "code") String code) {
         LOGGER.info("User accessing sign up screen with code {}", code);
-//
-//        if (inviteRepository.existsByCode(code)) {
-//            if (!inviteService.isCodeExpired(code)) {
-//                model.addAttribute("invite", inviteRepository.findByCode(code));
+
+        if (inviteRepository.existsByCode(code)) {
+            if (!inviteService.isCodeExpired(code)) {
+                model.addAttribute("invite", inviteRepository.findByCode(code));
                 model.addAttribute("signupForm", new SignupForm());
                 return "signup";
-//            }
-//        }
-//        return "login";
+            }
+        }
+        return "login";
     }
 
     @PostMapping("/{code}")
     @Transactional
     public String signup(@PathVariable(value = "code") String code, @ModelAttribute @Valid SignupForm form,
-                         BindingResult bindingResult, Model model) {
+            BindingResult bindingResult, Model model) {
         LOGGER.info("User attempting sign up with code {}", code);
 
-//        if (bindingResult.hasErrors()) {
-//            model.addAttribute("invite", inviteRepository.findByCode(code));
-//            return "signup";
-//        }
-//
-//        identityService.createIdentityFromInviteCode(code, form.getPassword());
-//        inviteService.updateInviteByCode(code, InviteStatus.ACCEPTED);
-//
-//        model.addAttribute("lpgUiUrl", lpgUiUrl);
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("invite", inviteRepository.findByCode(code));
+            return "signup";
+        }
+
+        identityService.createIdentityFromInviteCode(code, form.getPassword());
+        inviteService.updateInviteByCode(code, InviteStatus.ACCEPTED);
+
+        model.addAttribute("lpgUiUrl", lpgUiUrl);
 
         return "signupSuccess";
     }
