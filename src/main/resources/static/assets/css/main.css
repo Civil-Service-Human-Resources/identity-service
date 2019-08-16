@@ -566,15 +566,15 @@ a {
 }
 
 a:focus {
-  background-color: #ffbf47;
-  outline: 3px solid #ffbf47;
+  background-color: #fd0;
+  outline: 3px solid #fd0;
 }
 
 input:focus,
 textarea:focus,
 select:focus,
 button:focus {
-  outline: 3px solid #ffbf47;
+  outline: 3px solid #fd0;
   outline-offset: 0;
 }
 
@@ -1175,7 +1175,7 @@ hr {
 }
 
 .button:focus {
-  outline: 3px solid #ffbf47;
+  outline: 3px solid #fd0;
 }
 
 .button[disabled="disabled"] {
@@ -1737,7 +1737,7 @@ details summary:hover {
   color: #2b8cc4;
 }
 details summary:focus {
-  outline: 3px solid #ffbf47;
+  outline: 3px solid #fd0;
 }
 details .summary {
   text-decoration: underline;
@@ -2113,14 +2113,14 @@ select:focus::-ms-value {
   opacity: 0;
 }
 .multiple-choice [type="radio"]:focus + label::before {
-  -webkit-box-shadow: 0 0 0 4px #ffbf47;
-  -moz-box-shadow: 0 0 0 4px #ffbf47;
-  box-shadow: 0 0 0 4px #ffbf47;
+  -webkit-box-shadow: 0 0 0 4px #fd0;
+  -moz-box-shadow: 0 0 0 4px #fd0;
+  box-shadow: 0 0 0 4px #fd0;
 }
 .multiple-choice [type="checkbox"]:focus + label::before {
-  -webkit-box-shadow: 0 0 0 3px #ffbf47;
-  -moz-box-shadow: 0 0 0 3px #ffbf47;
-  box-shadow: 0 0 0 3px #ffbf47;
+  -webkit-box-shadow: 0 0 0 3px #fd0;
+  -moz-box-shadow: 0 0 0 3px #fd0;
+  box-shadow: 0 0 0 3px #fd0;
 }
 .multiple-choice input:checked + label::after {
   zoom: 1;
@@ -2236,7 +2236,7 @@ input[type="number"] {
   }
 }
 .error-summary:focus {
-  outline: 3px solid #ffbf47;
+  outline: 3px solid #fd0;
 }
 .error-summary .error-summary-heading {
   margin-top: 0;
@@ -3309,7 +3309,7 @@ hr.clear {
   background: #005ea5;
 }
 .banner--warning {
-  background: #ffbf47;
+  background: #fd0;
   color: #0b0c0c;
 }
 .banner--warning a:link,
@@ -4195,7 +4195,7 @@ hr.clear {
   width: 90%;
 }
 .feedback input:focus {
-  outline: 3px solid #ffbf47;
+  outline: 3px solid #fd0;
 }
 .feedback p {
   font-size: 19px;
@@ -4743,7 +4743,7 @@ hr.clear {
   color: #fff;
 }
 .badge--warn {
-  background-color: #ffbf47;
+  background-color: #fd0;
   color: #3c3c3c;
 }
 .badge--info {
@@ -5042,7 +5042,7 @@ hr.clear {
 }
 .autocomplete__input--focused {
   outline-offset: 0;
-  outline: 3px solid #ffbf47;
+  outline: 3px solid #fd0;
 }
 .autocomplete__input--show-all-values {
   padding: 4px 34px 4px 4px;
