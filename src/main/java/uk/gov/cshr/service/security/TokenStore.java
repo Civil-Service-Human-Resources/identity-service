@@ -43,6 +43,7 @@ public class TokenStore implements org.springframework.security.oauth2.provider.
     @Override
     public OAuth2Authentication readAuthentication(String tokenValue) {
         LOGGER.info("2. readAuthentication no cache");
+        LOGGER.info("[x] Database find");
         Token token = tokenRepository.findByTokenIdAndStatus(extractTokenKey(tokenValue), TokenStatus.ACTIVE);
         if (token != null) {
             return token.getAuthentication();
@@ -53,12 +54,14 @@ public class TokenStore implements org.springframework.security.oauth2.provider.
     @Override
     public void storeAccessToken(OAuth2AccessToken token, OAuth2Authentication authentication) {
         LOGGER.info("3. storeAccessToken");
+        LOGGER.info("[x] Database find");
         Token storedToken = tokenRepository.findByTokenIdAndStatus(extractTokenKey(token.getValue()), TokenStatus.ACTIVE);
         if (storedToken == null) {
             storedToken = new Token(authenticationKeyGenerator.extractKey(authentication), token, authentication);
         } else {
             storedToken.setAuthentication(authentication);
         }
+        LOGGER.info("[x] Database save");
         tokenRepository.save(storedToken);
     }
 
@@ -66,7 +69,7 @@ public class TokenStore implements org.springframework.security.oauth2.provider.
     @Cacheable(cacheNames = "readAccessTokenCache", key = "#tokenValue")
     public OAuth2AccessToken readAccessToken(String tokenValue) {
         LOGGER.info("4. readAccessToken");
-
+        LOGGER.info("[x] Database find");
         Token token = tokenRepository.findByTokenIdAndStatus(extractTokenKey(tokenValue), TokenStatus.ACTIVE);
         if (token != null) {
             return token.getToken();
@@ -78,10 +81,11 @@ public class TokenStore implements org.springframework.security.oauth2.provider.
     @CacheEvict(cacheNames = "readAccessTokenCache", key = "#token.getValue()")
     public void removeAccessToken(OAuth2AccessToken token) {
         LOGGER.info("5. removeAccessToken");
-
+        LOGGER.info("[x] Database find");
         Token storedToken = tokenRepository.findByTokenIdAndStatus(extractTokenKey(token.getValue()), TokenStatus.ACTIVE);
         if (storedToken != null) {
             storedToken.setStatus(TokenStatus.REVOKED);
+            LOGGER.info("[x] Database save");
             tokenRepository.save(storedToken);
         }
     }
@@ -112,7 +116,7 @@ public class TokenStore implements org.springframework.security.oauth2.provider.
     @Override
     public OAuth2AccessToken getAccessToken(OAuth2Authentication authentication) {
         LOGGER.info("7. getAccessToken");
-
+        LOGGER.info("[x] Database find");
         Token storedToken = tokenRepository.findByAuthenticationIdAndStatus(authenticationKeyGenerator.extractKey(authentication), TokenStatus.ACTIVE);
         if (storedToken != null) {
             return storedToken.getToken();
@@ -123,7 +127,7 @@ public class TokenStore implements org.springframework.security.oauth2.provider.
     @Override
     public Collection<OAuth2AccessToken> findTokensByClientIdAndUserName(String clientId, String userName) {
         LOGGER.info("8. findTokensByClientIdAndUserName");
-
+        LOGGER.info("[x] Database find");
         Collection<Token> storedTokens = tokenRepository.findByClientIdAndUserName(clientId, userName);
         return storedTokens.stream()
                 .map(Token::getToken)
@@ -133,7 +137,7 @@ public class TokenStore implements org.springframework.security.oauth2.provider.
     @Override
     public Collection<OAuth2AccessToken> findTokensByClientId(String clientId) {
         LOGGER.info("9. findTokensByClientId");
-
+        LOGGER.info("[x] Database find");
         Collection<Token> storedTokens = tokenRepository.findByClientId(clientId);
         return storedTokens.stream()
                 .map(Token::getToken)

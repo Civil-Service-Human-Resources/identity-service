@@ -76,6 +76,9 @@ dependencies {
 
     compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
 
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    
     // https://github.com/alphagov/notifications-java-client
     compile('uk.gov.service.notify:notifications-java-client:3.9.1-RELEASE')
 
