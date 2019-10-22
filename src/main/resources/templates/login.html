@@ -1,55 +1,109 @@
-<page th:replace="fragments/user-layout :: page(~{::title},~{::content})">
-    <title>Sign in</title>
+<html lang="en">
 
-    <content>
-        <div class="container">
-            <div class="grid-row">
-                <div class="column-two-thirds">
-                    <div th:if="${param.error}" class="error-summary" role="alert"
-                         aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Maintenance - Learning Platform for Government</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/main.css"/>
+    <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico"/>
+</head>
 
-                        <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-1">
-                            Sign in failed
-                        </h2>
-                        <p>
-
-                            <span th:if="${param.error[0] == 'failed'}">You have entered the wrong email address or password, please try again.</span>
-                            <span th:if="${param.error[0] == 'locked'}">Your account has been locked. Please contact us to <a
-                                    href="mailto:feedback@cslearning.gov.uk">unlock your account.</a></span>
-                        </p>
-                    </div>
-
-                    <div th:if="${param.logout}" class="error-summary" role="alert"
-                         aria-labelledby="error-summary-heading-example-1" tabindex="-1">
-                        You have been logged out.
-                    </div>
-
-                    <h1 class="heading-large">Sign in</h1>
-
-                    <p class="info-item">If this is the first time you have used this website, you will need to <a href="/signup/request">create an account</a></p>
-
-
-                    <form autocomplete="nope" th:action="@{/login}" method="post" class="push-bottom">
-                        <div class="form-group">
-                            <label for="email-address" class="form-label">
-                                Email address
-                            </label>
-                            <input class="form-control form-control-2-3" id="email-address" name="username"
-                                   type="email">
-                        </div>
-                        <div class="form-group">
-                            <label for="password" class="form-label">
-                                Password
-                            </label>
-                            <input class="form-control form-control-2-3" id="password" type="password" name="password">
-                        </div>
-                        <div>
-                            <input type="submit" class="button" value="Continue">
-                        </div>
-                    </form>
-                    <a href="/reset" class="push-bottom">Forgotten your password?</a>
+<body>
+<div>
+    <header role="banner" id="global-header" class="with-proposition">
+        <div class="header-wrapper container">
+            <div class="header-global">
+                <div class="header-logo">
+                    <a href="https://www.gov.uk" title="Go to the GOV.UK homepage" id="logo" class="content">
+                        <img src="/assets/img/gov.uk_logotype_crown_invert_trans.png" width="36" height="32" alt="">
+                        GOV.UK
+                    </a>
                 </div>
             </div>
+            <div class="header-proposition">
+                <div class="content">
+                    <a href='/' id='proposition-name'>Civil Service Learning</a>
+                </div>
+            </div>
+
         </div>
-    </content>
-</page>
+    </header>
+
+    <div id="global-header-bar"></div>
+    <div class="phase-banner">
+        <p><strong class="phase-tag">BETA</strong> <a class="lpg-feedback-link"
+                                                      href="https://www.smartsurvey.co.uk/s/CSHR-Privatebeta/"
+                                                      target="_blank">Complete our survey to help us improve our new
+            service (opens in new window)</a>.</p>
+    </div>
+</div>
+
+<div id="content" class="col  align-self-center">
+    <div class="container">
+        <div class="grid-row">
+            <div class="column-two-thirds">
+                <h1 class="heading-large">Maintenance</h1>
+
+                <p class="lede">The learning website is undergoing scheduled maintenance.</p>
+
+                <p class="lede">It will be down from 5pm on Tuesday, 22 October until 7am on Wednesday, 23 October.</p>
+
+                <p class="lede">Apologies for the inconvenience.</p>
+
+                <p class="lede">If the maintenance period is extended, further information will be provided here.</p>
+
+                <p class="lede">If you need to complete mandatory learning urgently, you can access the former Civil
+                    Service Learning
+                    website at:
+                    <a target="_blank" href="https://civilservicelearning.civilservice.gov.uk/">https://civilservicelearning.civilservice.gov.uk/</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<footer class="group js-footer" id="footer" role="contentinfo">
+    <div class="footer-wrapper">
+        <div class="footer-meta">
+            <div class="footer-meta-inner">
+                <div>
+                    <ul>
+                        <li>
+                            Built by the <a href="#">Civil Service Learning Platform</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="open-government-licence">
+                    <p class="logo">
+                        <a
+                                href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+                                rel="license">
+                            Open Government Licence
+                        </a>
+                    </p>
+                    <p>
+                        All content is available under the
+                        <a
+                                href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+                                rel="license">
+                            Open Government Licence v3.0
+                        </a>, except where otherwise stated
+                    </p>
+                </div>
+            </div>
+            <div class="copyright">
+                <a href="https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/copyright-and-re-use/crown-copyright/">
+                    © Crown copyright
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+
+<script>document.body.className = document.body.className.replace('', 'js-enabled');</script>
+
+</body>
+</html>
