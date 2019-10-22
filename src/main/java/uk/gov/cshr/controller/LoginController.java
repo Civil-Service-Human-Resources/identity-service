@@ -22,7 +22,7 @@ public class LoginController {
             response.sendRedirect(lpgUiUrl);
         }
 
-        return "login";
+        return "maintenance";
 
     }
 
