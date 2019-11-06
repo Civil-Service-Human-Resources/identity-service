@@ -1,0 +1,26 @@
+<page th:replace="fragments/maintenance-layout :: page(~{::title},~{::content})">
+    <title>Maintenance page</title>
+
+    <content>
+        <div class="container">
+            <div class="grid-row">
+                <div class="column-two-thirds">
+                    <h3></h3>
+
+                    <h1 class="heading-large">Maintenance</h1>
+
+                    <p>The learning website is undergoing scheduled maintenance.</p>
+
+                    <p th:text="${maintenanceWindow}"></p>
+
+                    <p>Apologies for the inconvenience.</p>
+
+                    <p>If the maintenance period is extended, further information will be provided here.</p>
+
+                    <p>If you need to complete mandatory learning urgently, you can access the former Civil Service Learning website at: <a href="https://civilservicelearning.civilservice.gov.uk/" target="_blank">https://civilservicelearning.civilservice.gov.uk/</a></p>
+
+                </div>
+            </div>
+        </div>
+    </content>
+</page>

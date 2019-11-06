@@ -1,13 +1,16 @@
 package uk.gov.cshr.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import uk.gov.cshr.filter.MaintenanceFilter;
 import uk.gov.cshr.service.security.WebSecurityExpressionHandler;
 
 import javax.servlet.http.HttpServletResponse;
@@ -24,13 +27,17 @@ public class UserSecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${lpg.uiUrl}")
     private String lpgUiUrl;
 
+    @Autowired
+    private MaintenanceFilter maintenanceFilter;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .requestMatcher(forPort(serverPort))
+                .addFilterBefore(maintenanceFilter, ChannelProcessingFilter.class)
                 .authorizeRequests()
                 .antMatchers("/management/**").denyAll()
-                .antMatchers("/login", "/oauth/logout", "/webjars/**", "/assets/**", "/signup/**", "/reset/**",  "/account/passwordUpdated").permitAll()
+                .antMatchers("/maintenance", "/login", "/oauth/logout", "/webjars/**", "/assets/**", "/signup/**", "/reset/**",  "/account/passwordUpdated").permitAll()
                 .anyRequest().authenticated().and()
                 .formLogin()
                 .loginPage("/login").defaultSuccessUrl(lpgUiUrl)

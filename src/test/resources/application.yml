@@ -63,3 +63,9 @@ account:
 lpg:
   uiUrl: ${LPG_UI_URL:http://localhost:3001}
   identity: ${OAUTH_SERVICE_URL:http://localhost:8080}
+
+maintenance:
+  enabled: ${MAINTENANCE_ENABLED:false}
+  maintenanceWindowMessage: ${MAINTENANCE_WINDOW_MESSAGE:mesage}
+  overrideTokenName: ${MAINTENANCE_TOKEN_NAME:token}
+  overrideTokenValue: ${MAINTENANCE_TOKEN_VALUE:token_value}
