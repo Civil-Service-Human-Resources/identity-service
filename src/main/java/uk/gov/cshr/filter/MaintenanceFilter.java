@@ -20,6 +20,7 @@ public class MaintenanceFilter implements Filter {
 
     private static final String MAINTENANCE_URI = "/maintenance";
     private static final String MAIN_URI = "/";
+    private static final String OAUTH_PATH = "/oauth";
     private final boolean maintenanceEnabled;
     private final String maintenanceOverrideTokenName;
     private final String maintenanceOverrideTokenValue;
@@ -66,7 +67,7 @@ public class MaintenanceFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest)request;
         return maintenanceEnabled &&
                 !isMaintenaceRequest(httpRequest) &&
-                !isAssetsRequest(httpRequest) &&
+                !isWhiteListedRequest(httpRequest) &&
                 !isMaintenanceOverrideCookiePresent(httpRequest);
     }
 
@@ -80,8 +81,9 @@ public class MaintenanceFilter implements Filter {
         return httpRequest.getRequestURI().equalsIgnoreCase(MAINTENANCE_URI);
     }
 
-    private boolean isAssetsRequest(HttpServletRequest httpRequest) {
-        return httpRequest.getRequestURI().startsWith(ASSETS_PATH);
+    private boolean isWhiteListedRequest(HttpServletRequest httpRequest) {
+        return httpRequest.getRequestURI().startsWith(ASSETS_PATH) ||
+                httpRequest.getRequestURI().startsWith(OAUTH_PATH);
     }
 
     private boolean isMaintenanceOverrideCookiePresent(HttpServletRequest httpRequest) {
