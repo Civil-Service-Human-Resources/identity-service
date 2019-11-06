@@ -18,7 +18,8 @@ import java.io.IOException;
 @Component
 public class MaintenanceFilter implements Filter {
 
-    private static final String MAINTENANCE_URL = "/maintenance";
+    private static final String MAINTENANCE_URI = "/maintenance";
+    private static final String MAIN_URI = "/";
     private final boolean maintenanceEnabled;
     private final String maintenanceOverrideTokenName;
     private final String maintenanceOverrideTokenValue;
@@ -43,7 +44,12 @@ public class MaintenanceFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         if (shouldRedirectToMaintenancePage(request)) {
-            httpResponse.sendRedirect(MAINTENANCE_URL);
+            httpResponse.sendRedirect(MAINTENANCE_URI);
+            return;
+        }
+
+        if (shouldRedirectToMainPage(request)) {
+            httpResponse.sendRedirect(MAIN_URI);
             return;
         }
 
@@ -64,8 +70,14 @@ public class MaintenanceFilter implements Filter {
                 !isMaintenanceOverrideCookiePresent(httpRequest);
     }
 
+    private boolean shouldRedirectToMainPage(ServletRequest request) {
+        HttpServletRequest httpRequest = (HttpServletRequest)request;
+        return !maintenanceEnabled &&
+                isMaintenaceRequest(httpRequest);
+    }
+
     private boolean isMaintenaceRequest(HttpServletRequest httpRequest) {
-        return httpRequest.getRequestURI().equalsIgnoreCase(MAINTENANCE_URL);
+        return httpRequest.getRequestURI().equalsIgnoreCase(MAINTENANCE_URI);
     }
 
     private boolean isAssetsRequest(HttpServletRequest httpRequest) {
