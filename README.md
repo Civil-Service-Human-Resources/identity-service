@@ -7,7 +7,7 @@ The Identity Service uses [Spring Security OAuth](http://projects.spring.io/spri
 You will need to add the following env variables to run code locally, or to run the test suite.
 
 | VARIABLE | DESCRIPTION | DEFAULT |
-|--|--|--|
+|---|---|---|
 |GOV_NOTIFY_API_KEY | Api key for Gov Notify|NO|
 |GOV_NOTIFY_INVITE_TEMPLATE_ID|Template ID for invite emails|NO|
 |GOV_NOTIFY_RESET_TEMPLATE_ID|Template ID for password reset emails|NO|
@@ -34,6 +34,20 @@ The user can log in to the management portal to perform CRUD operations on Roles
 With the standard user interface, this can be used for logging in and resetting a password.
 
 ## Deployment
+
+## Maintenance page
+
+Identity service supports maintenance mode.
+
+it is set up by using following properties:
+
+| Name | value | default | description |
+| --- | --- | --- | --- |
+| maintenance.enabled |env.MAINTENANCE_ENABLED |false|Whether maintenance mode is enabled|
+| maintenance.maintenanceWindowMessage |env.MAINTENANCE_WINDOW_MESSAGE |message|maintenance mode message (specifing datetimes of maintenance page being on)|
+| maintenance.overrideTokenName |env.MAINTENANCE_TOKEN_NAME |token| name of the cookie to override the maintenance mode (for live-proving testing purposes)|
+| maintenance.overrideTokenValue |env.MAINTENANCE_TOKEN_VALUE | token_value |Expected value of the cookie to override the maintenance mode (for live-proving testing purposes)|
+
 
 ## Requirements
 
