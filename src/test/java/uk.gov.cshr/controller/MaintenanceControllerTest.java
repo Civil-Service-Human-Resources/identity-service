@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.cshr.AppInsightsHelper.Helper;
+import uk.gov.cshr.appinsights.FilterHelper;
 
 import javax.servlet.http.Cookie;
 import javax.transaction.Transactional;
@@ -27,11 +27,11 @@ public class MaintenanceControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private Helper helper;
+    private FilterHelper filterHelper;
 
     @Before
     public void overrideFilters() throws IllegalAccessException {
-        helper.initAppInsighsFilter(mockMvc);
+        filterHelper.initAppInsighsFilter(mockMvc);
     }
 
     @Test
@@ -46,6 +46,13 @@ public class MaintenanceControllerTest {
         mockMvc
             .perform(get("/assets/img/gov.uk_logotype_crown.png"))
             .andExpect(redirectedUrl(null));
+    }
+
+    @Test
+    public void oauthShouldRedirectToMaintenance() throws Exception {
+        mockMvc
+                .perform(get("/oauth/resolve"))
+                .andExpect(redirectedUrl(null));
     }
 
     @Test

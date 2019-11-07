@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import uk.gov.cshr.Application;
-import uk.gov.cshr.AppInsightsHelper.Helper;
+import uk.gov.cshr.appinsights.FilterHelper;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -29,11 +29,11 @@ public class AuthenticationControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private Helper helper;
+    private FilterHelper filterHelper;
 
     @Before
     public void overrideFilters() throws IllegalAccessException {
-        helper.initAppInsighsFilter(mockMvc);
+        filterHelper.initAppInsighsFilter(mockMvc);
     }
 
     @Test

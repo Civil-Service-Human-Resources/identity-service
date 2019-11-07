@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.cshr.AppInsightsHelper.Helper;
+import uk.gov.cshr.appinsights.FilterHelper;
 
 import javax.servlet.http.Cookie;
 import javax.transaction.Transactional;
@@ -27,18 +27,25 @@ public class MaintenanceControllerDisabledTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private Helper helper;
+    private FilterHelper filterHelper;
 
     @Before
     public void overrideFilters() throws IllegalAccessException {
-        helper.initAppInsighsFilter(mockMvc);
+        filterHelper.initAppInsighsFilter(mockMvc);
     }
 
     @Test
-    public void shouldRedirectToMaintenance() throws Exception {
+    public void shouldRedirectFromMaintenanceToMainPage() throws Exception {
         mockMvc
             .perform(get("/maintenance"))
             .andExpect(redirectedUrl("/"));
+    }
+
+    @Test
+    public void shouldNotRedirectWhenAssetsProvided() throws Exception {
+        mockMvc
+                .perform(get("/assets/img/gov.uk_logotype_crown.png"))
+                .andExpect(redirectedUrl(null));
     }
 
 }

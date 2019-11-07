@@ -1,4 +1,4 @@
-package uk.gov.cshr.AppInsightsHelper;
+package uk.gov.cshr.appinsights;
 
 import com.microsoft.applicationinsights.web.internal.WebRequestTrackingFilter;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -11,7 +11,7 @@ import javax.servlet.ServletContext;
 import java.util.Enumeration;
 
 @Component
-public class Helper {
+public class FilterHelper {
     public void initAppInsighsFilter(MockMvc mockMvc) throws IllegalAccessException {
         Filter[] filters = (Filter[]) FieldUtils.readField(mockMvc, "filters", true);
         for (int i = 0; i < filters.length; i++) {
