@@ -46,6 +46,10 @@ public class SignupController {
 
     private final String lpgUiUrl;
 
+    private String domain;
+
+    private EnterTokenForm enterTokenForm;
+
     public SignupController(InviteService inviteService,
                             IdentityService identityService,
                             CsrsService csrsService,
@@ -140,6 +144,10 @@ public class SignupController {
 
         LOGGER.info("User attempting sign up with code {}", code);
 
+
+        csrsService.updateSpacesAvailable(domain, enterTokenForm.getToken(), enterTokenForm.getOrganisation(), enterTokenForm.isRemoveUser());
+
+
         if (bindingResult.hasErrors()) {
             model.addAttribute("invite", inviteRepository.findByCode(code));
             return "signup";
@@ -194,6 +202,8 @@ public class SignupController {
 
         LOGGER.info("User attempting token-based sign up");
 
+        enterTokenForm = form;
+
         System.out.println(form);
 
         if (bindingResult.hasErrors()) {
@@ -205,10 +215,10 @@ public class SignupController {
             Invite invite = inviteRepository.findByCode(code);
 
             final String emailAddress = invite.getForEmail();
-            final String domain = identityService.getDomainFromEmailAddress(emailAddress);
+            domain = identityService.getDomainFromEmailAddress(emailAddress);
 
             try {
-                csrsService.updateSpacesAvailable(domain, form.getToken(), form.getOrganisation(), form.isRemoveUser());
+//                csrsService.updateSpacesAvailable(domain, form.getToken(), form.getOrganisation(), form.isRemoveUser());
                 LOGGER.info("User submitted Enter Token form with org = {}, token = {}, email = {}", form.getOrganisation(), form.getToken(), emailAddress);
 
                 invite.setAuthorisedInvite(true);
@@ -250,13 +260,13 @@ public class SignupController {
             return "updateToken";
         }
 
-        // TODO - CALL NEW METHOD
-        // domain token org boolean
-        try {
-            csrsService.updateSpacesAvailable(code, form.getToken(), form.getOrganisation(), form.isRemoveUser());
-        } catch (Exception e) {
-
-        }
+//        // TODO - CALL NEW METHOD
+//        // domain token org boolean
+//        try {
+//            csrsService.updateSpacesAvailable(code, form.getToken(), form.getOrganisation(), form.isRemoveUser());
+//        } catch (Exception e) {
+//
+//        }
 
         // TODO - CHECK WHERE THIS SHOULD GO TO
         return "TODO";
