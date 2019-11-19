@@ -28,13 +28,15 @@ public class CsrsService {
     private String organisationalUnitsFlatUrl;
     private String updateSpacesAvailableUrl;
     private String getSpacesAvailableUrl;
+    private String checkTokenAvailableUrl;
 
     public CsrsService(RestTemplate restTemplate,
                         @Value("${registry.agencyTokensFormat}") String agencyTokensFormat,
                         @Value("${registry.agencyTokensByDomainFormat}") String agencyTokensByDomainFormat,
                         @Value("${registry.organisationalUnitsFlatUrl}") String organisationalUnitsFlatUrl,
                         @Value("${registry.updateSpacesAvailableUrl}") String updateSpacesAvailableUrl,
-                        @Value("${registry.getSpacesAvailableUrl}") String getSpacesAvailableUrl)
+                        @Value("${registry.getSpacesAvailableUrl}") String getSpacesAvailableUrl,
+                        @Value("${registry.checkTokenAvailableUrl}") String checkTokenAvailableUrl)
 
     {
         this.restTemplate = restTemplate;
@@ -42,7 +44,7 @@ public class CsrsService {
         this.agencyTokensByDomainFormat = agencyTokensByDomainFormat;
         this.organisationalUnitsFlatUrl = organisationalUnitsFlatUrl;
         this.updateSpacesAvailableUrl = updateSpacesAvailableUrl;
-        this.getSpacesAvailableUrl = getSpacesAvailableUrl;
+        this.checkTokenAvailableUrl = checkTokenAvailableUrl;
     }
 
     public AgencyToken[] getAgencyTokensForDomain(String domain) {
@@ -63,21 +65,20 @@ public class CsrsService {
         }
     }
 
-//    public void checkIfTokenValid() {
-//        try {
-//
-////            updateCsrs(domain, token, organisation, removeUser);
-//        } catch (HttpClientErrorException e) {
-//            log.warn("*****httpClientException");
-//            if (HttpStatus.NOT_FOUND.equals(e.getStatusCode())) {
-//                throw new ResourceNotFoundException();
-//            } else if (HttpStatus.CONFLICT.equals(e.getStatusCode())) {
-//                throw new NotEnoughSpaceAvailableException("Not enough spaces available for AgencyToken " + token);
-//            } else {
-//                throw new BadRequestException();
-//            }
-//        }
-//    }
+    public void checkIfTokenValid(String domain, String token, String organisation, boolean removeUser) {
+        try {
+            checkCsrs(domain, token, organisation, removeUser);
+        } catch (HttpClientErrorException e) {
+            log.warn("*****httpClientException");
+            if (HttpStatus.NOT_FOUND.equals(e.getStatusCode())) {
+                throw new ResourceNotFoundException();
+            } else if (HttpStatus.CONFLICT.equals(e.getStatusCode())) {
+                throw new NotEnoughSpaceAvailableException("Not enough spaces available for AgencyToken " + token);
+            } else {
+                throw new BadRequestException();
+            }
+        }
+    }
 
     public void updateSpacesAvailable(String domain, String token, String organisation, boolean removeUser) {
         try {
@@ -116,6 +117,10 @@ public class CsrsService {
         restTemplate.put(updateSpacesAvailableUrl, requestDTO);
     }
 
+    private void checkCsrs(String domain, String token, String organisation, boolean removeUser) {
+        AgencyTokenDTO requestDTO = buildAgencyTokenDTO(domain, token, organisation, removeUser);
+        restTemplate.put(updateSpacesAvailableUrl, requestDTO);
+    }
 
     private AgencyTokenDTO buildAgencyTokenDTO(String domain, String token, String organisation, boolean removeUser) {
         AgencyTokenDTO agencyTokenDTO = new AgencyTokenDTO();

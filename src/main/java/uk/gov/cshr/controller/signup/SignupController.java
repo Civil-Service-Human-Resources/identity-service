@@ -218,7 +218,7 @@ public class SignupController {
             domain = identityService.getDomainFromEmailAddress(emailAddress);
 
             try {
-//                csrsService.updateSpacesAvailable(domain, form.getToken(), form.getOrganisation(), form.isRemoveUser());
+                csrsService.checkIfTokenValid(domain, form.getToken(), form.getOrganisation(), form.isRemoveUser());
                 LOGGER.info("User submitted Enter Token form with org = {}, token = {}, email = {}", form.getOrganisation(), form.getToken(), emailAddress);
 
                 invite.setAuthorisedInvite(true);

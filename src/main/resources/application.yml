@@ -63,6 +63,7 @@ registry:
   organisationalUnitsFlatUrl: "${registry.serviceUrl}/organisationalUnits/flat"
   updateSpacesAvailableUrl: "${registry.serviceUrl}/agencyTokens"
   getSpacesAvailableUrl: "${registry.serviceUrl}/agencyTokens"
+  checkTokenAvailableUrl: "${registry.serviceUrl}/agencyTokens"
 ---
 
 spring:
