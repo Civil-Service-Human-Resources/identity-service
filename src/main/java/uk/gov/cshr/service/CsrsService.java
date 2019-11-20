@@ -12,10 +12,8 @@ import org.springframework.web.client.RestTemplate;
 import uk.gov.cshr.domain.AgencyToken;
 import uk.gov.cshr.domain.OrganisationalUnitDto;
 import uk.gov.cshr.dto.AgencyTokenDTO;
-import uk.gov.cshr.exception.BadRequestException;
-import uk.gov.cshr.exception.NotEnoughSpaceAvailableException;
-import uk.gov.cshr.exception.ResourceNotFoundException;
-import uk.gov.cshr.exception.UnableToAllocateAgencyTokenException;
+import uk.gov.cshr.dto.CheckValidTokenDTO;
+import uk.gov.cshr.exception.*;
 
 import java.util.Optional;
 
@@ -65,10 +63,10 @@ public class CsrsService {
         }
     }
 
-    public void checkIfTokenValid(String domain, String token, String organisation, boolean removeUser) {
-        try {
-            checkCsrs(domain, token, organisation, removeUser);
-        } catch (HttpClientErrorException e) {
+    public boolean checkIfTokenValid(String domain, String token, String organisation, boolean removeUser) {
+      //  try {
+            return checkCsrs(domain, token, organisation, removeUser);
+        /*} catch (HttpClientErrorException e) {
             log.warn("*****httpClientException");
             if (HttpStatus.NOT_FOUND.equals(e.getStatusCode())) {
                 throw new ResourceNotFoundException();
@@ -77,7 +75,7 @@ public class CsrsService {
             } else {
                 throw new BadRequestException();
             }
-        }
+        }*/
     }
 
     public void updateSpacesAvailable(String domain, String token, String organisation, boolean removeUser) {
@@ -117,9 +115,24 @@ public class CsrsService {
         restTemplate.put(updateSpacesAvailableUrl, requestDTO);
     }
 
-    private void checkCsrs(String domain, String token, String organisation, boolean removeUser) {
-        AgencyTokenDTO requestDTO = buildAgencyTokenDTO(domain, token, organisation, removeUser);
-        restTemplate.put(updateSpacesAvailableUrl, requestDTO);
+    public boolean checkCsrs(String domain, String token, String organisation, boolean isRemoveUser) {
+            String requestURL = String.format(checkTokenAvailableUrl,
+                    domain, token, organisation, isRemoveUser);
+            System.out.println(requestURL);
+            ResponseEntity<CheckValidTokenDTO> responseEntity = restTemplate.getForEntity(requestURL, CheckValidTokenDTO.class);
+
+            if(responseEntity != null) {
+                if(responseEntity.getStatusCode() == HttpStatus.OK) {
+                    return responseEntity.getBody().isValid();
+                } else if(responseEntity.getStatusCode() == HttpStatus.NOT_FOUND) {
+                    throw new ResourceNotFoundException();
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+
     }
 
     private AgencyTokenDTO buildAgencyTokenDTO(String domain, String token, String organisation, boolean removeUser) {

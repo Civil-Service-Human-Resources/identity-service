@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cshr.domain.AgencyToken;
 import uk.gov.cshr.domain.Invite;
@@ -140,12 +141,10 @@ public class SignupController {
     public String signup(@PathVariable(value = "code") String code,
                          @ModelAttribute @Valid SignupForm form,
                          BindingResult bindingResult,
-                         Model model) {
+                         Model model,
+                         RedirectAttributes redirectAttributes) {
 
         LOGGER.info("User attempting sign up with code {}", code);
-
-
-        csrsService.updateSpacesAvailable(domain, enterTokenForm.getToken(), enterTokenForm.getOrganisation(), enterTokenForm.isRemoveUser());
 
 
         if (bindingResult.hasErrors()) {
@@ -159,12 +158,24 @@ public class SignupController {
                 return "redirect:/signup/enterToken/" + code;
             }
 
-            identityService.createIdentityFromInviteCode(code, form.getPassword());
-            inviteService.updateInviteByCode(code, InviteStatus.ACCEPTED);
+            try {
+                identityService.createIdentityFromInviteCode(code, form.getPassword());
+                inviteService.updateInviteByCode(code, InviteStatus.ACCEPTED);
+                model.addAttribute("lpgUiUrl", lpgUiUrl);
+                csrsService.updateSpacesAvailable(domain, enterTokenForm.getToken(), enterTokenForm.getOrganisation(), enterTokenForm.isRemoveUser());
+                return "signupSuccess";
+            } catch (ResourceNotFoundException e) {
+                redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, "Incorrect token for this organisation");
+                return "redirect:/signup/enterToken/" + code;
+            } catch (NotEnoughSpaceAvailableException e) {
+                redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, "Not enough spaces available on this token");
+                return "redirect:/signup/enterToken/" + code;
+            } catch (BadRequestException e) {
+                return "redirect:/login";
+            } catch (UnableToAllocateAgencyTokenException e) {
+                return "redirect:/login";
+            }
 
-            model.addAttribute("lpgUiUrl", lpgUiUrl);
-
-            return "signupSuccess";
         } else {
             return "redirect:/login";
         }
@@ -218,28 +229,29 @@ public class SignupController {
             domain = identityService.getDomainFromEmailAddress(emailAddress);
 
             try {
-                csrsService.checkIfTokenValid(domain, form.getToken(), form.getOrganisation(), form.isRemoveUser());
-                LOGGER.info("User submitted Enter Token form with org = {}, token = {}, email = {}", form.getOrganisation(), form.getToken(), emailAddress);
+                boolean isTokenValid = csrsService.checkIfTokenValid(domain, form.getToken(), form.getOrganisation(), form.isRemoveUser());
 
-                invite.setAuthorisedInvite(true);
-                inviteRepository.save(invite);
+                if (isTokenValid) {
+                    LOGGER.info("User submitted Enter Token form with org = {}, token = {}, email = {}", form.getOrganisation(), form.getToken(), emailAddress);
 
-                model.addAttribute("invite", invite);
+                    invite.setAuthorisedInvite(true);
+                    inviteRepository.save(invite);
 
-                redirectAttributes.addFlashAttribute("organisation", form.getOrganisation());
-                redirectAttributes.addFlashAttribute("token", form.getToken());
+                    model.addAttribute("invite", invite);
 
-                return "redirect:/signup/" + code;
+                    redirectAttributes.addFlashAttribute("organisation", form.getOrganisation());
+                    redirectAttributes.addFlashAttribute("token", form.getToken());
 
-            } catch (ResourceNotFoundException e) {
+                    return "redirect:/signup/" + code;
+                } else {
+                    redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, "Not enough spaces");
+                    return "redirect:/signup/enterToken/" + code;
+                }
+
+            } catch (RestClientException e) {
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, "Incorrect token for this organisation");
                 return "redirect:/signup/enterToken/" + code;
-            } catch (NotEnoughSpaceAvailableException e) {
-                redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, "Not enough spaces available on this token");
-                return "redirect:/signup/enterToken/" + code;
-            } catch (BadRequestException e) {
-                return "redirect:/login";
-            } catch (UnableToAllocateAgencyTokenException e) {
+            } catch (Exception e) {
                 return "redirect:/login";
             }
         }
