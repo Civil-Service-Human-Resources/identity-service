@@ -159,10 +159,10 @@ public class SignupController {
             }
 
             try {
+                csrsService.updateSpacesAvailable(domain, enterTokenForm.getToken(), enterTokenForm.getOrganisation(), enterTokenForm.isRemoveUser());
                 identityService.createIdentityFromInviteCode(code, form.getPassword());
                 inviteService.updateInviteByCode(code, InviteStatus.ACCEPTED);
                 model.addAttribute("lpgUiUrl", lpgUiUrl);
-                csrsService.updateSpacesAvailable(domain, enterTokenForm.getToken(), enterTokenForm.getOrganisation(), enterTokenForm.isRemoveUser());
                 return "signupSuccess";
             } catch (ResourceNotFoundException e) {
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, "Incorrect token for this organisation");

@@ -118,7 +118,7 @@ public class CsrsService {
     public boolean checkCsrs(String domain, String token, String organisation, boolean isRemoveUser) {
             String requestURL = String.format(checkTokenAvailableUrl,
                     domain, token, organisation, isRemoveUser);
-            System.out.println(requestURL);
+
             ResponseEntity<CheckValidTokenDTO> responseEntity = restTemplate.getForEntity(requestURL, CheckValidTokenDTO.class);
 
             if(responseEntity != null) {
@@ -132,7 +132,6 @@ public class CsrsService {
             } else {
                 return false;
             }
-
     }
 
     private AgencyTokenDTO buildAgencyTokenDTO(String domain, String token, String organisation, boolean removeUser) {
