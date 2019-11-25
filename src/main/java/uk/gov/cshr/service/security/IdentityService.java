@@ -93,6 +93,7 @@ public class IdentityService implements UserDetailsService {
         identity.setDeletionNotificationSent(false);
         identity.setPassword(passwordEncoder.encode(password));
         identityRepository.save(identity);
+        identity.setLocked(false);
     }
 
     public void lockIdentity(String email) {

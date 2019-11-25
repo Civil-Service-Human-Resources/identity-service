@@ -14,8 +14,11 @@
                         <p>
 
                             <span th:if="${param.error[0] == 'failed'}">You have entered the wrong email address or password, please try again.</span>
-                            <span th:if="${param.error[0] == 'locked'}">Your account has been locked. Please contact us to <a
-                                    href="mailto:feedback@cslearning.gov.uk">unlock your account.</a></span>
+                            <span th:if="${param.error[0] == 'locked'}"><a href="/reset" class="push-bottom">Reset your password to unlock your account</a></span>
+
+
+<!--                            <span th:if="${param.error[0] == 'locked'}">Your account has been locked. Please contact us to -->
+<!--                                <a href="mailto:feedback@cslearning.gov.uk">unlock your account.</a></span>-->
                         </p>
                     </div>
 
