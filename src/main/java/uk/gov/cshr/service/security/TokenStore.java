@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.AuthenticationKeyGenerator;
 import org.springframework.security.oauth2.provider.token.DefaultAuthenticationKeyGenerator;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cshr.domain.Token;
 import uk.gov.cshr.domain.TokenStatus;
 import uk.gov.cshr.repository.TokenRepository;
@@ -57,7 +58,6 @@ public class TokenStore implements org.springframework.security.oauth2.provider.
     }
 
     @Override
-    @Cacheable(cacheNames = "readAccessTokenCache", key = "#tokenValue")
     public OAuth2AccessToken readAccessToken(String tokenValue) {
         Token token = tokenRepository.findByTokenIdAndStatus(extractTokenKey(tokenValue), TokenStatus.ACTIVE);
         if (token != null) {
@@ -68,12 +68,9 @@ public class TokenStore implements org.springframework.security.oauth2.provider.
 
     @Override
     @CacheEvict(cacheNames = "readAccessTokenCache", key = "#token.getValue()")
+    @Transactional
     public void removeAccessToken(OAuth2AccessToken token) {
-        Token storedToken = tokenRepository.findByTokenIdAndStatus(extractTokenKey(token.getValue()), TokenStatus.ACTIVE);
-        if (storedToken != null) {
-            storedToken.setStatus(TokenStatus.REVOKED);
-            tokenRepository.save(storedToken);
-        }
+        tokenRepository.deleteByTokenIdAndStatus(extractTokenKey(token.getValue()), TokenStatus.ACTIVE);
     }
 
     @Override

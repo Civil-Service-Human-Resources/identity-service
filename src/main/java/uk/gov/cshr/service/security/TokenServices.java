@@ -11,9 +11,7 @@ import org.springframework.security.oauth2.provider.TokenRequest;
 import org.springframework.security.oauth2.provider.token.AuthorizationServerTokenServices;
 import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.stereotype.Service;
-import uk.gov.cshr.domain.Token;
 
-import java.util.Collection;
 import java.util.Date;
 
 @Service
@@ -36,13 +34,7 @@ public class TokenServices implements AuthorizationServerTokenServices, Consumer
         OAuth2AccessToken existingAccessToken = tokenStore.getAccessToken(authentication);
 
         if (existingAccessToken != null) {
-            if (existingAccessToken.isExpired()) {
-                tokenStore.removeAccessToken(existingAccessToken);
-            } else {
-                // Re-store the access token in case the authentication has changed
-                tokenStore.storeAccessToken(existingAccessToken, authentication);
-                return existingAccessToken;
-            }
+            tokenStore.removeAccessToken(existingAccessToken);
         }
 
         DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(RandomStringUtils.random(42, true, true));

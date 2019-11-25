@@ -12,6 +12,8 @@ public interface TokenRepository extends CrudRepository<Token, Long> {
 
     Token findByTokenIdAndStatus(String tokenId, TokenStatus status);
 
+    void deleteByTokenIdAndStatus(String tokenId, TokenStatus status);
+
     Token findByAuthenticationIdAndStatus(String authenticationId, TokenStatus status);
 
     Collection<Token> findByClientIdAndUserName(String clientId, String userName);
