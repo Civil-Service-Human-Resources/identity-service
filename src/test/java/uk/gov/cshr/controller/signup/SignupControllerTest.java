@@ -425,7 +425,7 @@ public class SignupControllerTest {
                         .param("organisation", organisation)
                         .param("token", token))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/" + code));
+                .andExpect(redirectedUrl("/signup/enterToken/" + code));
     }
 
 
