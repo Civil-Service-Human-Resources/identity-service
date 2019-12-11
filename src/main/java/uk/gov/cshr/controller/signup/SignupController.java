@@ -166,10 +166,10 @@ public class SignupController {
                 return "signupSuccess";
             } catch (ResourceNotFoundException e) {
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, "Incorrect token for this organisation");
-                return "redirect:/signup/enterToken/" + code;
+                return "redirect:/signup/" + code;
             } catch (NotEnoughSpaceAvailableException e) {
                 redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, "Not enough spaces available on this token");
-                return "redirect:/signup/enterToken/" + code;
+                return "redirect:/signup/" + code;
             } catch (BadRequestException e) {
                 return "redirect:/login";
             } catch (UnableToAllocateAgencyTokenException e) {

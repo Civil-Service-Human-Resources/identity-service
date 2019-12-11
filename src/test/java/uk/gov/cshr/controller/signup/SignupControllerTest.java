@@ -380,7 +380,6 @@ public class SignupControllerTest {
                 .andExpect(redirectedUrl("/signup/" + code));
     }
 
-
     @Test
     public void shouldRedirectToLoginIfTokenInviteInvalid() throws Exception {
         String code = "abc123";
