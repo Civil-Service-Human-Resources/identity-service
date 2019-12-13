@@ -1,5 +1,6 @@
 package uk.gov.cshr.service;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.stereotype.Service;
@@ -73,11 +74,15 @@ public class InviteService {
         inviteRepository.save(invite);
     }
 
-    public void sendSelfSignupInvite(String email) throws NotificationClientException {
+    public void sendSelfSignupInvite(String email, boolean isAuthorisedInvite) throws NotificationClientException {
         Invite invite = inviteFactory.createSelfSignUpInvite(email);
-
+        invite.setAuthorisedInvite(isAuthorisedInvite);
         notifyService.notify(invite.getForEmail(), invite.getCode(), govNotifyInviteTemplateId, signupUrlFormat);
 
         inviteRepository.save(invite);
+    }
+
+    public boolean isInviteValid(String code) {
+        return inviteRepository.existsByCode(code) && (inviteRepository.existsByCode(code) || !isCodeExpired(code));
     }
 }

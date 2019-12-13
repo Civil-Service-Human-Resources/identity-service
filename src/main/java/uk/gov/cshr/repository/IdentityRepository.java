@@ -1,5 +1,6 @@
 package uk.gov.cshr.repository;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -10,6 +11,7 @@ import uk.gov.cshr.dto.IdentityDTO;
 import java.util.List;
 import java.util.Optional;
 
+@Profile({"default"})
 @Repository
 public interface IdentityRepository extends JpaRepository<Identity, Long> {
 

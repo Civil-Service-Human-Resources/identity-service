@@ -3,6 +3,7 @@ package uk.gov.cshr.service.security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,6 +22,7 @@ import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.NotifyService;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -34,29 +36,27 @@ public class IdentityService implements UserDetailsService {
     private final String updatePasswordEmailTemplateId;
 
     private final IdentityRepository identityRepository;
-
-    private InviteService inviteService;
-
     private final PasswordEncoder passwordEncoder;
-
+    private InviteService inviteService;
+    private String[] whitelistedDomains;
     private final TokenServices tokenServices;
-
     private final TokenRepository tokenRepository;
-
     private final NotifyService notifyService;
 
     public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
                            IdentityRepository identityRepository,
                            PasswordEncoder passwordEncoder,
                            TokenServices tokenServices,
-                           TokenRepository tokenRepository,
-                           NotifyService notifyService) {
+                           @Qualifier("tokenRepository") TokenRepository tokenRepository,
+                           NotifyService notifyService,
+                           @Value("${invite.whitelist.domains}") String[] whitelistedDomains) {
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.identityRepository = identityRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenServices = tokenServices;
         this.tokenRepository = tokenRepository;
         this.notifyService = notifyService;
+        this.whitelistedDomains = whitelistedDomains;
     }
 
     @Autowired
@@ -135,6 +135,14 @@ public class IdentityService implements UserDetailsService {
         savedIdentity.setEmail(email);
 
         identityRepository.save(savedIdentity);
+    }
+
+    public boolean isWhitelistedDomain(String domain) {
+        return Arrays.asList(whitelistedDomains).contains(domain);
+    }
+
+    public String getDomainFromEmailAddress(String emailAddress) {
+        return emailAddress.substring(emailAddress.indexOf('@') + 1);
     }
 
 }

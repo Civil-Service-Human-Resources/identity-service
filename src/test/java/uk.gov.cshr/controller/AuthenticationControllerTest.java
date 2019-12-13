@@ -6,15 +6,19 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import uk.gov.cshr.Application;
+import uk.gov.cshr.service.NotifyService;
+
 
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
@@ -35,35 +39,10 @@ public class AuthenticationControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Before
-    public void overrideFilters() throws IllegalAccessException {
-        Filter[] filters = (Filter[]) FieldUtils.readField(mockMvc, "filters", true);
-        for (int i = 0; i < filters.length; i++) {
-            if (filters[i].getClass().getSimpleName().equals("PatternMappingFilterProxy")) {
-                WebRequestTrackingFilter filter = (WebRequestTrackingFilter) FieldUtils.readField(filters[i],
-                        "delegate", true);
-                FieldUtils.writeField(filter, "appName", "test", true);
-                filter.init(new FilterConfig() {
-                    @Override
-                    public String getFilterName() {
-                        return null;
-                    }
-                    @Override
-                    public ServletContext getServletContext() {
-                        return null;
-                    }
-                    @Override
-                    public String getInitParameter(String name) {
-                        return null;
-                    }
-                    @Override
-                    public Enumeration<String> getInitParameterNames() {
-                        return null;
-                    }
-                });
-            }
-        }
-    }
+
+    @Qualifier("notifyServiceImpl")
+    @MockBean
+    private NotifyService notifyService;
 
     @Test
     public void shouldReturnUnauthorisedWhenUnauthenticated() throws Exception {
