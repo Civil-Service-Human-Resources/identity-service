@@ -29,10 +29,10 @@ public class CsrsService {
     private String updateSpacesAvailableUrl;
 
     public CsrsService(RestTemplate restTemplate,
-                       @Value("${registry.agencyTokensFormat}") String agencyTokensFormat,
-                       @Value("${registry.agencyTokensByDomainFormat}") String agencyTokensByDomainFormat,
-                       @Value("${registry.organisationalUnitsFlatUrl}") String organisationalUnitsFlatUrl,
-                       @Value("${registry.updateSpacesAvailableUrl}") String updateSpacesAvailableUrl) {
+                       @Value("$ {registry.agencyTokensFormat}") String agencyTokensFormat,
+                       @Value("$ {registry.agencyTokensByDomainFormat}") String agencyTokensByDomainFormat,
+                       @Value("$ {registry.organisationalUnitsFlatUrl}") String organisationalUnitsFlatUrl,
+                       @Value("$ {registry.updateSpacesAvailableUrl}") String updateSpacesAvailableUrl) {
         this.restTemplate = restTemplate;
         this.agencyTokensFormat = agencyTokensFormat;
         this.agencyTokensByDomainFormat = agencyTokensByDomainFormat;
