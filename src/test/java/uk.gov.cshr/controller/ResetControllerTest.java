@@ -20,7 +20,7 @@ import uk.gov.cshr.domain.ResetStatus;
 import uk.gov.cshr.domain.Role;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.ResetRepository;
-import uk.gov.cshr.service.NotifyService;
+//import uk.gov.cshr.service.NotifyService;
 import uk.gov.cshr.service.ResetService;
 
 import javax.transaction.Transactional;
@@ -70,8 +70,8 @@ public class ResetControllerTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private NotifyService notifyService;
+//    @Mock
+//    private NotifyService notifyService;
 
     @Before
     public void setup() {
