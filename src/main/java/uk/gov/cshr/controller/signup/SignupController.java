@@ -55,7 +55,7 @@ public class SignupController {
                             InviteRepository inviteRepository,
                             CsrsService csrsService,
                             SignupFormValidator signupFormValidator,
-                            @Value("${lpg.uiUrl}") String lpgUiUrl) {
+                            @Value("$ {lpg.uiUrl}") String lpgUiUrl) {
 
         this.inviteService = inviteService;
         this.identityService = identityService;
