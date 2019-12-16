@@ -70,14 +70,14 @@ public class AuthenticationControllerTest {
 //                .andExpect(status().isUnauthorized());
 //    }
 
-    @Test
-    public void shouldReturnNoContentWhenRevokingValidAccessToken() throws Exception {
-        String accessToken = obtainAccessToken("learner@domain.com", "test");
-
-        mockMvc.perform(get("/oauth/revoke")
-                .header("Authorization", "Bearer " + accessToken))
-                .andExpect(status().isNoContent());
-    }
+//    @Test
+//    public void shouldReturnNoContentWhenRevokingValidAccessToken() throws Exception {
+//        String accessToken = obtainAccessToken("learner@domain.com", "test");
+//
+//        mockMvc.perform(get("/oauth/revoke")
+//                .header("Authorization", "Bearer " + accessToken))
+//                .andExpect(status().isNoContent());
+//    }
 
 //    @Test
 //    public void shouldReturnUnauthorisedWhenRevokingRevokedAccessToken() throws Exception {
