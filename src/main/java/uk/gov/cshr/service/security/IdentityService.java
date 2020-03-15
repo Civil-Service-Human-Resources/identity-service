@@ -35,9 +35,6 @@ public class IdentityService implements UserDetailsService {
     private final String updatePasswordEmailTemplateId;
 
     private final IdentityRepository identityRepository;
-
-    private InviteService inviteService;
-
     private final PasswordEncoder passwordEncoder;
     private final TokenServices tokenServices;
     private final TokenRepository tokenRepository;
