@@ -1,4 +1,3 @@
-
 spring:
   data:
     redis:
@@ -55,6 +54,7 @@ reset:
 
 emailUpdate:
   urlFormat: "${lpg.identity}/account/email/verify/%s?redirect=true"
+  invalidDomainUrl: "${lpg.identity}/invalid"
 
 accountValidation:
   passwordPattern: ${PASSWORD_PATTERN:(?!([a-zA-Z]*|[a-z\d]*|[^A-Z\d]*|[A-Z\d]*|[^a-z\d]*|[^a-zA-Z]*)$).{8,}}
@@ -67,6 +67,15 @@ lpg:
   uiUrl: ${LPG_UI_URL:http://localhost:3001}
   identity: ${OAUTH_SERVICE_URL:http://localhost:8080}
 
+registry:
+  serviceUrl: ${REGISTRY_SERVICE_URL:http://localhost:9002}
+  agencyTokensFormat: "${registry.serviceUrl}/agencyTokens?domain=%s&token=%s&code=%s"
+  agencyTokensByDomainFormat: "${registry.serviceUrl}/agencyTokens?domain=%s"
+  agencyTokensByDomainAndOrganisationFormat: "${registry.serviceUrl}/agencyTokens?domain=%s&code=%s"
+  organisationalUnitsFlatUrl: "${registry.serviceUrl}/organisationalUnits/flat"
+  updateSpacesAvailableUrl: "${registry.serviceUrl}/agencyTokens"
+  getOrganisationUrl: "${registry.serviceUrl}/civilServants/org?uid=%s"
+  updateOrganisationUrl: "${registry.serviceUrl}/civilServants/org"
 ---
 
 spring:

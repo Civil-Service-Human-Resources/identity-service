@@ -1,8 +1,10 @@
 package uk.gov.cshr.service.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,20 +13,22 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.cshr.domain.AgencyToken;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Invite;
 import uk.gov.cshr.domain.Role;
 import uk.gov.cshr.exception.IdentityNotFoundException;
+import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
+import uk.gov.cshr.service.CsrsService;
 import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.NotifyService;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
+@Slf4j
 @Service
 @Transactional
 public class IdentityService implements UserDetailsService {
@@ -38,25 +42,28 @@ public class IdentityService implements UserDetailsService {
     private InviteService inviteService;
 
     private final PasswordEncoder passwordEncoder;
-
     private final TokenServices tokenServices;
-
     private final TokenRepository tokenRepository;
-
     private final NotifyService notifyService;
+    private final CsrsService csrsService;
+    private String[] whitelistedDomains;
 
     public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
                            IdentityRepository identityRepository,
                            PasswordEncoder passwordEncoder,
                            TokenServices tokenServices,
-                           TokenRepository tokenRepository,
-                           NotifyService notifyService) {
+                           @Qualifier("tokenRepository") TokenRepository tokenRepository,
+                           @Qualifier("notifyServiceImpl") NotifyService notifyService,
+                           CsrsService csrsService,
+                           @Value("${invite.whitelist.domains}") String[] whitelistedDomains) {
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.identityRepository = identityRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenServices = tokenServices;
         this.tokenRepository = tokenRepository;
         this.notifyService = notifyService;
+        this.csrsService = csrsService;
+        this.whitelistedDomains = whitelistedDomains;
     }
 
     @Autowired
@@ -82,7 +89,7 @@ public class IdentityService implements UserDetailsService {
         Invite invite = inviteService.findByCode(code);
 
         Set<Role> newRoles = new HashSet<>(invite.getForRoles());
-        Identity identity = new Identity(UUID.randomUUID().toString(), invite.getForEmail(), passwordEncoder.encode(password), true, false, newRoles, Instant.now(), false);
+        Identity identity = new Identity(UUID.randomUUID().toString(), invite.getForEmail(), passwordEncoder.encode(password), true, false, newRoles, Instant.now(), false, false);
         identityRepository.save(identity);
 
         LOGGER.info("New identity {} successfully created", identity.getEmail());
@@ -128,13 +135,37 @@ public class IdentityService implements UserDetailsService {
         return identityRepository.save(identity);
     }
 
-    public void updateEmailAddress(Identity identity, String email) {
+    public void updateEmailAddressAndEmailRecentlyUpdatedFlagToTrue(Identity identity, String email) {
         Identity savedIdentity = identityRepository.findById(identity.getId())
                 .orElseThrow(() -> new IdentityNotFoundException("No such identity: " + identity.getId()));
 
         savedIdentity.setEmail(email);
+        savedIdentity.setEmailRecentlyUpdated(true);
+        Identity updatedIdentity = identityRepository.save(savedIdentity);
+        log.info("identity has been updated to have a recently updated email flag of: " + updatedIdentity.isEmailRecentlyUpdated());
+    }
 
-        identityRepository.save(savedIdentity);
+    public void resetRecentlyUpdatedEmailFlagToFalse(Identity identity) {
+        Identity savedIdentity = identityRepository.findById(identity.getId())
+                .orElseThrow(() -> new IdentityNotFoundException("No such identity: " + identity.getId()));
+        savedIdentity.setEmailRecentlyUpdated(false);
+        Identity updatedIdentity = identityRepository.save(savedIdentity);
+        log.info("identity has been updated to have a recently updated email flag of: " + updatedIdentity.isEmailRecentlyUpdated());
+    }
+
+    public boolean getRecentlyUpdatedEmailFlag(Identity identity) {
+        Identity savedIdentity = identityRepository.findById(identity.getId())
+                .orElseThrow(() -> new IdentityNotFoundException("No such identity: " + identity.getId()));
+        log.info("found identity, email recently updated flag is: " + savedIdentity.isEmailRecentlyUpdated());
+        return savedIdentity.isEmailRecentlyUpdated();
+    }
+
+    public boolean isWhitelistedDomain(String domain) {
+        return Arrays.asList(whitelistedDomains).contains(domain);
+    }
+
+    public String getDomainFromEmailAddress(String emailAddress) {
+        return emailAddress.substring(emailAddress.indexOf('@') + 1);
     }
 
 }

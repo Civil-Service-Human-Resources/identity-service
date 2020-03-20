@@ -4,29 +4,30 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InOrder;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import uk.gov.cshr.domain.Identity;
-import uk.gov.cshr.domain.Invite;
-import uk.gov.cshr.domain.Role;
-import uk.gov.cshr.domain.Token;
+import uk.gov.cshr.domain.*;
+import uk.gov.cshr.exception.IdentityNotFoundException;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
+import uk.gov.cshr.service.CsrsService;
 import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.NotifyService;
 
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Collections.emptySet;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -34,10 +35,22 @@ import static org.mockito.Mockito.*;
 public class IdentityServiceTest {
 
     private final String updatePasswordEmailTemplateId = "template-id";
+    private final String[] whitelistedDomains = new String[]{"whitelisted.gov.uk"};
+    private final String orgCode = "AB";
+
+    private static final String EMAIL = "test@example.com";
+    private static final String CODE = "abc123";
+    private static final String UID = "uid123";
+    private static final Boolean ACTIVE = true;
+    private static final Boolean LOCKED = false;
+    private static final String PASSWORD = "password";
+    private static final Set<Role> ROLES = new HashSet();
+
+    private static Identity IDENTITY = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now(), false, false);
 
     private IdentityService identityService;
 
-    @Mock
+    @Mock(name="identityRepository")
     private IdentityRepository identityRepository;
 
     @Mock
@@ -55,6 +68,12 @@ public class IdentityServiceTest {
     @Mock
     private NotifyService notifyService;
 
+    @Mock
+    private CsrsService csrsService;
+
+    @Captor
+    private ArgumentCaptor<Identity> identityArgumentCaptor;
+
     @Before
     public void setUp() throws Exception {
         identityService = new IdentityService(
@@ -63,7 +82,9 @@ public class IdentityServiceTest {
                 passwordEncoder,
                 tokenServices,
                 tokenRepository,
-                notifyService
+                notifyService,
+                csrsService,
+                whitelistedDomains
         );
     }
 
@@ -72,7 +93,7 @@ public class IdentityServiceTest {
 
         final String emailAddress = "test@example.org";
         final String uid = "uid";
-        final Identity identity = new Identity(uid, emailAddress, "password", true, false, emptySet(), Instant.now(), false);
+        final Identity identity = new Identity(uid, emailAddress, "password", true, false, emptySet(), Instant.now(), false, false);
 
         when(identityRepository.findFirstByActiveTrueAndEmailEquals(emailAddress))
                 .thenReturn(identity);
@@ -220,5 +241,78 @@ public class IdentityServiceTest {
         verify(tokenServices).revokeToken(accessToken2Value);
 
         verify(notifyService).notify(email, updatePasswordEmailTemplateId);
+    }
+
+    @Test
+    public void givenAValidIdentityWithAWhitelistedDomain_whenUpdateEmailAddress_shouldReturnSuccessfully(){
+        // given
+        Optional<Identity> optionalIdentity = Optional.of(IDENTITY);
+        when(identityRepository.findById(anyLong())).thenReturn(optionalIdentity);
+        when(identityRepository.save(identityArgumentCaptor.capture())).thenReturn(new Identity());
+
+        Identity identityParam = new Identity();
+        identityParam.setId(new Long(123l));
+
+        // when
+        identityService.updateEmailAddressAndEmailRecentlyUpdatedFlagToTrue(identityParam, "mynewemail@whitelisted.gov.uk");
+
+        // then
+        verify(identityRepository, times(1)).findById(anyLong());
+        verify(identityRepository, times(1)).save(optionalIdentity.get());
+        Identity actualSavedIdentity = identityArgumentCaptor.getValue();
+        assertThat(actualSavedIdentity.isEmailRecentlyUpdated(), equalTo(true));
+        // ensure token flow was NOT executed
+        verify(csrsService, never()).getOrgCode(anyString());
+        verify(csrsService, never()).getAgencyTokenForDomainAndOrganisation(anyString(), anyString());
+        verify(csrsService, never()).updateSpacesAvailable(anyString(), anyString(), anyString(), anyBoolean());
+    }
+
+    @Test
+    public void givenAValidIdentity_resetRecentlyUpdatedEmailFlag_shouldReturnSuccessfully(){
+        // given
+        IDENTITY.setId(123L);
+        Optional<Identity> optionalIdentity = Optional.of(IDENTITY);
+        when(identityRepository.findById(anyLong())).thenReturn(optionalIdentity);
+        when(identityRepository.save(identityArgumentCaptor.capture())).thenReturn(new Identity());
+
+        // when
+        identityService.resetRecentlyUpdatedEmailFlagToFalse(IDENTITY);
+
+        // then
+        verify(identityRepository, times(1)).save(optionalIdentity.get());
+        Identity actualSavedIdentity = identityArgumentCaptor.getValue();
+        assertThat(actualSavedIdentity.isEmailRecentlyUpdated(), equalTo(false));
+    }
+
+    @Test(expected = IdentityNotFoundException.class)
+    public void givenAnNotFoundIdentity_resetRecentlyUpdatedEmailFlag_shouldThrowIdentityNotFoundException(){
+        // given
+//        when(identityRepository.findFirstByUid(anyString())).thenReturn(Optional.empty());
+
+        // when
+        identityService.resetRecentlyUpdatedEmailFlagToFalse(new Identity());
+
+        // then
+        verify(identityRepository, never()).save(any(Identity.class));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void givenAnInvalidIdentity_resetRecentlyUpdatedEmailFlag_shouldThrowException(){
+        // given
+        Optional<Identity> optionalIdentity = Optional.of(IDENTITY);
+
+        // when
+        identityService.resetRecentlyUpdatedEmailFlagToFalse(new Identity());
+
+        // then
+        verify(identityRepository, times(1)).save(optionalIdentity.get());
+    }
+
+    private AgencyToken buildAgencyToken() {
+        AgencyToken at = new AgencyToken();
+        at.setToken("token123");
+        at.setCapacity(100);
+        at.setCapacityUsed(11);
+        return at;
     }
 }
