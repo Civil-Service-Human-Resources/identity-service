@@ -1,0 +1,19 @@
+<page th:replace="fragments/user-layout :: page(~{::title},~{::content})">
+  <title>
+    Error
+  </title>
+  <content>
+    <div class="govuk-width-container">
+      <main class="govuk-main-wrapper govuk-main-wrapper--l" id="main-content" role="main">
+        <div class="govuk-grid-row">
+          <div class="govuk-grid-column-two-thirds">
+            <h1 class="govuk-heading-xl">Page not found</h1>
+            <p class="govuk-body">
+              The content you requested cannot be found, please <a href="/login" class="govuk-link">sign in</a>again.
+            </p>
+          </div>
+        </div>
+      </main>
+    </div>
+  </content>
+</page>
