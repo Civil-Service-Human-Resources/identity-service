@@ -160,6 +160,13 @@ public class IdentityService implements UserDetailsService {
         return savedIdentity.isEmailRecentlyUpdated();
     }
 
+    public boolean getRecentlyActivatedFlag(Identity identity) {
+        Identity savedIdentity = identityRepository.findById(identity.getId())
+                .orElseThrow(() -> new IdentityNotFoundException("No such identity: " + identity.getId()));
+        log.info("found identity, recently activated flag is: " + savedIdentity.isRecentlyReactivated());
+        return savedIdentity.isRecentlyReactivated();
+    }
+
     public boolean isWhitelistedDomain(String domain) {
         return Arrays.asList(whitelistedDomains).contains(domain);
     }

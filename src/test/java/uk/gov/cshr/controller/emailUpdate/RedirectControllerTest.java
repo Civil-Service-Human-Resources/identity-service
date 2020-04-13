@@ -43,20 +43,23 @@ public class RedirectControllerTest {
     }
 
     @Test
-    public void whenGoToUIHomePage_shouldRedirectToTheLPGUIHomePage() throws Exception {
-        mockMvc.perform(
-                get("/redirectToUIHomePage"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl(lpgUiUrl))
-                .andExpect(model().size(0));
-    }
-
-    @Test
-    public void whenGoToEnterTokenPage_shouldRedirectToTheEnterTokenPage() throws Exception {
+    public void whenGoToEnterTokenPage_shouldRedirectToTheEmailUpdatedEnterTokenPage() throws Exception {
         String expectedRedirectToUrl = "/emailUpdated/enterToken";
 
         mockMvc.perform(
                 get("/redirectToEnterTokenPage/mydomain/myuid"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(expectedRedirectToUrl))
+                .andExpect(flash().attribute("domain","mydomain"))
+                .andExpect(flash().attribute("uid","myuid"));
+    }
+
+    @Test
+    public void whenGoToEnterTokenPage_shouldRedirectToTheReactivationEnterTokenPage() throws Exception {
+        String expectedRedirectToUrl = "/reactivate/enterToken";
+
+        mockMvc.perform(
+                get("/redirectToReactivationEnterTokenPage/mydomain/myuid"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(expectedRedirectToUrl))
                 .andExpect(flash().attribute("domain","mydomain"))

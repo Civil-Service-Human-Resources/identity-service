@@ -71,27 +71,44 @@ public class CustomAuthenticationSuccessHandler
     }
 
     protected String determineTargetUrl(Authentication authentication) {
-        // GET FLAG FROM IDENTITY REPO (NOT SPRING AUTH)
+        // GET FLAGS FROM IDENTITY REPO (NOT SPRING AUTH)
         IdentityDetails identityDetails = (IdentityDetails) authentication.getPrincipal();
         Identity identity = identityDetails.getIdentity();
 
+        if(identityService.getRecentlyActivatedFlag(identity)) {
+            log.debug("signing in for the first time since being reactivated");
+            return processRecentlyReactivatedUser(identity);
+        }
+
         if(identityService.getRecentlyUpdatedEmailFlag(identity)) {
-            log.debug("users email has recently been updated");
-            return getTargetUrl(identity);
+            log.debug("signing in for the first time since updating their email");
+            return processRecentlyUpdatedEmailUser(identity);
         }
 
         return lpgUiUrl;
     }
 
-    private String getTargetUrl(Identity identity) {
-        String domain = identityService.getDomainFromEmailAddress(identity.getEmail());
-        String uid = identity.getUid();
+    private String processRecentlyReactivatedUser(Identity identity) {
+        String domain = getDomain(identity.getEmail());
+        if (agencyTokenService.isDomainWhiteListed(domain)) {
+            return lpgUiUrl;
+        } else {
+            if(agencyTokenService.isDomainAnAgencyTokenDomain(domain)) {
+                return "/redirectToReactivationEnterTokenPage/" + domain + "/" + identity.getUid();
+            } else {
+                return invalidDomainUrl;
+            }
+        }
+    }
+
+    private String processRecentlyUpdatedEmailUser(Identity identity) {
+        String domain = getDomain(identity.getEmail());
         if (agencyTokenService.isDomainWhiteListed(domain)) {
             emailUpdateService.processEmailUpdatedRecentlyRequestForWhiteListedDomainUser(identity);
             return lpgUiUrl;
         } else {
             if(agencyTokenService.isDomainAnAgencyTokenDomain(domain)) {
-                return "/redirectToEnterTokenPage/" + domain + "/" + uid;
+                return "/redirectToEnterTokenPage/" + domain + "/" + identity.getUid();
             } else {
                 return invalidDomainUrl;
             }
@@ -104,6 +121,10 @@ public class CustomAuthenticationSuccessHandler
             return;
         }
         session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+    }
+
+    private String getDomain(String email) {
+        return identityService.getDomainFromEmailAddress(email);
     }
 
 }
