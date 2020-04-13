@@ -44,7 +44,7 @@ public class EmailUpdateServiceTest {
     private static final String PASSWORD = "password";
     private static final Set<Role> ROLES = new HashSet();
 
-    private static Identity IDENTITY = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now(), false, false);
+    private static Identity IDENTITY = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now(), false, false, false);
 
     @MockBean
     private EmailUpdateRepository emailUpdateRepository;

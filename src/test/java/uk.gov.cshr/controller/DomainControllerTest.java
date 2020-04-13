@@ -122,7 +122,7 @@ public class DomainControllerTest {
     }
 
     private Identity createIdentity() {
-        return new Identity(UID, EMAIL, PASSWORD, true, false, null, Instant.now(), false, false);
+        return new Identity(UID, EMAIL, PASSWORD, true, false, null, Instant.now(), false, false, false);
     }
 
 }

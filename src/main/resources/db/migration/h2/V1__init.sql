@@ -18,6 +18,7 @@ CREATE TABLE `identity` (
   `email` varchar(150) NOT NULL UNIQUE,
   `password` varchar(100) NOT NULL,
   `email_recently_updated` bit(1) DEFAULT FALSE,
+  `recently_reactivated` bit(1) DEFAULT FALSE,
   PRIMARY KEY (`id`)
 );
 

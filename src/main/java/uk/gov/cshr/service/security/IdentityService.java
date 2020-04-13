@@ -89,7 +89,7 @@ public class IdentityService implements UserDetailsService {
         Invite invite = inviteService.findByCode(code);
 
         Set<Role> newRoles = new HashSet<>(invite.getForRoles());
-        Identity identity = new Identity(UUID.randomUUID().toString(), invite.getForEmail(), passwordEncoder.encode(password), true, false, newRoles, Instant.now(), false, false);
+        Identity identity = new Identity(UUID.randomUUID().toString(), invite.getForEmail(), passwordEncoder.encode(password), true, false, newRoles, Instant.now(), false, false, false);
         identityRepository.save(identity);
 
         LOGGER.info("New identity {} successfully created", identity.getEmail());

@@ -46,7 +46,7 @@ public class IdentityServiceTest {
     private static final String PASSWORD = "password";
     private static final Set<Role> ROLES = new HashSet();
 
-    private static Identity IDENTITY = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now(), false, false);
+    private static Identity IDENTITY = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now(), false, false, false);
 
     private IdentityService identityService;
 
@@ -93,7 +93,7 @@ public class IdentityServiceTest {
 
         final String emailAddress = "test@example.org";
         final String uid = "uid";
-        final Identity identity = new Identity(uid, emailAddress, "password", true, false, emptySet(), Instant.now(), false, false);
+        final Identity identity = new Identity(uid, emailAddress, "password", true, false, emptySet(), Instant.now(), false, false, false);
 
         when(identityRepository.findFirstByActiveTrueAndEmailEquals(emailAddress))
                 .thenReturn(identity);
