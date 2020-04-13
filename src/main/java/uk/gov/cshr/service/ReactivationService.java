@@ -23,10 +23,12 @@ public class ReactivationService {
         if(optionalIdentity.isPresent()) {
             Identity identity = optionalIdentity.get();
             identity.setRecentlyReactivated(false);
-            identityRepository.save(identity);
+            Identity updatedIdentity = identityRepository.save(identity);
+            log.info("updated identity to have isRecentlyReactivated flag set to " + updatedIdentity.isRecentlyReactivated());
         } else {
             log.info("No identity found for uid {}", uid);
             throw new ResourceNotFoundException();
         }
     }
+
 }

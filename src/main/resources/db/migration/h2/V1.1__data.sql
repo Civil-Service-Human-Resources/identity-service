@@ -29,6 +29,7 @@ INSERT INTO `role` (name) VALUES
 
 INSERT INTO `identity` (active, locked, email, uid, password, last_logged_in, deletion_notification_sent, email_recently_updated, recently_reactivated) VALUES
 (true, false, 'learner@domain.com', '3c706a70-3fff-4e7b-ae7f-102c1d46f569', '$2a$10$sGfnyPnJ8a0b9R.vqIphKu5vjetS3.Bvi6ISv39bOphq5On0U2m36', GETDATE(), false, false, false),
+(true, false, 'susan@nhsglasgow.gov.uk', '4c706a70-3fff-4e7b-ae7f-102c1d46f569', '$2a$10$sGfnyPnJ8a0b9R.vqIphKu5vjetS3.Bvi6ISv39bOphq5On0U2m36', GETDATE(), false, false, false),
 (true, false, 'course-manager@domain.com', '8dc80f78-9a52-4c31-ac54-d280a70c18eb', '$2a$10$sGfnyPnJ8a0b9R.vqIphKu5vjetS3.Bvi6ISv39bOphq5On0U2m36', GETDATE(), false, false, false),
 (true, false, 'profession-manager@domain.com', '1c66c980-8316-48e4-9358-eca1c2649964', '$2a$10$sGfnyPnJ8a0b9R.vqIphKu5vjetS3.Bvi6ISv39bOphq5On0U2m36', GETDATE(), false, false, false),
 (true, false, 'identity-manager@domain.com', '65313ea4-59ea-4802-a521-71f9a92c85cd', '$2a$10$sGfnyPnJ8a0b9R.vqIphKu5vjetS3.Bvi6ISv39bOphq5On0U2m36', GETDATE(), false, false, false),
@@ -43,6 +44,11 @@ INSERT INTO `identity_role` (identity_id, role_id) VALUES
 ((SELECT id FROM identity WHERE email = 'learner@domain.com'), (SELECT id FROM role WHERE name = 'ORGANISATION_MANAGER')),
 ((SELECT id FROM identity WHERE email = 'learner@domain.com'), (SELECT id FROM role WHERE name = 'PROFESSION_MANAGER')),
 ((SELECT id FROM identity WHERE email = 'learner@domain.com'), (SELECT id FROM role WHERE name = 'IDENTITY_MANAGER')),
+((SELECT id FROM identity WHERE email = 'susan@nhsglasgow.gov.uk'), (SELECT id FROM role WHERE name = 'LEARNER')),
+((SELECT id FROM identity WHERE email = 'susan@nhsglasgow.gov.uk'), (SELECT id FROM role WHERE name = 'LEARNING_MANAGER')),
+((SELECT id FROM identity WHERE email = 'susan@nhsglasgow.gov.uk'), (SELECT id FROM role WHERE name = 'ORGANISATION_MANAGER')),
+((SELECT id FROM identity WHERE email = 'susan@nhsglasgow.gov.uk'), (SELECT id FROM role WHERE name = 'PROFESSION_MANAGER')),
+((SELECT id FROM identity WHERE email = 'susan@nhsglasgow.gov.uk'), (SELECT id FROM role WHERE name = 'IDENTITY_MANAGER')),
 ((SELECT id FROM identity WHERE email = 'course-manager@domain.com'), (SELECT id FROM role WHERE name = 'LEARNING_MANAGER')),
 ((SELECT id FROM identity WHERE email = 'identity-manager@domain.com'), (SELECT id FROM role WHERE name = 'IDENTITY_MANAGER')),
 ((SELECT id FROM identity WHERE email = 'organisation-reporter@domain.com'), (SELECT id FROM role WHERE name = 'ORGANISATION_REPORTER')),
@@ -95,3 +101,7 @@ CREATE TABLE `oauth_code` (
 );
 
 ALTER TABLE `invite` ADD COLUMN `is_authorised_invite` bit(1) DEFAULT TRUE;
+
+-- UPDATE `identity` SET `last_logged_in` = 2017-01-01 00:00:01 WHERE `email` = 'susan@nhsglasgow.gov.uk';
+UPDATE `identity` SET `recently_reactivated` = 1 WHERE `email` = 'susan@nhsglasgow.gov.uk';
+UPDATE `identity` SET `active` = 1 WHERE `email` = 'susan@nhsglasgow.gov.uk';
