@@ -7,30 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.annotation.ReadOnlyProperty;
-import org.springframework.http.HttpRequest;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.cshr.domain.AgencyToken;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Invite;
 import uk.gov.cshr.domain.Role;
 import uk.gov.cshr.exception.IdentityNotFoundException;
-import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.CsrsService;
 import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.NotifyService;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.*;
 
@@ -99,30 +91,6 @@ public class IdentityService implements UserDetailsService {
         identityRepository.save(identity);
 
         LOGGER.info("New identity {} successfully created", identity.getEmail());
-    }
-
-    public void updateSpringAuthenticationAndSpringSessionWithUpdatedIdentity(Identity identity, HttpServletRequest request) {
-        Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
-        IdentityDetails existingIdentityDetails = (IdentityDetails) existingAuth.getPrincipal();
-        // TODO - refactor for any field on identity tomorrow (14 April) - see 2 methods below.
-        existingIdentityDetails.getIdentity().setRecentlyReactivated(false);
-
-        Authentication updatedAuthentication = new UsernamePasswordAuthenticationToken(existingIdentityDetails, existingIdentityDetails.getPassword(), existingIdentityDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(updatedAuthentication);
-
-        request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
-    }
-
-    public IdentityDetails getIdentityDetailsFromSpringAuthentication () {
-        Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
-        IdentityDetails existingIdentityDetails = (IdentityDetails) existingAuth.getPrincipal();
-        return existingIdentityDetails;
-    }
-
-    public void updateSpringAuthenticationAndSpringSessionWithUpdatedIdentity(HttpServletRequest request, IdentityDetails updatedIdentityDetails) {
-        Authentication updatedAuthentication = new UsernamePasswordAuthenticationToken(updatedIdentityDetails, updatedIdentityDetails.getPassword(), updatedIdentityDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(updatedAuthentication);
-        request.getSession().setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
     }
 
     public void updatePassword(Identity identity, String password) {

@@ -12,17 +12,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cshr.controller.form.EmailUpdatedRecentlyEnterTokenForm;
 import uk.gov.cshr.controller.form.ReactivationEnterTokenForm;
-import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.OrganisationalUnitDto;
 import uk.gov.cshr.exception.ResourceNotFoundException;
-import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.service.CsrsService;
 import uk.gov.cshr.service.ReactivationService;
-import uk.gov.cshr.service.security.IdentityService;
+import uk.gov.cshr.utils.ApplicationConstants;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Optional;
 
 @Slf4j
 @Controller
@@ -33,28 +30,18 @@ public class ReactivationController {
 
     private static final String ENTER_TOKEN_SINCE_REACTIVATION_VIEW_NAME_TEMPLATE = "enterTokenSinceReactivation";
 
-    private static final String STATUS_ATTRIBUTE = "status";
-
     private final ReactivationService reactivationService;
 
     private final CsrsService csrsService;
-
-    private final IdentityService identityService;
-
-    private final IdentityRepository identityRepository;
 
     private final String lpgUiUrl;
 
     public ReactivationController(
             ReactivationService reactivationService,
             CsrsService csrsService,
-            IdentityService identityService,
-            IdentityRepository identityRepository,
             @Value("${lpg.uiUrl}") String lpgUiUrl) {
         this.reactivationService = reactivationService;
         this.csrsService = csrsService;
-        this.identityService = identityService;
-        this.identityRepository = identityRepository;
         this.lpgUiUrl = lpgUiUrl;
     }
 
@@ -91,30 +78,17 @@ public class ReactivationController {
 
         log.info("User attempting token-based sign up since being reactivated");
 
-        String domain = form.getDomain();
-        String uid = form.getUid();
-
         if (bindingResult.hasErrors()) {
             model.addAttribute(RECENTLY_REACTIVATED_ENTER_TOKEN_FORM_TEMPLATE, form);
             return ENTER_TOKEN_SINCE_REACTIVATION_VIEW_NAME_TEMPLATE;
         }
 
         try {
-            log.info("User checking reactivation Enter Token form with domain = {}, token = {}, org = {}", domain, form.getToken(), form.getOrganisation());
-            Optional<Identity> optionalIdentity = identityRepository.findFirstByUid(uid);
-            if(optionalIdentity.isPresent()) {
-                Identity identity = optionalIdentity.get();
-                identity.setRecentlyReactivated(false);
-                Identity updatedIdentity = identityRepository.save(identity);
-                identityService.updateSpringAuthenticationAndSpringSessionWithUpdatedIdentity(updatedIdentity, request);
-                log.info("updated identity to have isRecentlyReactivated flag set to " + updatedIdentity.isRecentlyReactivated());
-            } else {
-                log.info("No identity found for uid {}", uid);
-                throw new ResourceNotFoundException();
-            }
+            log.info("User checking reactivation Enter Token form with domain = {}, token = {}, org = {}", form.getDomain(), form.getToken(), form.getOrganisation());
+            reactivationService.processReactivation(request, form.getUid());
             return "redirect:" + lpgUiUrl;
         } catch (ResourceNotFoundException e) {
-            redirectAttributes.addFlashAttribute(STATUS_ATTRIBUTE, "Incorrect token for this organisation");
+            redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, "Incorrect token for this organisation");
             redirectAttributes.addFlashAttribute(RECENTLY_REACTIVATED_ENTER_TOKEN_FORM_TEMPLATE, form);
             return "redirect:/reactivate/enterToken";
         } catch (Exception e) {
