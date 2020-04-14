@@ -27,6 +27,7 @@ import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
 
 import javax.servlet.Filter;
+import javax.servlet.http.HttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -119,7 +120,7 @@ public class AccountControllerTest {
                 .andDo(print());
 
         // then
-        verify(emailUpdateService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(), eq(EXPECTED_CODE));
+        verify(emailUpdateService, times(1)).updateEmailAddress(any(HttpServletRequest.class), identityArgumentCaptor.capture(), eq(EXPECTED_CODE));
         Identity actualIdentityToUpdate = identityArgumentCaptor.getValue();
         assertThat(actualIdentityToUpdate.getUid()).isEqualTo(expectedUIDToBeUpdated);
         assertThat(actualIdentityToUpdate.getEmail()).isEqualTo(expectedEmailToBeUpdated);
@@ -143,7 +144,7 @@ public class AccountControllerTest {
                 .andDo(print());
 
         // then
-        verify(emailUpdateService, never()).updateEmailAddress(any(Identity.class), anyString());
+        verify(emailUpdateService, never()).updateEmailAddress(any(HttpServletRequest.class), any(Identity.class), anyString());
     }
 
     @Test
@@ -151,7 +152,7 @@ public class AccountControllerTest {
         // given
         Authentication authentication = prepareAuthentication(NORMAL_TEST_USER_UID);
         when(emailUpdateService.verifyCode(any(Identity.class), anyString())).thenReturn(true);
-        doThrow(new ResourceNotFoundException()).when(emailUpdateService).updateEmailAddress(any(Identity.class), anyString());
+        doThrow(new ResourceNotFoundException()).when(emailUpdateService).updateEmailAddress(any(HttpServletRequest.class), any(Identity.class), anyString());
         // expected data to be sent for updating
         IdentityDetails identityDetails = (IdentityDetails) authentication.getPrincipal();
         Identity identity = identityDetails.getIdentity();
@@ -170,7 +171,7 @@ public class AccountControllerTest {
                 .andDo(print());
 
         // then
-        verify(emailUpdateService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(), eq(EXPECTED_CODE));
+        verify(emailUpdateService, times(1)).updateEmailAddress(any(HttpServletRequest.class), identityArgumentCaptor.capture(), eq(EXPECTED_CODE));
         Identity actualIdentityToUpdate = identityArgumentCaptor.getValue();
         assertThat(actualIdentityToUpdate.getUid()).isEqualTo(expectedUIDToBeUpdated);
         assertThat(actualIdentityToUpdate.getEmail()).isEqualTo(expectedEmailToBeUpdated);
@@ -181,7 +182,7 @@ public class AccountControllerTest {
         // given
         Authentication authentication = prepareAuthentication(NORMAL_TEST_USER_UID);
         when(emailUpdateService.verifyCode(any(Identity.class), anyString())).thenReturn(true);
-        doThrow(new RuntimeException()).when(emailUpdateService).updateEmailAddress(any(Identity.class), anyString());
+        doThrow(new RuntimeException()).when(emailUpdateService).updateEmailAddress(any(HttpServletRequest.class), any(Identity.class), anyString());
         // expected data to be sent for updating
         IdentityDetails identityDetails = (IdentityDetails) authentication.getPrincipal();
         Identity identity = identityDetails.getIdentity();
@@ -200,7 +201,7 @@ public class AccountControllerTest {
                 .andDo(print());
 
         // then
-        verify(emailUpdateService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(), eq(EXPECTED_CODE));
+        verify(emailUpdateService, times(1)).updateEmailAddress(any(HttpServletRequest.class), identityArgumentCaptor.capture(), eq(EXPECTED_CODE));
         Identity actualIdentityToUpdate = identityArgumentCaptor.getValue();
         assertThat(actualIdentityToUpdate.getUid()).isEqualTo(expectedUIDToBeUpdated);
         assertThat(actualIdentityToUpdate.getEmail()).isEqualTo(expectedEmailToBeUpdated);
