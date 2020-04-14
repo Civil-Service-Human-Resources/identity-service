@@ -8,6 +8,7 @@ import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -18,7 +19,9 @@ import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.CsrsService;
 import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.NotifyService;
+import uk.gov.cshr.utils.SpringUserUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -28,7 +31,7 @@ import java.util.Set;
 import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,6 +52,8 @@ public class IdentityServiceTest {
     private static Identity IDENTITY = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now(), false, false, false);
 
     private IdentityService identityService;
+
+    private MockHttpServletRequest request;
 
     @Mock(name="identityRepository")
     private IdentityRepository identityRepository;
@@ -71,6 +76,9 @@ public class IdentityServiceTest {
     @Mock
     private CsrsService csrsService;
 
+    @Mock
+    private SpringUserUtils springUserUtils;
+
     @Captor
     private ArgumentCaptor<Identity> identityArgumentCaptor;
 
@@ -84,8 +92,14 @@ public class IdentityServiceTest {
                 tokenRepository,
                 notifyService,
                 csrsService,
+                springUserUtils,
                 whitelistedDomains
         );
+
+        request = new MockHttpServletRequest();
+        Identity identityFromSpring = new Identity();
+        when(springUserUtils.getIdentityFromSpringAuthentication()).thenReturn(identityFromSpring);
+        doNothing().when(springUserUtils).updateSpringAuthenticationAndSpringSessionWithUpdatedIdentity(any(HttpServletRequest.class), eq(identityFromSpring));
     }
 
     @Test
@@ -300,6 +314,86 @@ public class IdentityServiceTest {
 
         // then
         verify(identityRepository, times(1)).save(optionalIdentity.get());
+    }
+
+    @Test
+    public void givenAValidIdentity_getEmailRecentlyUpdatedFlag_shouldReturnSuccessfully(){
+        // given
+        IDENTITY.setId(123L);
+        IDENTITY.setEmailRecentlyUpdated(true);
+        Optional<Identity> optionalIdentity = Optional.of(IDENTITY);
+        when(identityRepository.findById(anyLong())).thenReturn(optionalIdentity);
+
+        // when
+        boolean actual = identityService.getRecentlyUpdatedEmailFlag(IDENTITY);
+
+        // then
+        assertTrue(actual);
+        verify(identityRepository, times(1)).findById(eq(IDENTITY.getId()));
+    }
+
+    @Test(expected = IdentityNotFoundException.class)
+    public void givenAnInvalidIdentity_getEmailRecentlyUpdatedFlag_shouldThrowIdentityNotFoundException(){
+        // given
+
+        // when
+        boolean actual = identityService.getRecentlyUpdatedEmailFlag(IDENTITY);
+
+        // then
+        assertFalse(actual);
+        verify(identityRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    public void givenAValidIdentity_getRecentlyReactivatedFlag_shouldReturnSuccessfully(){
+        // given
+        IDENTITY.setId(123L);
+        IDENTITY.setRecentlyReactivated(true);
+        Optional<Identity> optionalIdentity = Optional.of(IDENTITY);
+        when(identityRepository.findById(anyLong())).thenReturn(optionalIdentity);
+
+        // when
+        boolean actual = identityService.getRecentlyActivatedFlag(IDENTITY);
+
+        // then
+        assertTrue(actual);
+        verify(identityRepository, times(1)).findById(eq(IDENTITY.getId()));
+    }
+
+    @Test(expected = IdentityNotFoundException.class)
+    public void givenAnInvalidIdentity_getRecentlyReactivatedFlag_shouldThrowIdentityNotFoundException(){
+        // given
+
+        // when
+        boolean actual = identityService.getRecentlyActivatedFlag(IDENTITY);
+
+        // then
+        assertFalse(actual);
+        verify(identityRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    public void givenAValidIdentity_updateSpringWithRecentlyEmailUpdatedFlag_shouldReturnSuccessfully(){
+        // given
+
+        // when
+        identityService.updateSpringWithRecentlyEmailUpdatedFlag(request, false);
+
+        // then
+        verify(springUserUtils, times(1)).updateSpringAuthenticationAndSpringSessionWithUpdatedIdentity(eq(request), identityArgumentCaptor.capture());
+        assertFalse(identityArgumentCaptor.getValue().isEmailRecentlyUpdated());
+    }
+
+    @Test
+    public void givenAValidIdentity_updateSpringWithRecentlyReactivatedFlag_shouldReturnSuccessfully(){
+        // given
+
+        // when
+        identityService.updateSpringWithRecentlyReactivatedFlag(request, false);
+
+        // then
+        verify(springUserUtils, times(1)).updateSpringAuthenticationAndSpringSessionWithUpdatedIdentity(eq(request), identityArgumentCaptor.capture());
+        assertFalse(identityArgumentCaptor.getValue().isEmailRecentlyUpdated());
     }
 
     private AgencyToken buildAgencyToken() {

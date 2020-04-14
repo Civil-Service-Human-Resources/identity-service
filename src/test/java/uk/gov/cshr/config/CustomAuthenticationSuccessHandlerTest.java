@@ -73,6 +73,7 @@ public class CustomAuthenticationSuccessHandlerTest {
         response = new MockHttpServletResponse();
         when(identityService.getDomainFromEmailAddress(eq("basic@domain.com"))).thenReturn("domain.com");
         when(identityService.getDomainFromEmailAddress(eq("special@domain.com"))).thenReturn("domain.com");
+        when(identityService.getDomainFromEmailAddress(eq("reactivate@domain.com"))).thenReturn("domain.com");
         session = new MockHttpSession(null, "test-session-id");
         request.setSession(session);
     }
@@ -147,6 +148,64 @@ public class CustomAuthenticationSuccessHandlerTest {
         // given
         prepareSecurityContext("specialuid");
         when(identityService.getRecentlyUpdatedEmailFlag(any(Identity.class))).thenReturn(true);
+        when(agencyTokenService.isDomainWhiteListed(anyString())).thenReturn(false);
+        when(agencyTokenService.isDomainAnAgencyTokenDomain(anyString())).thenReturn(false);
+
+        // when
+        classUnderTest.onAuthenticationSuccess(request, response, SecurityContextHolder.getContext().getAuthentication());
+
+        // then
+        String expectedInvalidOrgUrl = String.format(invalidDomainUrl, "domain.com", "specialuid");
+        verify(redirectStrategy, times(1)).sendRedirect(any(HttpServletRequest.class), any(HttpServletResponse.class), eq(expectedInvalidOrgUrl));
+    }
+
+    @Test
+    @WithUserDetails(
+            value = "reactivateduid",
+            userDetailsServiceBeanName = "userDetailsService")
+    public void givenReactivatedUserAndIsWhitelisted_whenOnAuthenticationSuccess_thenRedirectsToLPGUIHomePage() throws IOException, ServletException {
+        // *****as the profile checker in the UI will automatically redirect them to an org page.
+        // i.e. the redirect happens within the UI application, not here in the Java.
+
+        // given
+        prepareSecurityContext("reactivateduid");
+        when(identityService.getRecentlyActivatedFlag(any(Identity.class))).thenReturn(true);
+        when(agencyTokenService.isDomainWhiteListed(anyString())).thenReturn(true);
+
+        // when
+        classUnderTest.onAuthenticationSuccess(request, response, SecurityContextHolder.getContext().getAuthentication());
+
+        // then
+        verify(redirectStrategy, times(1)).sendRedirect(any(HttpServletRequest.class), any(HttpServletResponse.class), eq(lpgUiUrl));
+    }
+
+    @Test
+    @WithUserDetails(
+            value = "reactivateduid",
+            userDetailsServiceBeanName = "userDetailsService")
+    public void givenReactivatedUserAndIsAnAgencyTokenPerson_whenOnAuthenticationSuccess_thenRedirectsToControllerThatStoresTheUIDAndDomainAndThenPerformsTheRedirectToReactivationEnterTokenPage() throws IOException, ServletException {
+        // given
+        prepareSecurityContext("reactivateduid");
+        when(identityService.getRecentlyActivatedFlag(any(Identity.class))).thenReturn(true);
+        when(agencyTokenService.isDomainWhiteListed(anyString())).thenReturn(false);
+        when(agencyTokenService.isDomainAnAgencyTokenDomain(anyString())).thenReturn(true);
+
+        // when
+        classUnderTest.onAuthenticationSuccess(request, response, SecurityContextHolder.getContext().getAuthentication());
+
+        // then
+        String expectedEnterTokenUrl = "/redirectToReactivationEnterTokenPage/domain.com/reactivateduid";
+        verify(redirectStrategy, times(1)).sendRedirect(any(HttpServletRequest.class), any(HttpServletResponse.class), contains(expectedEnterTokenUrl));
+    }
+
+    @Test
+    @WithUserDetails(
+            value = "reactivateduid",
+            userDetailsServiceBeanName = "userDetailsService")
+    public void givenReactivatedUserAndIsAnInvalidDomain_whenOnAuthenticationSuccess_thenRedirectsToControllerThatPerformsTheRedirectToToSignOnPageWithErrorInvalidOrgMessage() throws IOException, ServletException {
+        // given
+        prepareSecurityContext("reactivateduid");
+        when(identityService.getRecentlyActivatedFlag(any(Identity.class))).thenReturn(true);
         when(agencyTokenService.isDomainWhiteListed(anyString())).thenReturn(false);
         when(agencyTokenService.isDomainAnAgencyTokenDomain(anyString())).thenReturn(false);
 

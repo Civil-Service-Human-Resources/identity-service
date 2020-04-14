@@ -22,7 +22,9 @@ import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.CsrsService;
 import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.NotifyService;
+import uk.gov.cshr.utils.SpringUserUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.*;
 
@@ -44,6 +46,7 @@ public class IdentityService implements UserDetailsService {
     private final TokenRepository tokenRepository;
     private final NotifyService notifyService;
     private final CsrsService csrsService;
+    private final SpringUserUtils springUserUtils;
     private String[] whitelistedDomains;
 
     public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
@@ -53,6 +56,7 @@ public class IdentityService implements UserDetailsService {
                            @Qualifier("tokenRepository") TokenRepository tokenRepository,
                            @Qualifier("notifyServiceImpl") NotifyService notifyService,
                            CsrsService csrsService,
+                           SpringUserUtils springUserUtils,
                            @Value("${invite.whitelist.domains}") String[] whitelistedDomains) {
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.identityRepository = identityRepository;
@@ -61,6 +65,7 @@ public class IdentityService implements UserDetailsService {
         this.tokenRepository = tokenRepository;
         this.notifyService = notifyService;
         this.csrsService = csrsService;
+        this.springUserUtils = springUserUtils;
         this.whitelistedDomains = whitelistedDomains;
     }
 
@@ -171,6 +176,20 @@ public class IdentityService implements UserDetailsService {
 
     public String getDomainFromEmailAddress(String emailAddress) {
         return emailAddress.substring(emailAddress.indexOf('@') + 1);
+    }
+
+    public void updateSpringWithRecentlyEmailUpdatedFlag(HttpServletRequest request, boolean emailUpdatedFlag) {
+        // update spring authentication and spring session
+        Identity identityFromSpringAuth = springUserUtils.getIdentityFromSpringAuthentication();
+        identityFromSpringAuth.setEmailRecentlyUpdated(emailUpdatedFlag);
+        springUserUtils.updateSpringAuthenticationAndSpringSessionWithUpdatedIdentity(request, identityFromSpringAuth);
+    }
+
+    public void updateSpringWithRecentlyReactivatedFlag(HttpServletRequest request, boolean reactivateFlag) {
+        // update spring authentication and spring session
+        Identity identityFromSpringAuth = springUserUtils.getIdentityFromSpringAuthentication();
+        identityFromSpringAuth.setRecentlyReactivated(reactivateFlag);
+        springUserUtils.updateSpringAuthenticationAndSpringSessionWithUpdatedIdentity(request, identityFromSpringAuth);
     }
 
 }

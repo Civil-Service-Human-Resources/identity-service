@@ -72,7 +72,7 @@ public class ReactivationController {
 
     @PostMapping(path = "/enterToken")
     public String checkToken(HttpServletRequest request, Model model,
-                             @ModelAttribute @Valid EmailUpdatedRecentlyEnterTokenForm form,
+                             @ModelAttribute @Valid ReactivationEnterTokenForm form,
                              BindingResult bindingResult,
                              RedirectAttributes redirectAttributes) {
 

@@ -26,6 +26,9 @@ public class SpringSecurityTestConfig {
         Identity recentlyUpdatedTheirEmailIdentity = new Identity("specialuid", "special@domain.com", "password", true, false, emptySet(), Instant.now(), false, true, false);
         IdentityDetails recentlyUpdatedTheirEmailActiveUser = new IdentityDetails(recentlyUpdatedTheirEmailIdentity);
 
+        Identity recentlyReactivatedIdentity = new Identity("reactivateduid", "reactivate@domain.com", "password", true, false, emptySet(), Instant.now(), false, false, true);
+        IdentityDetails recentlyReactivatedActiveUser = new IdentityDetails(recentlyReactivatedIdentity);
+
         return new UserDetailsManager() {
             @Override
             public void createUser(UserDetails user) {
@@ -59,6 +62,9 @@ public class SpringSecurityTestConfig {
                 }
                 if(recentlyUpdatedTheirEmailActiveUser.getUsername().equals(username)) {
                     return recentlyUpdatedTheirEmailActiveUser;
+                }
+                if(recentlyReactivatedActiveUser.getUsername().equals(username)) {
+                    return recentlyReactivatedActiveUser;
                 }
                 throw new UsernameNotFoundException("No user found with email address " + username);
             }

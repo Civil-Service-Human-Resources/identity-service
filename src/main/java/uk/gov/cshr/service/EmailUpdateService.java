@@ -10,7 +10,6 @@ import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.exception.InvalidCodeException;
 import uk.gov.cshr.repository.EmailUpdateRepository;
 import uk.gov.cshr.service.security.IdentityService;
-import uk.gov.cshr.utils.SpringUserUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ public class EmailUpdateService {
     private final NotifyService notifyService;
     private final IdentityService identityService;
     private final CsrsService csrsService;
-    private final SpringUserUtils springUserUtils;
     private final String updateEmailTemplateId;
     private final String inviteUrlFormat;
 
@@ -35,7 +33,6 @@ public class EmailUpdateService {
                               @Qualifier("notifyServiceImpl") NotifyService notifyService,
                               IdentityService identityService,
                               CsrsService csrsService,
-                              SpringUserUtils springUserUtils,
                               @Value("${govNotify.template.emailUpdate}") String updateEmailTemplateId,
                               @Value("${emailUpdate.urlFormat}") String inviteUrlFormat) {
         this.emailUpdateRepository = emailUpdateRepository;
@@ -43,7 +40,6 @@ public class EmailUpdateService {
         this.notifyService = notifyService;
         this.identityService = identityService;
         this.csrsService = csrsService;
-        this.springUserUtils = springUserUtils;
         this.updateEmailTemplateId = updateEmailTemplateId;
         this.inviteUrlFormat = inviteUrlFormat;
     }
@@ -74,7 +70,7 @@ public class EmailUpdateService {
         // update identity in the db
         identityService.updateEmailAddressAndEmailRecentlyUpdatedFlagToTrue(identity, emailUpdate.getEmail());
         // update spring
-        updateSpringWithRecentlyReactivatedFlag(request, true);
+        identityService.updateSpringWithRecentlyEmailUpdatedFlag(request, true);
         log.info("deleting the email update config for this user");
         emailUpdateRepository.delete(emailUpdate);
         log.info("all ok");
@@ -85,7 +81,7 @@ public class EmailUpdateService {
         // update identity in the db
         identityService.resetRecentlyUpdatedEmailFlagToFalse(identity);
         // update spring
-        updateSpringWithRecentlyReactivatedFlag(request, false);
+        identityService.updateSpringWithRecentlyEmailUpdatedFlag(request, false);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -95,14 +91,7 @@ public class EmailUpdateService {
         // update identity in the db
         identityService.resetRecentlyUpdatedEmailFlagToFalse(identity);
         // update spring
-        updateSpringWithRecentlyReactivatedFlag(request, false);
-    }
-
-    private void updateSpringWithRecentlyReactivatedFlag(HttpServletRequest request, boolean reactivateFlag) {
-        // update spring authentication and spring session
-        Identity identityFromSpringAuth = springUserUtils.getIdentityFromSpringAuthentication();
-        identityFromSpringAuth.setEmailRecentlyUpdated(reactivateFlag);
-        springUserUtils.updateSpringAuthenticationAndSpringSessionWithUpdatedIdentity(request, identityFromSpringAuth);
+        identityService.updateSpringWithRecentlyEmailUpdatedFlag(request, false);
     }
 
 }

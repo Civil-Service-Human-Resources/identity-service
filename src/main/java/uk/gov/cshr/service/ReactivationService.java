@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.repository.IdentityRepository;
-import uk.gov.cshr.utils.SpringUserUtils;
+import uk.gov.cshr.service.security.IdentityService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
@@ -16,11 +16,11 @@ public class ReactivationService {
 
     private IdentityRepository identityRepository;
 
-    private SpringUserUtils springUserUtils;
+    private IdentityService identityService;
 
-    public ReactivationService(IdentityRepository identityRepository, SpringUserUtils springUserUtils) {
+    public ReactivationService(IdentityRepository identityRepository, IdentityService identityService) {
         this.identityRepository = identityRepository;
-        this.springUserUtils = springUserUtils;
+        this.identityService = identityService;
     }
 
     public void processReactivation(HttpServletRequest request, String uid) {
@@ -30,12 +30,8 @@ public class ReactivationService {
             // update identity in the db
             identity.setRecentlyReactivated(false);
             Identity updatedIdentity = identityRepository.save(identity);
-            // update spring authentication and spring session
-            Identity identityFromSpringAuth = springUserUtils.getIdentityFromSpringAuthentication();
-            identityFromSpringAuth.setRecentlyReactivated(false);
-            springUserUtils.updateSpringAuthenticationAndSpringSessionWithUpdatedIdentity(request, identityFromSpringAuth);
-            log.info("updated identity in db - isRecentlyReactivated flag=" + updatedIdentity.isRecentlyReactivated());
-            log.info("updated identity in spring - isRecentlyReactivated flag=" + springUserUtils.getIdentityFromSpringAuthentication().isRecentlyReactivated());
+            // update spring
+            identityService.updateSpringWithRecentlyReactivatedFlag(request, false);
         } else {
             log.info("No identity found for uid {}", uid);
             throw new ResourceNotFoundException();
