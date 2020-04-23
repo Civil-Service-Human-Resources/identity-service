@@ -26,7 +26,6 @@ import uk.gov.cshr.utils.MockMVCFilterOverrider;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -439,7 +438,7 @@ public class SignupControllerTest {
     }
 
     @Test
-    public void shouldRedirectToSignupIfInviteValid() throws Exception {
+    public void shouldRedirectToSignupIfInviteValidAndAgencyTokenHasCapacity() throws Exception {
         String code = "abc123";
         String organisation = "org";
         String token = "token123";
@@ -451,6 +450,8 @@ public class SignupControllerTest {
         invite.setAuthorisedInvite(true);
 
         AgencyToken agencyToken = new AgencyToken();
+        agencyToken.setCapacity(10);
+        agencyToken.setCapacityUsed(5);
         Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
@@ -468,7 +469,39 @@ public class SignupControllerTest {
                 .andExpect(redirectedUrl("/signup/" + code));
     }
 
-    @Test 
+    @Test
+    public void shouldRedirectToTokenWithErroIfInviteValidAndAgencyTokenDoesNotHaveCapacity() throws Exception {
+        String code = "abc123";
+        String organisation = "org";
+        String token = "token123";
+        String email = "test@example.com";
+        String domain = "example.com";
+
+        Invite invite = new Invite();
+        invite.setForEmail(email);
+        invite.setAuthorisedInvite(true);
+
+        AgencyToken agencyToken = new AgencyToken();
+        agencyToken.setCapacity(10);
+        agencyToken.setCapacityUsed(10);
+        Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
+
+        when(inviteService.isInviteValid(code)).thenReturn(true);
+        when(inviteRepository.findByCode(code)).thenReturn(invite);
+        when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
+        when(csrsService.getAgencyTokenForDomainTokenOrganisation(domain, token, organisation)).thenReturn(optionalAgencyToken);
+
+        mockMvc.perform(
+                post("/signup/enterToken/" + code)
+                        .with(CsrfRequestPostProcessor.csrf())
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                        .param("organisation", organisation)
+                        .param("token", token))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/signup/enterToken/" + code));
+    }
+
+    @Test
     public void shouldRedirectToEnterTokenWithErrorMessageIfNoTokensFound() throws Exception {
         String code = "abc123";
         String organisation = "org";
