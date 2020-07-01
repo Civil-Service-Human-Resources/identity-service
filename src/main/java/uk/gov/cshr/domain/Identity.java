@@ -23,6 +23,9 @@ public class Identity implements Serializable {
     @Column(length = 100)
     private String password;
 
+    @Column(name = "failed_login_attempts")
+    private Long failedLoginAttempts;
+
     private boolean active;
 
     private boolean locked;
@@ -41,7 +44,7 @@ public class Identity implements Serializable {
     public Identity() {
     }
 
-    public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles, Instant lastLoggedIn, boolean deletionNotificationSent) {
+    public Identity(String uid, String email, String password, boolean active, boolean locked, Set<Role> roles, Instant lastLoggedIn, boolean deletionNotificationSent, Long failedLoginAttempts) {
         this.uid = uid;
         this.email = email;
         this.password = password;
@@ -50,6 +53,7 @@ public class Identity implements Serializable {
         this.locked = locked;
         this.lastLoggedIn = lastLoggedIn;
         this.deletionNotificationSent = deletionNotificationSent;
+        this.failedLoginAttempts = failedLoginAttempts;
     }
 
     public boolean isActive() {
@@ -120,6 +124,15 @@ public class Identity implements Serializable {
         this.email = email;
     }
 
+    public Long getFailedLoginAttempts() {
+        return failedLoginAttempts;
+    }
+
+    public Identity setFailedLoginAttempts(Long failedLoginAttempts) {
+        this.failedLoginAttempts = failedLoginAttempts;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "Identity{" +
@@ -128,5 +141,72 @@ public class Identity implements Serializable {
                 ", active=" + active +
                 ", locked=" + locked +
                 '}';
+    }
+
+    public static class Builder {
+        private Long id;
+        private String uid;
+        private String email;
+        private String password;
+        private Long failedLoginAttempts;
+        private boolean active;
+        private boolean locked;
+        private Set<Role> roles;
+        private Instant lastLoggedIn;
+        private boolean deletionNotificationSent;
+
+        public Builder setId(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder setUid(String uid) {
+            this.uid = uid;
+            return this;
+        }
+
+        public Builder setEmail(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder setPassword(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public Builder setFailedLoginAttempts(Long failedLoginAttempts) {
+            this.failedLoginAttempts = failedLoginAttempts;
+            return this;
+        }
+
+        public Builder setActive(boolean active) {
+            this.active = active;
+            return this;
+        }
+
+        public Builder setLocked(boolean locked) {
+            this.locked = locked;
+            return this;
+        }
+
+        public Builder setRoles(Set<Role> roles) {
+            this.roles = roles;
+            return this;
+        }
+
+        public Builder setLastLoggedIn(Instant lastLoggedIn) {
+            this.lastLoggedIn = lastLoggedIn;
+            return this;
+        }
+
+        public Builder setDeletionNotificationSent(boolean deletionNotificationSent) {
+            this.deletionNotificationSent = deletionNotificationSent;
+            return this;
+        }
+
+        public Identity build() {
+            return new Identity(uid, email, password, active, locked, roles, lastLoggedIn, deletionNotificationSent, failedLoginAttempts);
+        }
     }
 }

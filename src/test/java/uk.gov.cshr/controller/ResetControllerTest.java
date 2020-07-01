@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import uk.gov.cshr.controller.reset.ResetController;
+import uk.gov.cshr.data.provider.IdentityMother;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Reset;
 import uk.gov.cshr.domain.ResetStatus;
@@ -47,13 +48,13 @@ public class ResetControllerTest {
     private static final String EMAIL = "test@example.com";
     private static final String CODE = "abc123";
     private static final String UID = "uid123";
-    private static final Boolean ACTIVE = true;
-    private static final Boolean LOCKED = false;
     private static final String PASSWORD = "password";
-    private static final Set<Role> ROLES = new HashSet();
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private IdentityMother identityMother;
 
     @InjectMocks
     private ResetController resetController;
@@ -66,12 +67,6 @@ public class ResetControllerTest {
 
     @Mock
     private ResetService resetService;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @Mock
-    private NotifyService notifyService;
 
     @Before
     public void setup() {
@@ -139,7 +134,7 @@ public class ResetControllerTest {
         when(resetService.isResetExpired(reset)).thenReturn(false);
         when(resetService.isResetPending(reset)).thenReturn(true);
 
-        Identity identity = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now(), false);
+        Identity identity = identityMother.provideIdentity(UID, EMAIL, PASSWORD);
         when(identityRepository.findFirstByActiveTrueAndEmailEquals(EMAIL)).thenReturn(identity);
 
         this.mockMvc.perform(get("/reset/" + CODE))

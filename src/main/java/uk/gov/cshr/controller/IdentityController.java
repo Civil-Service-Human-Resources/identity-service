@@ -109,6 +109,10 @@ public class IdentityController {
                 identity.setLocked(false);
             }
 
+            if (!identity.isLocked()) {
+                identity.setFailedLoginAttempts(0L);
+            }
+
             identityRepository.save(identity);
 
             LOGGER.info("{} updated new role {}", authenticationDetails.getCurrentUsername(), identity);
