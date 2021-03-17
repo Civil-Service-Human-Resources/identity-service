@@ -3,6 +3,7 @@ package uk.gov.cshr.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.dto.IdentityDTO;
@@ -27,6 +28,10 @@ public interface IdentityRepository extends JpaRepository<Identity, Long> {
         @Query("select new uk.gov.cshr.dto.IdentityDTO(i.email, i.uid) " +
                 "from Identity i")
         List<IdentityDTO> findAllNormalised();
+
+        @Query("select new uk.gov.cshr.dto.IdentityDTO(i.email, i.uid) " +
+                "from Identity i where i.uid in (:uids)")
+        List<IdentityDTO> findIdentitiesByIds(@Param("uids") List<String> uids);
 
         Long countByAgencyTokenUid(String uid);
 
