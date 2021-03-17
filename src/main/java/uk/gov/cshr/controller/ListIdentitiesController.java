@@ -50,7 +50,7 @@ public class ListIdentitiesController {
     public ResponseEntity<Map<String, IdentityDTO>> listIdentitiesAsMapForUids(@RequestParam List<String> uids) {
         return ResponseEntity.ok(
                 identityRepository
-                        .findIdentitiesByIds(uids)
+                        .findIdentitiesByUidsNormalised(uids)
                         .stream()
                         .collect(Collectors.toMap(IdentityDTO::getUid, o -> o))
         );

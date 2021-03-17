@@ -31,7 +31,7 @@ public interface IdentityRepository extends JpaRepository<Identity, Long> {
 
         @Query("select new uk.gov.cshr.dto.IdentityDTO(i.email, i.uid) " +
                 "from Identity i where i.uid in (:uids)")
-        List<IdentityDTO> findIdentitiesByIds(@Param("uids") List<String> uids);
+        List<IdentityDTO> findIdentitiesByUidsNormalised(@Param("uids") List<String> uids);
 
         Long countByAgencyTokenUid(String uid);
 
