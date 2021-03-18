@@ -124,9 +124,9 @@ public class IdentityRepositoryTest {
         String uid3 = UUID.randomUUID().toString();
         String uid4 = UUID.randomUUID().toString();
 
-        Identity identity1 = createIdentity(uid1, uid1);
-        Identity identity2 = createIdentity(uid2, uid2);
-        Identity identity3 = createIdentity(uid3, uid3);
+        Identity identity1 = createIdentity(uid1, uid1, null);
+        Identity identity2 = createIdentity(uid2, uid2, "");
+        Identity identity3 = createIdentity(uid3, uid3, "at");
 
         identityRepository.saveAndFlush(identity1);
         identityRepository.saveAndFlush(identity2);
@@ -174,12 +174,10 @@ public class IdentityRepositoryTest {
     }
 
     private Identity createIdentity(String agencyTokenUid) {
-        Identity identity = new Identity(UUID.randomUUID().toString(), String.format(EMAIL_TEMPLATE, UUID.randomUUID().toString()), PASSWORD, true, false, null, Instant.now(), false, false, agencyTokenUid);
-        return identity;
+        return createIdentity(UUID.randomUUID().toString(), UUID.randomUUID().toString(), agencyTokenUid);
     }
 
-    private Identity createIdentity(String uid, String emailPrefix) {
-        Identity identity = new Identity(uid, String.format(EMAIL_TEMPLATE, emailPrefix), PASSWORD, true, false, null, Instant.now(), false, false, null);
-        return identity;
+    private Identity createIdentity(String uid, String emailPrefix, String agencyTokenUid) {
+        return new Identity(uid, String.format(EMAIL_TEMPLATE, emailPrefix), PASSWORD, true, false, null, Instant.now(), false, false, agencyTokenUid);
     }
 }
