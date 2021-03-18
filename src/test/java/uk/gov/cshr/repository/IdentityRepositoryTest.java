@@ -7,8 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cshr.domain.Identity;
+import uk.gov.cshr.dto.IdentityDTO;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -113,12 +116,70 @@ public class IdentityRepositoryTest {
         assertEquals(otherNonAgencyIdentity.toString(), postUpdateOtherNonAgencyIdentity.toString());
     }
 
+    @Test
+    public void findIdentitiesByUidsNormalised_shouldReturnIdentitiesForGivenUids() {
+
+        String uid1 = UUID.randomUUID().toString();
+        String uid2 = UUID.randomUUID().toString();
+        String uid3 = UUID.randomUUID().toString();
+        String uid4 = UUID.randomUUID().toString();
+
+        Identity identity1 = createIdentity(uid1, uid1);
+        Identity identity2 = createIdentity(uid2, uid2);
+        Identity identity3 = createIdentity(uid3, uid3);
+
+        identityRepository.saveAndFlush(identity1);
+        identityRepository.saveAndFlush(identity2);
+        identityRepository.saveAndFlush(identity3);
+
+        List<String> uids1 = new ArrayList<>();
+        uids1.add(uid1);
+        uids1.add(uid2);
+        uids1.add(uid3);
+        List<IdentityDTO> result1 = identityRepository.findIdentitiesByUidsNormalised(uids1);
+        assertEquals(3, result1.size());
+        assertEquals(1, result1.stream().filter(r -> r.getUid().equals(uid1)).count());
+        assertEquals(1, result1.stream().filter(r -> r.getUid().equals(uid2)).count());
+        assertEquals(1, result1.stream().filter(r -> r.getUid().equals(uid3)).count());
+
+        List<String> uids2 = new ArrayList<>();
+        uids2.add(uid1);
+        uids2.add(uid2);
+        List<IdentityDTO> result2 = identityRepository.findIdentitiesByUidsNormalised(uids2);
+        assertEquals(2, result2.size());
+        assertEquals(1, result2.stream().filter(r -> r.getUid().equals(uid1)).count());
+        assertEquals(1, result2.stream().filter(r -> r.getUid().equals(uid2)).count());
+
+        List<String> uids3 = new ArrayList<>();
+        uids3.add(uid1);
+        uids3.add(uid4);
+        List<IdentityDTO> result3 = identityRepository.findIdentitiesByUidsNormalised(uids3);
+        assertEquals(1, result3.size());
+        assertEquals(1, result3.stream().filter(r -> r.getUid().equals(uid1)).count());
+        assertEquals(0, result3.stream().filter(r -> r.getUid().equals(uid4)).count());
+
+        List<String> uids4 = new ArrayList<>();
+        uids4.add(uid4);
+        List<IdentityDTO> result4 = identityRepository.findIdentitiesByUidsNormalised(uids4);
+        assertEquals(0, result4.size());
+        assertEquals(0, result4.stream().filter(r -> r.getUid().equals(uid4)).count());
+
+        List<String> uids5 = new ArrayList<>();
+        List<IdentityDTO> result5 = identityRepository.findIdentitiesByUidsNormalised(uids5);
+        assertEquals(0, result5.size());
+    }
+
     private Identity createIdentity() {
         return createIdentity(null);
     }
 
     private Identity createIdentity(String agencyTokenUid) {
         Identity identity = new Identity(UUID.randomUUID().toString(), String.format(EMAIL_TEMPLATE, UUID.randomUUID().toString()), PASSWORD, true, false, null, Instant.now(), false, false, agencyTokenUid);
+        return identity;
+    }
+
+    private Identity createIdentity(String uid, String emailPrefix) {
+        Identity identity = new Identity(uid, String.format(EMAIL_TEMPLATE, emailPrefix), PASSWORD, true, false, null, Instant.now(), false, false, null);
         return identity;
     }
 }
