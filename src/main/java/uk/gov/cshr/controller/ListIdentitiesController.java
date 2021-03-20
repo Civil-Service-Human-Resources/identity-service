@@ -52,8 +52,7 @@ public class ListIdentitiesController {
                 identityRepository
                         .findIdentitiesByUidsNormalised(uids)
                         .stream()
-                        .collect(Collectors.toMap(IdentityDTO::getUid, o -> o))
-        );
+                        .collect(Collectors.toMap(IdentityDTO::getUid, o -> o)));
     }
 
     @GetMapping(value = "/api/identities", params = "emailAddress")
