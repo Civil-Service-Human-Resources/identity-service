@@ -46,6 +46,15 @@ public class ListIdentitiesController {
         return ResponseEntity.ok(identityRepository.findAllNormalised().stream().collect(Collectors.toMap(o -> o.getUid(), o -> o)));
     }
 
+    @GetMapping(value ="/api/identities/map-for-uids", params = "uids")
+    public ResponseEntity<Map<String, IdentityDTO>> listIdentitiesAsMapForUids(@RequestParam List<String> uids) {
+        return ResponseEntity.ok(
+                identityRepository
+                        .findIdentitiesByUidsNormalised(uids)
+                        .stream()
+                        .collect(Collectors.toMap(IdentityDTO::getUid, o -> o)));
+    }
+
     @GetMapping(value = "/api/identities", params = "emailAddress")
     public ResponseEntity<IdentityDTO> findByEmailAddress(@RequestParam String emailAddress) {
 
