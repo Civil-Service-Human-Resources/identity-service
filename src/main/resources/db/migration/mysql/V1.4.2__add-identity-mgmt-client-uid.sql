@@ -1,0 +1,2 @@
+INSERT INTO `client` (active, uid, password, redirect_uri)
+VALUES (true, 'management', '$2a$10$AbxhLGtIx7yv8jhF0BePiOxnb1mlHHq/Ge4R3PxCL2wIsoEov1VaS', 'http://local.learn.civilservice.gov.uk:8081/mgmt/login');
