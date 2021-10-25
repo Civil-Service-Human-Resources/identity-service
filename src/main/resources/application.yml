@@ -78,7 +78,7 @@ maintenancePage:
   contentLine4: ${MAINTENANCE_PAGE_CONTENT_LINE_4:If the maintenance period is extended, further information will be provided here.}
 
 lpg:
-  uiUrl: ${LPG_UI_URL:http://local.learn.civilservice.gov.uk:3001}
+  uiUrl: ${LPG_UI_URL:http://develop.learn.civilservice.gov.uk:3001}
   identity: ${OAUTH_SERVICE_URL:http://localhost:8080}
 
 registry:
