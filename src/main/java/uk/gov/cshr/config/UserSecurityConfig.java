@@ -54,7 +54,8 @@ public class UserSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/reset/**",
                         "/account/passwordUpdated",
                         "/account/reactivate/**",
-                        "/account/verify/agency/**").permitAll()
+                        "/account/verify/agency/**",
+                        "/health").permitAll()
                 .anyRequest().authenticated().and()
                 .formLogin()
                 .loginPage("/login").defaultSuccessUrl(lpgUiUrl)
