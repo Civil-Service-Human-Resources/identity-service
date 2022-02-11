@@ -28,8 +28,11 @@ logging:
     root: ${ROOT_LOGGING_LEVEL:INFO}
     org.apache.http: WARN
 
+templates:
+  assetCdn: ${ASSET_CDN:}
+
 accessToken:
-  jwtKey: ${jwt_key}
+  jwtKey: ${jwt_key:dummy}
   validityInSeconds: ${ACCESS_TOKEN_VALIDITY:86400}
 
 govNotify:
