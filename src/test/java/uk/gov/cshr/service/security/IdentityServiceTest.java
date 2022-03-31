@@ -90,7 +90,6 @@ public class IdentityServiceTest {
                 tokenRepository,
                 notifyService,
                 csrsService,
-                whitelistedDomains,
                 agencyTokenCapacityService
         );
 

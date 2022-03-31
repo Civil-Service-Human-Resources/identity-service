@@ -44,7 +44,6 @@ public class IdentityService implements UserDetailsService {
     private final NotifyService notifyService;
     private final CsrsService csrsService;
     private InviteService inviteService;
-    private String[] whitelistedDomains;
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
     public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
@@ -54,7 +53,7 @@ public class IdentityService implements UserDetailsService {
                            @Qualifier("tokenRepository") TokenRepository tokenRepository,
                            @Qualifier("notifyServiceImpl") NotifyService notifyService,
                            CsrsService csrsService,
-                           @Value("${invite.whitelist.domains}") String[] whitelistedDomains, AgencyTokenCapacityService agencyTokenCapacityService) {
+                           AgencyTokenCapacityService agencyTokenCapacityService) {
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.identityRepository = identityRepository;
         this.passwordEncoder = passwordEncoder;
@@ -62,7 +61,6 @@ public class IdentityService implements UserDetailsService {
         this.tokenRepository = tokenRepository;
         this.notifyService = notifyService;
         this.csrsService = csrsService;
-        this.whitelistedDomains = whitelistedDomains;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
     }
 
@@ -197,6 +195,8 @@ public class IdentityService implements UserDetailsService {
     }
 
     public boolean isWhitelistedDomain(String domain) {
+        String[] whitelistedDomains = csrsService.getWhitelistedDomains();
+
         return Arrays.asList(whitelistedDomains).stream().anyMatch(domain::equalsIgnoreCase);
     }
 

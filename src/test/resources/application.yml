@@ -79,3 +79,4 @@ registry:
   agencyTokensByDomainFormat: "${registry.serviceUrl}/agencyTokens?domain=%s"
   agencyTokensByDomainAndOrganisationFormat: "${registry.serviceUrl}/agencyTokens?domain=%s&code=%s"
   organisationalUnitsFlatUrl: "${registry.serviceUrl}/organisationalUnits/flat"
+  whitelistedDomainsUrl: "${registry.serviceUrl}/domains"
