@@ -1,6 +1,7 @@
 package uk.gov.cshr.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.cshr.domain.AgencyToken;
 import uk.gov.cshr.domain.Identity;
@@ -50,5 +51,16 @@ public class ReactivationService {
 
         log.debug("Identity reactivated for Reactivation: {}", reactivation);
         reactivationRepository.save(reactivation);
+    }
+
+    public Reactivation saveReactivation(Reactivation reactivation){
+        return reactivationRepository.save(reactivation);
+    }
+
+    public Reactivation saveReactivation(String email){
+        String reactivationCode = RandomStringUtils.random(40, true, true);
+
+        Reactivation reactivation = new Reactivation(reactivationCode, ReactivationStatus.PENDING, new Date(), email);
+        return saveReactivation(reactivation);
     }
 }

@@ -1,16 +1,31 @@
 package uk.gov.cshr.controller;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import uk.gov.cshr.domain.Identity;
+import uk.gov.cshr.domain.Reactivation;
+import uk.gov.cshr.domain.ReactivationStatus;
+import uk.gov.cshr.service.NotifyService;
+import uk.gov.cshr.service.ReactivationService;
+import uk.gov.cshr.service.security.IdentityService;
+import uk.gov.service.notify.NotificationClientException;
 
 @Controller
+@Slf4j
 public class LoginController {
 
   @Value("${lpg.uiUrl}")
@@ -31,6 +46,19 @@ public class LoginController {
   @Value("${maintenancePage.contentLine4}")
   private String maintenancePageContentLine4;
 
+  NotifyService notifyService;
+  IdentityService identityService;
+
+  ReactivationService reactivationService;
+
+
+
+  public LoginController(NotifyService notifyService, IdentityService identityService, ReactivationService reactivationService){
+    this.notifyService = notifyService;
+    this.identityService = identityService;
+    this.reactivationService = reactivationService;
+  }
+
   @RequestMapping("/login")
   public String login(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
@@ -39,6 +67,7 @@ public class LoginController {
       request.setAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
       request.setAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
       request.setAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
+
       return "maintenance";
     }
 
@@ -47,6 +76,7 @@ public class LoginController {
     if (dsr != null && dsr.getQueryString() == null) {
       response.sendRedirect(lpgUiUrl);
     }
+
     return "login";
   }
 
