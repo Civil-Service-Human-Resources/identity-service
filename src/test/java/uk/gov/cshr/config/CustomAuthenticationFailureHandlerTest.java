@@ -50,7 +50,6 @@ public class CustomAuthenticationFailureHandlerTest {
         AuthenticationException exception = mock(AuthenticationException.class);
 
         when(exception.getMessage()).thenReturn("User account is blocked");
-        when(request.getParameter("username")).thenReturn("A user");
 
         authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
 
@@ -64,6 +63,7 @@ public class CustomAuthenticationFailureHandlerTest {
         AuthenticationException exception = mock(AuthenticationException.class);
 
         when(exception.getMessage()).thenReturn("User account is deactivated");
+        when(request.getParameter("username")).thenReturn("user1");
 
         authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
 
