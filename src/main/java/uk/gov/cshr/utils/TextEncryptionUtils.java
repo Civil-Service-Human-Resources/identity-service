@@ -5,6 +5,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -18,11 +19,11 @@ public class TextEncryptionUtils {
         return encryptedText;
     }
 
-    public static String decryptText(String encryptedText) throws IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    public static String decryptText(String encryptedText) throws IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
         Cipher cipher = getCipher(Cipher.DECRYPT_MODE);
         byte[] plainText = cipher.doFinal(Base64.getDecoder()
                 .decode(encryptedText));
-        String decryptedText = new String(plainText);
+        String decryptedText = new String(plainText, "UTF-8");
         return decryptedText;
     }
 
