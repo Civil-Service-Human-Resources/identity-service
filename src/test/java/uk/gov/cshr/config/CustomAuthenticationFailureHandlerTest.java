@@ -75,6 +75,6 @@ public class CustomAuthenticationFailureHandlerTest {
 
         authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
 
-        verify(response).sendRedirect("/login?error=deactivated&username&username=" + TextEncryptionUtils.encryptText(username));
+        verify(response).sendRedirect("/login?error=deactivated&username=" + TextEncryptionUtils.encryptText(username));
     }
 }
