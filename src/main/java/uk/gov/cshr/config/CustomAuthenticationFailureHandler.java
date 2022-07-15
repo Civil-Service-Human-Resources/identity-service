@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
 
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
     @SneakyThrows
@@ -27,7 +28,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                 String username = request.getParameter("username");
                 String encryptedUsername = TextEncryptionUtils.encryptText(username);
 
-                response.sendRedirect("/login?error=deactivated&username=" + encryptedUsername);
+                response.sendRedirect("/login?error=deactivated&username=" + URLEncoder.encode(encryptedUsername, "UTF-8"));
                 break;
             default:
                 response.sendRedirect("/login?error=failed");
