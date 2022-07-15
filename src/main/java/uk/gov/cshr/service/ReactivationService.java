@@ -38,6 +38,11 @@ public class ReactivationService {
                 .existsByCodeAndReactivationStatusEquals(code, reactivationStatus);
     }
 
+    public boolean pendingExistsByEmail(String email){
+        return reactivationRepository
+                .existsByEmailAndReactivationStatusEquals(email, ReactivationStatus.PENDING);
+    }
+
     public void reactivateIdentity(Reactivation reactivation) {
         reactivateIdentity(reactivation, null);
     }
