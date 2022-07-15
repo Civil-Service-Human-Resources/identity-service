@@ -11,6 +11,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -68,13 +69,14 @@ public class CustomAuthenticationFailureHandlerTest {
         HttpServletResponse response = mock(HttpServletResponse.class);
         AuthenticationException exception = mock(AuthenticationException.class);
 
-        String username = "user1";
+        String username = "user.name@domain.gov.uk";
+        String encryptedUsername = TextEncryptionUtils.encryptText(username);
 
         when(exception.getMessage()).thenReturn("User account is deactivated");
         when(request.getParameter("username")).thenReturn(username);
 
         authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
 
-        verify(response).sendRedirect("/login?error=deactivated&username=" + TextEncryptionUtils.encryptText(username));
+        verify(response).sendRedirect("/login?error=deactivated&username=" + URLEncoder.encode(encryptedUsername, "UTF-8"));
     }
 }
