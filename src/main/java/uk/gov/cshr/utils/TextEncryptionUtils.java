@@ -23,12 +23,12 @@ public class TextEncryptionUtils {
         Cipher cipher = getCipher(Cipher.DECRYPT_MODE);
         byte[] plainText = cipher.doFinal(Base64.getDecoder()
                 .decode(encryptedText));
-        String decryptedText = new String(plainText, "UTF-8");
+        String decryptedText = new String(plainText);
         return decryptedText;
     }
 
     private static Cipher getCipher(int mode) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        String key = "9?uX!hmDy_ttcP2ESsrz^8v$";
+        String key = "abc123";
         Key aesKey = new SecretKeySpec(key.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(mode, aesKey);
