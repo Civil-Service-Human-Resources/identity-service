@@ -13,22 +13,28 @@ import java.util.Base64;
 
 public class TextEncryptionUtils {
     public static String encryptText(String text) throws IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        System.out.println("[ENCRYPT] Text before encrypting: " + text);
         Cipher cipher = getCipher(Cipher.ENCRYPT_MODE);
         byte[] encrypted = cipher.doFinal(text.getBytes());
         String encryptedText = Base64.getEncoder().encodeToString(encrypted);
+        System.out.println("[ENCRYPT] Encrypted text: " + encryptedText);
         return encryptedText;
     }
 
     public static String decryptText(String encryptedText) throws IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
+        System.out.println("[DECRYPT] Encrypted text before decrypting: " + encryptedText);
         Cipher cipher = getCipher(Cipher.DECRYPT_MODE);
         byte[] plainText = cipher.doFinal(Base64.getDecoder()
                 .decode(encryptedText));
+
         String decryptedText = new String(plainText);
+        System.out.println("[DECRYPT] Decrypted text: " + decryptedText);
+
         return decryptedText;
     }
 
     private static Cipher getCipher(int mode) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        String key = "abc123";
+        String key = "9?uX!hmDy_ttcP2ESsrz^8v$";
         Key aesKey = new SecretKeySpec(key.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(mode, aesKey);
