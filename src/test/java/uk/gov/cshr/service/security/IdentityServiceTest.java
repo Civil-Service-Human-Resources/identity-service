@@ -76,7 +76,6 @@ public class IdentityServiceTest {
     @Mock
     private ReactivationService reactivationService;
 
-
     @Captor
     private ArgumentCaptor<Identity> identityArgumentCaptor;
 
