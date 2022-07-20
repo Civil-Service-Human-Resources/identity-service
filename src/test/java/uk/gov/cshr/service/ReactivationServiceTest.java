@@ -125,10 +125,12 @@ public class ReactivationServiceTest {
 
     @Test
     public void pendingExistsByEmailShouldReturnTrueIfPendingReactivationExistsForEmail(){
-        String email = "my.email@myorg.gov.uk";
-        reactivationService.saveReactivation(email);
+
 
         try {
+            String email = "my.email@myorg.gov.uk";
+            reactivationService.saveReactivation(email);
+            
             boolean pendingReactivationExists = reactivationService.pendingExistsByEmail(email);
             assertTrue(pendingReactivationExists);
         }
