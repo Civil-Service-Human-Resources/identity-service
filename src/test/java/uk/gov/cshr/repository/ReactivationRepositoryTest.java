@@ -35,7 +35,7 @@ public class ReactivationRepositoryTest {
         reactivation.setRequestedAt(new Date());
         reactivation.setEmail(EMAIL);
 
-//        reactivationRepository.save(reactivation);
+        reactivationRepository.save(reactivation);
 //        boolean pendingReactivationExists = reactivationRepository.existsByEmailAndReactivationStatusEquals(CODE, REACTIVATION_STATUS);
 
         assertThat(true, equalTo(true));
