@@ -20,7 +20,10 @@ import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
-import uk.gov.cshr.service.*;
+import uk.gov.cshr.service.AgencyTokenCapacityService;
+import uk.gov.cshr.service.CsrsService;
+import uk.gov.cshr.service.InviteService;
+import uk.gov.cshr.service.NotifyService;
 
 import java.time.Instant;
 import java.util.*;
@@ -44,8 +47,6 @@ public class IdentityService implements UserDetailsService {
     private String[] whitelistedDomains;
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
-    private ReactivationService reactivationService;
-
     public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
                            IdentityRepository identityRepository,
                            PasswordEncoder passwordEncoder,
@@ -53,9 +54,7 @@ public class IdentityService implements UserDetailsService {
                            @Qualifier("tokenRepository") TokenRepository tokenRepository,
                            @Qualifier("notifyServiceImpl") NotifyService notifyService,
                            CsrsService csrsService,
-                           @Value("${invite.whitelist.domains}") String[] whitelistedDomains,
-                           AgencyTokenCapacityService agencyTokenCapacityService,
-                           ReactivationService reactivationService) {
+                           @Value("${invite.whitelist.domains}") String[] whitelistedDomains, AgencyTokenCapacityService agencyTokenCapacityService) {
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.identityRepository = identityRepository;
         this.passwordEncoder = passwordEncoder;
@@ -65,7 +64,6 @@ public class IdentityService implements UserDetailsService {
         this.csrsService = csrsService;
         this.whitelistedDomains = whitelistedDomains;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
-        this.reactivationService = reactivationService;
     }
 
     @Autowired
@@ -79,14 +77,7 @@ public class IdentityService implements UserDetailsService {
         if (identity == null) {
             throw new UsernameNotFoundException("No user found with email address " + username);
         } else if (!identity.isActive()) {
-            boolean emailHasPendingReactivationRequest = reactivationService.pendingExistsByEmail(identity.getEmail());
-
-            if(emailHasPendingReactivationRequest){
-                throw new AccountDeactivatedException("User account has pending reactivation request");
-            }
-            else {
-                throw new AccountDeactivatedException("User account is deactivated");
-            }
+            throw new AccountDeactivatedException("User account is deactivated");
         }
         return new IdentityDetails(identity);
     }

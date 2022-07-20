@@ -17,7 +17,10 @@ import uk.gov.cshr.exception.AccountDeactivatedException;
 import uk.gov.cshr.exception.IdentityNotFoundException;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
-import uk.gov.cshr.service.*;
+import uk.gov.cshr.service.AgencyTokenCapacityService;
+import uk.gov.cshr.service.CsrsService;
+import uk.gov.cshr.service.InviteService;
+import uk.gov.cshr.service.NotifyService;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -73,9 +76,6 @@ public class IdentityServiceTest {
     @Mock
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
-    @Mock
-    private ReactivationService reactivationService;
-
 
     @Captor
     private ArgumentCaptor<Identity> identityArgumentCaptor;
@@ -91,8 +91,7 @@ public class IdentityServiceTest {
                 notifyService,
                 csrsService,
                 whitelistedDomains,
-                agencyTokenCapacityService,
-                reactivationService
+                agencyTokenCapacityService
         );
 
         request = new MockHttpServletRequest();
