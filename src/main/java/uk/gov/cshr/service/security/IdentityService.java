@@ -20,10 +20,7 @@ import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
-import uk.gov.cshr.service.AgencyTokenCapacityService;
-import uk.gov.cshr.service.CsrsService;
-import uk.gov.cshr.service.InviteService;
-import uk.gov.cshr.service.NotifyService;
+import uk.gov.cshr.service.*;
 
 import java.time.Instant;
 import java.util.*;
@@ -47,6 +44,8 @@ public class IdentityService implements UserDetailsService {
     private String[] whitelistedDomains;
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
+    private ReactivationService reactivationService;
+
     public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
                            IdentityRepository identityRepository,
                            PasswordEncoder passwordEncoder,
@@ -54,7 +53,8 @@ public class IdentityService implements UserDetailsService {
                            @Qualifier("tokenRepository") TokenRepository tokenRepository,
                            @Qualifier("notifyServiceImpl") NotifyService notifyService,
                            CsrsService csrsService,
-                           @Value("${invite.whitelist.domains}") String[] whitelistedDomains, AgencyTokenCapacityService agencyTokenCapacityService) {
+                           @Value("${invite.whitelist.domains}") String[] whitelistedDomains, AgencyTokenCapacityService agencyTokenCapacityService,
+                           ReactivationService reactivationService) {
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.identityRepository = identityRepository;
         this.passwordEncoder = passwordEncoder;
@@ -64,6 +64,7 @@ public class IdentityService implements UserDetailsService {
         this.csrsService = csrsService;
         this.whitelistedDomains = whitelistedDomains;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
+        this.reactivationService = reactivationService;
     }
 
     @Autowired
