@@ -4,12 +4,13 @@ import lombok.Data;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 @Entity
 @Data
 @ToString
-public class Reactivation {
+public class Reactivation implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
