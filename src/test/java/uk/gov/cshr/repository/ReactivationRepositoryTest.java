@@ -1,5 +1,6 @@
 package uk.gov.cshr.repository;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 @SpringBootTest
 @Transactional
 public class ReactivationRepositoryTest {
-    public static final String CODE = "abc123";
+    public static final String CODE = RandomStringUtils.random(40, true, true);
     public static final String EMAIL = "my.name@myorg.gov.uk";
     public static final ReactivationStatus REACTIVATION_STATUS = ReactivationStatus.PENDING;
     @Autowired
