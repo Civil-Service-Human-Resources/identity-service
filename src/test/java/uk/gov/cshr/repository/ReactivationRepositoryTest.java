@@ -19,15 +19,16 @@ import static org.hamcrest.CoreMatchers.equalTo;
 @SpringBootTest
 @Transactional
 public class ReactivationRepositoryTest {
+    public static final String CODE = "abc123";
+    public static final String EMAIL = "my.name@myorg.gov.uk";
+    public static final ReactivationStatus REACTIVATION_STATUS = ReactivationStatus.PENDING;
     @Autowired
-    ReactivationRepository reactivationRepository;
+    private ReactivationRepository reactivationRepository;
 
     @Test
     public void existsByEmailAndReactivationStatusEqualsReturnsTrueIfReactivationExistsForEmailAndReactivationStatus(){
-        String email = "my.name@myorg.gov.uk";
-        ReactivationStatus reactivationStatus = ReactivationStatus.PENDING;
 
-        Reactivation reactivation = new Reactivation("abc", reactivationStatus, new Date(), email);
+        Reactivation reactivation = new Reactivation(CODE, REACTIVATION_STATUS, new Date(), EMAIL);
         reactivationRepository.save(reactivation);
         boolean pendingReactivationExists = true;
 
