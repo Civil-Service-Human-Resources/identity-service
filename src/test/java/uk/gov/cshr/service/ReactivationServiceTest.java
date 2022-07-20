@@ -123,20 +123,4 @@ public class ReactivationServiceTest {
         reactivationService.getReactivationByCodeAndStatus(CODE, ReactivationStatus.PENDING);
     }
 
-    @Test
-    public void pendingExistsByEmailShouldReturnTrueIfPendingReactivationExistsForEmail(){
-
-
-        try {
-            String email = "my.email@myorg.gov.uk";
-            reactivationService.saveReactivation(email);
-            
-            boolean pendingReactivationExists = reactivationService.pendingExistsByEmail(email);
-            assertTrue(pendingReactivationExists);
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
 }
