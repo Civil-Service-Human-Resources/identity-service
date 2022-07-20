@@ -29,17 +29,15 @@ public class ReactivationRepositoryTest {
     @Test
     public void existsByEmailAndReactivationStatusEqualsReturnsTrueIfReactivationExistsForEmailAndReactivationStatus(){
 
-//        Reactivation reactivation = new Reactivation();
-//        reactivation.setCode(CODE);
-//        reactivation.setReactivationStatus(REACTIVATION_STATUS);
-//        reactivation.setRequestedAt(new Date());
-//        reactivation.setEmail(EMAIL);
-//
-//        reactivationRepository.save(reactivation);
-//        boolean pendingReactivationExists = reactivationRepository.existsByEmailAndReactivationStatusEquals(CODE, REACTIVATION_STATUS);
+        Reactivation reactivation = new Reactivation();
+        reactivation.setCode(CODE);
+        reactivation.setReactivationStatus(REACTIVATION_STATUS);
+        reactivation.setRequestedAt(new Date());
+        reactivation.setEmail(EMAIL);
 
-        boolean test = true;
+        reactivationRepository.save(reactivation);
+        boolean pendingReactivationExists = reactivationRepository.existsByEmailAndReactivationStatusEquals(EMAIL, REACTIVATION_STATUS);
 
-        assertThat(test, equalTo(true));
+        assertThat(pendingReactivationExists, equalTo(true));
     }
 }
