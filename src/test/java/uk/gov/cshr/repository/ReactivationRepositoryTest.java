@@ -20,24 +20,30 @@ import static org.hamcrest.CoreMatchers.equalTo;
 @SpringBootTest
 @Transactional
 public class ReactivationRepositoryTest {
-    public static final String CODE = RandomStringUtils.random(40, true, true);
-    public static final String EMAIL = "my.name@myorg.gov.uk";
     public static final ReactivationStatus REACTIVATION_STATUS = ReactivationStatus.PENDING;
     @Autowired
     private ReactivationRepository reactivationRepository;
 
     @Test
     public void existsByEmailAndReactivationStatusEqualsReturnsTrueIfReactivationExistsForEmailAndReactivationStatus(){
+        String email = "my.name@myorg.gov.uk";
 
         Reactivation reactivation = new Reactivation();
-        reactivation.setCode(CODE);
-        reactivation.setReactivationStatus(REACTIVATION_STATUS);
+        reactivation.setCode(RandomStringUtils.random(40, true, true));
+        reactivation.setReactivationStatus(ReactivationStatus.PENDING);
         reactivation.setRequestedAt(new Date());
-        reactivation.setEmail(EMAIL);
+        reactivation.setEmail(email);
 
         reactivationRepository.save(reactivation);
-        boolean pendingReactivationExists = reactivationRepository.existsByEmailAndReactivationStatusEquals(EMAIL, REACTIVATION_STATUS);
+        boolean pendingReactivationExists = reactivationRepository.existsByEmailAndReactivationStatusEquals(email, ReactivationStatus.PENDING);
 
         assertThat(pendingReactivationExists, equalTo(true));
+    }
+
+    @Test
+    public void existsByEmailAndReactivationStatusEqualsReturnsFalseIfReactivationDoesNotExistsForEmailAndReactivationStatus(){
+        String email = "my.name2@myorg.gov.uk";
+        boolean pendingReactivationExists = reactivationRepository.existsByEmailAndReactivationStatusEquals(email, ReactivationStatus.PENDING);
+        assertThat(pendingReactivationExists, equalTo(false));
     }
 }
