@@ -14,6 +14,6 @@ public interface ReactivationRepository extends CrudRepository<Reactivation, Lon
 
     boolean existsByCodeAndReactivationStatusEquals(String code, ReactivationStatus reactivationStatus);
 
-    boolean existsByEmailAndReactivationStatusEquals(String email, ReactivationStatus reactivationStatus);
+//    boolean existsByEmailAndReactivationStatusEquals(String email, ReactivationStatus reactivationStatus);
 
 }
