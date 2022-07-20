@@ -28,7 +28,12 @@ public class ReactivationRepositoryTest {
     @Test
     public void existsByEmailAndReactivationStatusEqualsReturnsTrueIfReactivationExistsForEmailAndReactivationStatus(){
 
-        Reactivation reactivation = new Reactivation(CODE, REACTIVATION_STATUS, new Date(), EMAIL);
+        Reactivation reactivation = new Reactivation();
+        reactivation.setCode(CODE);
+        reactivation.setReactivationStatus(REACTIVATION_STATUS);
+        reactivation.setRequestedAt(new Date());
+        reactivation.setEmail(EMAIL);
+
         reactivationRepository.save(reactivation);
         boolean pendingReactivationExists = true;
 
