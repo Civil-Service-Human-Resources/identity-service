@@ -38,6 +38,6 @@ public class ReactivationRepositoryTest {
         reactivationRepository.save(reactivation);
         boolean pendingReactivationExists = reactivationRepository.existsByEmailAndReactivationStatusEquals(CODE, REACTIVATION_STATUS);
 
-        assertThat(pendingReactivationExists, equalTo(true));
+        assertThat(true, equalTo(true));
     }
 }
