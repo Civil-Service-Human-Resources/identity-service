@@ -123,4 +123,26 @@ public class ReactivationServiceTest {
         reactivationService.getReactivationByCodeAndStatus(CODE, ReactivationStatus.PENDING);
     }
 
+    @Test
+    public void pendingExistsByEmailShouldReturnTrueIfPendingReactivationExistsForEmail(){
+        String email = "my.name@myorg.gov.uk";
+
+        when(reactivationRepository.existsByEmailAndReactivationStatusEquals(email, ReactivationStatus.PENDING))
+                .thenReturn(true);
+
+        boolean pendingReactivationExistsForEmail = reactivationService.pendingExistsByEmail(email);
+        assertTrue(pendingReactivationExistsForEmail);
+    }
+
+    @Test
+    public void pendingExistsByEmailShouldReturnFalseIfPendingReactivationDoesNotExistForEmail(){
+        String email = "my.name2@myorg.gov.uk";
+
+        when(reactivationRepository.existsByEmailAndReactivationStatusEquals(email, ReactivationStatus.PENDING))
+                .thenReturn(false);
+
+        boolean pendingReactivationExistsForEmail = reactivationService.pendingExistsByEmail(email);
+        assertFalse(pendingReactivationExistsForEmail);
+    }
+
 }
