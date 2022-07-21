@@ -30,6 +30,9 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 
                 response.sendRedirect("/login?error=deactivated&username=" + URLEncoder.encode(encryptedUsername, "UTF-8"));
                 break;
+            case("Pending reactivation already exists for user"):
+                response.sendRedirect("/login?error=pending-reactivation");
+                break;
             default:
                 response.sendRedirect("/login?error=failed");
         }

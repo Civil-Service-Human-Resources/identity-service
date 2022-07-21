@@ -79,4 +79,20 @@ public class CustomAuthenticationFailureHandlerTest {
 
         verify(response).sendRedirect("/login?error=deactivated&username=" + URLEncoder.encode(encryptedUsername, "UTF-8"));
     }
+
+    @Test
+    public void shouldSetErrorToDeactivatedOnAccountDeactivatedAndPendingReactivationExists() throws IOException, ServletException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        AuthenticationException exception = mock(AuthenticationException.class);
+
+        String username = "user.name@domain.gov.uk";
+        String encryptedUsername = TextEncryptionUtils.encryptText(username);
+
+        when(exception.getMessage()).thenReturn("Pending reactivation already exists for user");
+
+        authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
+
+        verify(response).sendRedirect("/login?error=pending-reactivation");
+    }
 }

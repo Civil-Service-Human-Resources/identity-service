@@ -80,6 +80,11 @@ public class IdentityService implements UserDetailsService {
         if (identity == null) {
             throw new UsernameNotFoundException("No user found with email address " + username);
         } else if (!identity.isActive()) {
+            boolean pendingReactivationExistsForAccount = reactivationService.pendingExistsByEmail(identity.getEmail());
+
+            if(pendingReactivationExistsForAccount){
+                throw new AccountDeactivatedException("Pending reactivation already exists for user");
+            }
             throw new AccountDeactivatedException("User account is deactivated");
         }
         return new IdentityDetails(identity);
