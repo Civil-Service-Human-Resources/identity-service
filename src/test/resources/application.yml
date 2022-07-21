@@ -91,4 +91,4 @@ reactivation:
   emailTemplateId: ${EMAIL_TEMPLATE_ID:abfb2e5f-3905-4817-b041-c53afd1eb3e5}
 
 textEncryption:
-  key: ${ENCRYPTION_KEY:9?uX!hmDy_ttcP2ESsrz^8v$}
+  key: ${ENCRYPTION_KEY:abc123}
