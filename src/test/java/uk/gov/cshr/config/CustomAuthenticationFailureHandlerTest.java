@@ -1,6 +1,7 @@
 package uk.gov.cshr.config;
 
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import uk.gov.cshr.utils.TextEncryptionUtils;
 
@@ -21,6 +22,9 @@ public class CustomAuthenticationFailureHandlerTest {
 
 
     private CustomAuthenticationFailureHandler authenticationFailureHandler = new CustomAuthenticationFailureHandler();
+
+    @Value("${textEncryption.key}")
+    private String encryptionKey;
 
     @Test
     public void shouldSetErrorToLockedOnAccountLock() throws IOException, ServletException {
@@ -70,7 +74,7 @@ public class CustomAuthenticationFailureHandlerTest {
         AuthenticationException exception = mock(AuthenticationException.class);
 
         String username = "user.name@domain.gov.uk";
-        String encryptedUsername = TextEncryptionUtils.encryptText(username);
+        String encryptedUsername = TextEncryptionUtils.encryptText(username, encryptionKey);
 
         when(exception.getMessage()).thenReturn("User account is deactivated");
         when(request.getParameter("username")).thenReturn(username);
@@ -87,7 +91,7 @@ public class CustomAuthenticationFailureHandlerTest {
         AuthenticationException exception = mock(AuthenticationException.class);
 
         String username = "user.name@domain.gov.uk";
-        String encryptedUsername = TextEncryptionUtils.encryptText(username);
+        String encryptedUsername = TextEncryptionUtils.encryptText(username, encryptionKey);
 
         when(exception.getMessage()).thenReturn("Pending reactivation already exists for user");
 

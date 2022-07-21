@@ -1,6 +1,7 @@
 package uk.gov.cshr.config;
 
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import uk.gov.cshr.utils.TextEncryptionUtils;
@@ -12,6 +13,10 @@ import java.io.IOException;
 import java.net.URLEncoder;
 
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
+
+    @Value("${textEncryption.key}")
+    private String encryptionKey;
+
     @SneakyThrows
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
@@ -26,7 +31,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                 break;
             case ("User account is deactivated"):
                 String username = request.getParameter("username");
-                String encryptedUsername = TextEncryptionUtils.encryptText(username);
+                String encryptedUsername = TextEncryptionUtils.encryptText(username, encryptionKey);
 
                 response.sendRedirect("/login?error=deactivated&username=" + URLEncoder.encode(encryptedUsername, "UTF-8"));
                 break;

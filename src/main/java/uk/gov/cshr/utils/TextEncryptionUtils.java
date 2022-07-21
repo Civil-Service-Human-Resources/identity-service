@@ -12,15 +12,15 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 public class TextEncryptionUtils {
-    public static String encryptText(String text) throws IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        Cipher cipher = getCipher(Cipher.ENCRYPT_MODE);
+    public static String encryptText(String text, String key) throws IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, key);
         byte[] encrypted = cipher.doFinal(text.getBytes());
         String encryptedText = Base64.getEncoder().encodeToString(encrypted);
         return encryptedText;
     }
 
-    public static String decryptText(String encryptedText) throws IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
-        Cipher cipher = getCipher(Cipher.DECRYPT_MODE);
+    public static String decryptText(String encryptedText, String key) throws IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
+        Cipher cipher = getCipher(Cipher.DECRYPT_MODE, key);
         byte[] plainText = cipher.doFinal(Base64.getDecoder()
                 .decode(encryptedText));
 
@@ -29,8 +29,7 @@ public class TextEncryptionUtils {
         return decryptedText;
     }
 
-    private static Cipher getCipher(int mode) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        String key = "9?uX!hmDy_ttcP2ESsrz^8v$";
+    private static Cipher getCipher(int mode, String key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         Key aesKey = new SecretKeySpec(key.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(mode, aesKey);
