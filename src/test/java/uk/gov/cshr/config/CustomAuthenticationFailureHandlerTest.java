@@ -1,8 +1,13 @@
 package uk.gov.cshr.config;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.cshr.utils.TextEncryptionUtils;
 
 import javax.crypto.BadPaddingException;
@@ -18,6 +23,10 @@ import java.security.NoSuchAlgorithmException;
 
 import static org.mockito.Mockito.*;
 
+@AutoConfigureMockMvc
+@Import(SpringSecurityTestConfig.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class CustomAuthenticationFailureHandlerTest {
 
 
