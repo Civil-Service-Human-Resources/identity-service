@@ -79,7 +79,7 @@ public class CustomAuthenticationFailureHandlerTest {
         AuthenticationException exception = mock(AuthenticationException.class);
 
         String username = "user.name@domain.gov.uk";
-        String encryptedUsername = textEncryptionService.getEncryptedText(username);
+        String encryptedUsername = "123";
 
         when(exception.getMessage()).thenReturn("User account is deactivated");
         when(request.getParameter("username")).thenReturn(username);
