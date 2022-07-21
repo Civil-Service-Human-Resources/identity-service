@@ -56,6 +56,9 @@ public class ReactivationController {
     @Value("${reactivation.reactivationUrl}")
     private String reactivationBaseUrl;
 
+    @Value("${textEncryption.key}")
+    private String encryptionKey;
+
 
     public ReactivationController(ReactivationService reactivationService,
                                   IdentityService identityService,
@@ -73,7 +76,7 @@ public class ReactivationController {
     public String sendReactivationEmail(@RequestParam String code){
 
         try {
-            String email = TextEncryptionUtils.decryptText(code);
+            String email = TextEncryptionUtils.decryptText(code, encryptionKey);
             Reactivation reactivation = reactivationService.saveReactivation(email);
             notifyUserByEmail(reactivation);
             return "reactivate";
