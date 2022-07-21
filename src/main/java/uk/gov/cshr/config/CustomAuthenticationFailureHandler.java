@@ -2,6 +2,7 @@ package uk.gov.cshr.config;
 
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import uk.gov.cshr.utils.TextEncryptionUtils;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 
+@Configuration
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
     @Value("${textEncryption.key}")
