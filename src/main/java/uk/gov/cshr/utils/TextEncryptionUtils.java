@@ -1,5 +1,8 @@
 package uk.gov.cshr.utils;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -11,16 +14,20 @@ import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
+@Configuration
 public class TextEncryptionUtils {
-    public static String encryptText(String text, String key) throws IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
-        Cipher cipher = getCipher(Cipher.ENCRYPT_MODE, key);
+    @Value("${textEncryption.key}")
+    private static String encryptionKey;
+
+    public static String encryptText(String text) throws IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        Cipher cipher = getCipher(Cipher.ENCRYPT_MODE);
         byte[] encrypted = cipher.doFinal(text.getBytes());
         String encryptedText = Base64.getEncoder().encodeToString(encrypted);
         return encryptedText;
     }
 
-    public static String decryptText(String encryptedText, String key) throws IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
-        Cipher cipher = getCipher(Cipher.DECRYPT_MODE, key);
+    public static String decryptText(String encryptedText) throws IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
+        Cipher cipher = getCipher(Cipher.DECRYPT_MODE);
         byte[] plainText = cipher.doFinal(Base64.getDecoder()
                 .decode(encryptedText));
 
@@ -29,7 +36,8 @@ public class TextEncryptionUtils {
         return decryptedText;
     }
 
-    private static Cipher getCipher(int mode, String key) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    private static Cipher getCipher(int mode) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        String key = encryptionKey;
         Key aesKey = new SecretKeySpec(key.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(mode, aesKey);

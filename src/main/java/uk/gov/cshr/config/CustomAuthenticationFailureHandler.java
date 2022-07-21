@@ -16,9 +16,6 @@ import java.net.URLEncoder;
 @Configuration
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    @Value("${textEncryption.key}")
-    private String encryptionKey;
-
     @SneakyThrows
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
@@ -33,7 +30,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                 break;
             case ("User account is deactivated"):
                 String username = request.getParameter("username");
-                String encryptedUsername = TextEncryptionUtils.encryptText(username, encryptionKey);
+                String encryptedUsername = TextEncryptionUtils.encryptText(username);
 
                 response.sendRedirect("/login?error=deactivated&username=" + URLEncoder.encode(encryptedUsername, "UTF-8"));
                 break;
