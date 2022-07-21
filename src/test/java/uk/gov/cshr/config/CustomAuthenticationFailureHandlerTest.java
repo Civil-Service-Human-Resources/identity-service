@@ -2,12 +2,11 @@ package uk.gov.cshr.config;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.cshr.utils.TextEncryptionUtils;
+import uk.gov.cshr.service.TextEncryptionService;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -29,6 +28,8 @@ public class CustomAuthenticationFailureHandlerTest {
 
 
     private CustomAuthenticationFailureHandler authenticationFailureHandler = new CustomAuthenticationFailureHandler();
+
+    private TextEncryptionService textEncryptionService = new TextEncryptionService();
 
     @Test
     public void shouldSetErrorToLockedOnAccountLock() throws IOException, ServletException {
@@ -78,7 +79,7 @@ public class CustomAuthenticationFailureHandlerTest {
         AuthenticationException exception = mock(AuthenticationException.class);
 
         String username = "user.name@domain.gov.uk";
-        String encryptedUsername = TextEncryptionUtils.encryptText(username);
+        String encryptedUsername = textEncryptionService.getEncryptedText(username);
 
         when(exception.getMessage()).thenReturn("User account is deactivated");
         when(request.getParameter("username")).thenReturn(username);

@@ -12,13 +12,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cshr.domain.Reactivation;
 import uk.gov.cshr.domain.ReactivationStatus;
 import uk.gov.cshr.exception.ResourceNotFoundException;
-import uk.gov.cshr.service.AgencyTokenService;
-import uk.gov.cshr.service.CsrsService;
-import uk.gov.cshr.service.NotifyService;
-import uk.gov.cshr.service.ReactivationService;
+import uk.gov.cshr.service.*;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
-import uk.gov.cshr.utils.TextEncryptionUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +43,8 @@ public class ReactivationController {
 
     private NotifyService notifyService;
 
+    private TextEncryptionService textEncryptionService;
+
 
     private final String lpgUiUrl;
 
@@ -60,11 +58,13 @@ public class ReactivationController {
                                   IdentityService identityService,
                                   AgencyTokenService agencyTokenService,
                                   NotifyService notifyService,
+                                  TextEncryptionService textEncryptionService,
                                   @Value("${lpg.uiUrl}") String lpgUiUrl) {
         this.reactivationService = reactivationService;
         this.identityService = identityService;
         this.agencyTokenService = agencyTokenService;
         this.notifyService = notifyService;
+        this.textEncryptionService = textEncryptionService;
         this.lpgUiUrl = lpgUiUrl;
     }
 
@@ -72,7 +72,7 @@ public class ReactivationController {
     public String sendReactivationEmail(@RequestParam String code){
 
         try {
-            String email = TextEncryptionUtils.decryptText(code);
+            String email = textEncryptionService.getDecryptedText(code);
             Reactivation reactivation = reactivationService.saveReactivation(email);
             notifyUserByEmail(reactivation);
             return "reactivate";
