@@ -18,8 +18,8 @@ import java.util.Base64;
 @Slf4j
 @Service
 public class TextEncryptionService {
-//    @Value("${textEncryption.key}")
-    private String encryptionKey = "0123456789abcdef0123456789abcdef";
+    @Value("${textEncryption.key}")
+    private String encryptionKey;
 
     public String getEncryptedText(String rawText) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = getCipher(Cipher.ENCRYPT_MODE);
