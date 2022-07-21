@@ -25,7 +25,7 @@ public class TextEncryptionUtilsTest {
     private String encryptionKey;
 
     public static final String RAW_TEXT = "learner@domain.com";
-    public static final String ENCRYPTED_TEXT = "jYlyqFrhPuzCK6psm9v39+nYK8D0bI4ZtyFoy146TD0=";
+    public static final String ENCRYPTED_TEXT = "ajFDVKBsZumgsU1mzM+M9ezyfEWsiNzvkFcZ7n2FBnQ=";
 
     @Test
     public void encryptTextShouldReturnCorrectEncryptedTextGivenRawText() throws IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
