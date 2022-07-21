@@ -124,19 +124,12 @@ public class ReactivationController {
     }
 
     private void notifyUserByEmail(Reactivation reactivation){
-        String learnerName = getFullNameFromEmailAddress(reactivation.getEmail());
+        String learnerName = reactivation.getEmail();
 
         Map<String, String> emailPersonalisation = new HashMap<>();
         emailPersonalisation.put("learnerName", learnerName);
         emailPersonalisation.put("reactivationUrl", reactivationBaseUrl + reactivation.getCode());
 
         notifyService.notifyWithPersonalisation(reactivation.getEmail(), reactivationEmailTemplateId, emailPersonalisation);
-    }
-
-    private String getFullNameFromEmailAddress(String email){
-        return email
-                .split("@")[0]
-                .replace(".", " ")
-                .toUpperCase();
     }
 }
