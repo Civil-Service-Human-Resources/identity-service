@@ -90,9 +90,6 @@ public class CustomAuthenticationFailureHandlerTest {
         HttpServletResponse response = mock(HttpServletResponse.class);
         AuthenticationException exception = mock(AuthenticationException.class);
 
-        String username = "user.name@domain.gov.uk";
-        String encryptedUsername = TextEncryptionUtils.encryptText(username, encryptionKey);
-
         when(exception.getMessage()).thenReturn("Pending reactivation already exists for user");
 
         authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
