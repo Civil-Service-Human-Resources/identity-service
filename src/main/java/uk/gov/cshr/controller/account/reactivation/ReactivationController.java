@@ -16,6 +16,15 @@ import uk.gov.cshr.service.*;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,9 +52,6 @@ public class ReactivationController {
 
     private NotifyService notifyService;
 
-    private TextEncryptionService textEncryptionService;
-
-
     private final String lpgUiUrl;
 
     @Value("${reactivation.emailTemplateId}")
@@ -54,17 +60,18 @@ public class ReactivationController {
     @Value("${reactivation.reactivationUrl}")
     private String reactivationBaseUrl;
 
+    @Value("${textEncryption.encryptionKey}")
+    private String encryptionKey;
+
     public ReactivationController(ReactivationService reactivationService,
                                   IdentityService identityService,
                                   AgencyTokenService agencyTokenService,
                                   NotifyService notifyService,
-                                  TextEncryptionService textEncryptionService,
                                   @Value("${lpg.uiUrl}") String lpgUiUrl) {
         this.reactivationService = reactivationService;
         this.identityService = identityService;
         this.agencyTokenService = agencyTokenService;
         this.notifyService = notifyService;
-        this.textEncryptionService = textEncryptionService;
         this.lpgUiUrl = lpgUiUrl;
     }
 
@@ -72,7 +79,7 @@ public class ReactivationController {
     public String sendReactivationEmail(@RequestParam String code){
 
         try {
-            String email = textEncryptionService.getDecryptedText(code);
+            String email = getDecryptedTextFromCode(code);
             Reactivation reactivation = reactivationService.saveReactivation(email);
             notifyUserByEmail(reactivation);
             return "reactivate";
@@ -122,6 +129,17 @@ public class ReactivationController {
         return agencyTokenService.isDomainInAgencyToken(newDomain);
     }
 
+    private String getDecryptedTextFromCode(String code) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        Key aesKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.DECRYPT_MODE, aesKey);
+
+        byte[] plainText = cipher.doFinal(Base64.getDecoder()
+                .decode(code));
+
+        String decryptedText = new String(plainText);
+        return decryptedText;
+    }
     private void notifyUserByEmail(Reactivation reactivation){
         String learnerName = reactivation.getEmail();
 
