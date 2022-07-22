@@ -1,6 +1,7 @@
 package uk.gov.cshr.config;
 
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -15,7 +16,8 @@ import java.net.URLEncoder;
 @Configuration
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    private TextEncryptionService textEncryptionService = new TextEncryptionService();
+    @Autowired
+    private TextEncryptionService textEncryptionService;
 
     @SneakyThrows
     @Override
