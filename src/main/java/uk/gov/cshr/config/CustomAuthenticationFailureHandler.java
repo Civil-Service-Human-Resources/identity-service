@@ -17,11 +17,8 @@ import java.net.URLEncoder;
 @Configuration
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    private final TextEncryptionService textEncryptionService;
-
-    public CustomAuthenticationFailureHandler(TextEncryptionService textEncryptionService) {
-        this.textEncryptionService = textEncryptionService;
-    }
+    @Autowired
+    TextEncryptionService textEncryptionService;
 
     @SneakyThrows
     @Override

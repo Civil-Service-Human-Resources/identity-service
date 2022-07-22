@@ -34,7 +34,7 @@ public class CustomAuthenticationFailureHandlerTest {
     @Mock
     private TextEncryptionService textEncryptionService;
 
-    private CustomAuthenticationFailureHandler authenticationFailureHandler = new CustomAuthenticationFailureHandler(textEncryptionService);
+    private CustomAuthenticationFailureHandler authenticationFailureHandler = new CustomAuthenticationFailureHandler();
 
 
 

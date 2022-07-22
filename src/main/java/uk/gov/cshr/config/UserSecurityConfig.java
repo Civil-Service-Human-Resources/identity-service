@@ -63,7 +63,7 @@ public class UserSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated().and()
                 .formLogin()
                 .loginPage("/login").defaultSuccessUrl(lpgUiUrl)
-                .failureHandler(new CustomAuthenticationFailureHandler(textEncryptionService))
+                .failureHandler(new CustomAuthenticationFailureHandler())
                 .and()
                 .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
