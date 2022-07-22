@@ -1,5 +1,6 @@
 package uk.gov.cshr.config;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -30,7 +31,12 @@ public class CustomAuthenticationFailureHandlerTest {
 
     private CustomAuthenticationFailureHandler authenticationFailureHandler = new CustomAuthenticationFailureHandler();
 
-    private TextEncryptionService textEncryptionService = new TextEncryptionService("0123456789abcdef0123456789abcdef");
+    private TextEncryptionService textEncryptionService;
+
+    @Before
+    public void setUp(){
+        textEncryptionService = new TextEncryptionService("0123456789abcdef0123456789abcdef");
+    }
 
     @Test
     public void shouldSetErrorToLockedOnAccountLock() throws IOException, ServletException {
