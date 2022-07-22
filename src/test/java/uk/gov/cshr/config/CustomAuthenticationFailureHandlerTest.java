@@ -30,13 +30,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 public class CustomAuthenticationFailureHandlerTest {
 
-
-    @Mock
-    private TextEncryptionService textEncryptionService;
-
     private CustomAuthenticationFailureHandler authenticationFailureHandler = new CustomAuthenticationFailureHandler();
-
-
 
     @Test
     public void shouldSetErrorToLockedOnAccountLock() throws IOException, ServletException {
@@ -90,7 +84,6 @@ public class CustomAuthenticationFailureHandlerTest {
 
         when(exception.getMessage()).thenReturn("User account is deactivated");
         when(request.getParameter("username")).thenReturn(username);
-        when(textEncryptionService.getEncryptedText(username)).thenReturn(encryptedUsername);
 
         authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
 

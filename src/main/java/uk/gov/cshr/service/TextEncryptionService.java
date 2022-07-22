@@ -20,7 +20,8 @@ import java.util.Base64;
 @Service
 public class TextEncryptionService {
 
-    private String encryptionKey = "0123456789abcdef0123456789abcdef";
+    @Value("${textEncryption.encryptionKey}")
+    private String encryptionKey;
 
     public String getEncryptedText(String rawText) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = getCipher(Cipher.ENCRYPT_MODE);
