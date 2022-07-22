@@ -3,6 +3,7 @@ package uk.gov.cshr.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -17,6 +18,7 @@ import java.util.Base64;
 
 @Slf4j
 @Service
+@Transactional
 public class TextEncryptionService {
     @Value("${textEncryption.key}")
     private String encryptionKey;
