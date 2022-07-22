@@ -31,10 +31,12 @@ import static org.mockito.Mockito.*;
 public class CustomAuthenticationFailureHandlerTest {
 
 
-    private CustomAuthenticationFailureHandler authenticationFailureHandler = new CustomAuthenticationFailureHandler();
-
     @Mock
     private TextEncryptionService textEncryptionService;
+
+    private CustomAuthenticationFailureHandler authenticationFailureHandler = new CustomAuthenticationFailureHandler(textEncryptionService);
+
+
 
     @Test
     public void shouldSetErrorToLockedOnAccountLock() throws IOException, ServletException {

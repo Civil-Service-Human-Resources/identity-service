@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import uk.gov.cshr.service.TextEncryptionService;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.service.security.UserDetailsChecker;
 import uk.gov.cshr.service.security.WebSecurityExpressionHandler;
@@ -32,6 +33,9 @@ public class UserSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    TextEncryptionService textEncryptionService;
 
     @Value("${server.port}")
     private int serverPort;
@@ -59,7 +63,7 @@ public class UserSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated().and()
                 .formLogin()
                 .loginPage("/login").defaultSuccessUrl(lpgUiUrl)
-                .failureHandler(new CustomAuthenticationFailureHandler())
+                .failureHandler(new CustomAuthenticationFailureHandler(textEncryptionService))
                 .and()
                 .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
