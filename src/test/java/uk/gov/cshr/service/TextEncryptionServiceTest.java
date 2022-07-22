@@ -17,7 +17,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 public class TextEncryptionServiceTest {
     @Test
     public void getEncryptedTextShouldReturnCorrectEncryptedText() throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        TextEncryptionService textEncryptionService = new TextEncryptionService();
+        TextEncryptionService textEncryptionService = new TextEncryptionService("0123456789abcdef0123456789abcdef");
         String rawText = "learner@domain.com";
         String expectedOutput = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
 
@@ -28,7 +28,7 @@ public class TextEncryptionServiceTest {
 
     @Test
     public void getDecryptedTextShouldReturnCorrectEncryptedText() throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
-        TextEncryptionService textEncryptionService = new TextEncryptionService();
+        TextEncryptionService textEncryptionService = new TextEncryptionService("0123456789abcdef0123456789abcdef");
         String encryptedText = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
         String expectedOutput = "learner@domain.com";
 
