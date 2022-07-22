@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -31,12 +32,8 @@ public class CustomAuthenticationFailureHandlerTest {
 
     private CustomAuthenticationFailureHandler authenticationFailureHandler = new CustomAuthenticationFailureHandler();
 
+    @MockBean
     private TextEncryptionService textEncryptionService;
-
-    @Before
-    public void setUp(){
-        textEncryptionService = new TextEncryptionService("0123456789abcdef0123456789abcdef");
-    }
 
     @Test
     public void shouldSetErrorToLockedOnAccountLock() throws IOException, ServletException {
@@ -85,11 +82,12 @@ public class CustomAuthenticationFailureHandlerTest {
         HttpServletResponse response = mock(HttpServletResponse.class);
         AuthenticationException exception = mock(AuthenticationException.class);
 
-        String username = "user.name@domain.gov.uk";
-        String encryptedUsername = textEncryptionService.getEncryptedText(username);
+        String username = "learner@domain.com";
+        String encryptedUsername = "W+tehauG4VaW9RRQXwc/8e1ETIr28UKG0eQYbPX2oLY=";
 
         when(exception.getMessage()).thenReturn("User account is deactivated");
         when(request.getParameter("username")).thenReturn(username);
+        when(textEncryptionService.getEncryptedText(username)).thenReturn(encryptedUsername);
 
         authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
 
