@@ -3,6 +3,7 @@ package uk.gov.cshr.service;
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -17,7 +18,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 @RunWith(MockitoJUnitRunner.class)
 public class TextEncryptionServiceTest {
 
-    @MockBean
+    @InjectMocks
     TextEncryptionService textEncryptionService;
     @Test
     public void getEncryptedTextShouldReturnCorrectEncryptedText() throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
