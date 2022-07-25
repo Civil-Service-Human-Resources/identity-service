@@ -25,8 +25,8 @@ import java.util.Base64;
 @Configuration
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-//    @Value("${textEncryption.encryptionKey}")
-    String encryptionKey = "0123456789abcdef0123456789abcdef";
+    @Value("${textEncryption.encryptionKey}")
+    String encryptionKey;
 
     @SneakyThrows
     @Override
@@ -55,11 +55,11 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     }
 
     public String getEncryptedText(String rawText) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Key aesKey = new SecretKeySpec(rawText.getBytes(), "AES");
+        Key aesKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.ENCRYPT_MODE, aesKey);
 
-        byte[] encrypted = cipher.doFinal(encryptionKey.getBytes());
+        byte[] encrypted = cipher.doFinal(rawText.getBytes());
         String encryptedText = Base64.getEncoder().encodeToString(encrypted);
         return encryptedText;
     }
