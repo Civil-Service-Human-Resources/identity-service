@@ -39,6 +39,9 @@ public class UserSecurityConfig extends WebSecurityConfigurerAdapter {
     @Value("${lpg.uiUrl}")
     private String lpgUiUrl;
 
+    @Value("${textEncryption.encryptionKey}")
+    private String encryptionKey;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -59,7 +62,7 @@ public class UserSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated().and()
                 .formLogin()
                 .loginPage("/login").defaultSuccessUrl(lpgUiUrl)
-                .failureHandler(new CustomAuthenticationFailureHandler())
+                .failureHandler(new CustomAuthenticationFailureHandler(encryptionKey))
                 .and()
                 .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))

@@ -25,8 +25,12 @@ import java.util.Base64;
 @Configuration
 public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    @Value("${textEncryption.encryptionKey}")
+
     private String encryptionKey;
+
+    public CustomAuthenticationFailureHandler(@Value("${textEncryption.encryptionKey}") String encryptionKey){
+        this.encryptionKey = encryptionKey;
+    }
 
     @SneakyThrows
     @Override
