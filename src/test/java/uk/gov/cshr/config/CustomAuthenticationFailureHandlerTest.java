@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.AuthenticationException;
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.*;
 @Import(SpringSecurityTestConfig.class)
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@AutoConfigureMockMvc
+@TestConfiguration
 public class CustomAuthenticationFailureHandlerTest {
 
     private CustomAuthenticationFailureHandler authenticationFailureHandler = new CustomAuthenticationFailureHandler();
