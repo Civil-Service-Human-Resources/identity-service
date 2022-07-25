@@ -86,7 +86,7 @@ public class CustomAuthenticationFailureHandlerTest {
 
         when(exception.getMessage()).thenReturn("User account is deactivated");
         when(request.getParameter("username")).thenReturn(username);
-        when(authenticationFailureHandler.getEncryptedText(username)).thenReturn(encryptedUsername);
+//        when(authenticationFailureHandler.getEncryptedText(username)).thenReturn(encryptedUsername);
 
         authenticationFailureHandler.onAuthenticationFailure(request, response, exception);
 
