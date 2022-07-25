@@ -10,7 +10,7 @@ import java.util.Date;
 @Entity
 @Data
 @ToString
-public class Reactivation implements Serializable {
+public class Reactivation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
