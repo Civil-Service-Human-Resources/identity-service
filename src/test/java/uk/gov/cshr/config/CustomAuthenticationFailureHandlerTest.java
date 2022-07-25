@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,7 +37,8 @@ public class CustomAuthenticationFailureHandlerTest {
     @Value("${textEncryption.encryptionKey}")
     private String encryptionKey;
 
-    private CustomAuthenticationFailureHandler authenticationFailureHandler = new CustomAuthenticationFailureHandler(encryptionKey);
+    @Autowired
+    private CustomAuthenticationFailureHandler authenticationFailureHandler;
 
     @Test
     public void shouldSetErrorToLockedOnAccountLock() throws IOException, ServletException {

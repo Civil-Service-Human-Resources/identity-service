@@ -33,14 +33,14 @@ public class UserSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Autowired
+    CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+
     @Value("${server.port}")
     private int serverPort;
 
     @Value("${lpg.uiUrl}")
     private String lpgUiUrl;
-
-    @Value("${textEncryption.encryptionKey}")
-    private String encryptionKey;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -62,7 +62,7 @@ public class UserSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated().and()
                 .formLogin()
                 .loginPage("/login").defaultSuccessUrl(lpgUiUrl)
-                .failureHandler(new CustomAuthenticationFailureHandler(encryptionKey))
+                .failureHandler(customAuthenticationFailureHandler)
                 .and()
                 .logout()
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
