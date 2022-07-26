@@ -1,8 +1,13 @@
 package uk.gov.cshr.config;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.cshr.Application;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -17,6 +22,9 @@ import java.security.NoSuchAlgorithmException;
 
 import static org.mockito.Mockito.*;
 
+@RunWith(SpringRunner.class)
+@AutoConfigureMockMvc
+@SpringBootTest(classes = Application.class)
 public class CustomAuthenticationFailureHandlerTest {
 
     @Autowired
