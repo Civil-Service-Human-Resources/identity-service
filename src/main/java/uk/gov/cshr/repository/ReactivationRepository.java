@@ -13,4 +13,7 @@ public interface ReactivationRepository extends CrudRepository<Reactivation, Lon
     Optional<Reactivation> findFirstByCodeAndReactivationStatusEquals(String code, ReactivationStatus reactivationStatus);
 
     boolean existsByCodeAndReactivationStatusEquals(String code, ReactivationStatus reactivationStatus);
+
+    boolean existsByEmailAndReactivationStatusEquals(String email, ReactivationStatus reactivationStatus);
+
 }

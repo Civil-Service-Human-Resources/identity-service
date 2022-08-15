@@ -7,14 +7,26 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cshr.domain.Reactivation;
 import uk.gov.cshr.domain.ReactivationStatus;
 import uk.gov.cshr.exception.ResourceNotFoundException;
-import uk.gov.cshr.service.AgencyTokenService;
-import uk.gov.cshr.service.ReactivationService;
+import uk.gov.cshr.service.*;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Slf4j
@@ -38,17 +50,42 @@ public class ReactivationController {
 
     private final AgencyTokenService agencyTokenService;
 
+    private NotifyService notifyService;
+
     private final String lpgUiUrl;
 
+    @Value("${reactivation.emailTemplateId}")
+    private String reactivationEmailTemplateId;
+
+    @Value("${reactivation.reactivationUrl}")
+    private String reactivationBaseUrl;
+
+    @Value("${textEncryption.encryptionKey}")
+    private String encryptionKey;
 
     public ReactivationController(ReactivationService reactivationService,
                                   IdentityService identityService,
                                   AgencyTokenService agencyTokenService,
+                                  NotifyService notifyService,
                                   @Value("${lpg.uiUrl}") String lpgUiUrl) {
         this.reactivationService = reactivationService;
         this.identityService = identityService;
         this.agencyTokenService = agencyTokenService;
+        this.notifyService = notifyService;
         this.lpgUiUrl = lpgUiUrl;
+    }
+
+    @GetMapping
+    public String sendReactivationEmail(@RequestParam String code){
+
+        try {
+            String email = getDecryptedTextFromCode(code);
+            Reactivation reactivation = reactivationService.saveReactivation(email);
+            notifyUserByEmail(reactivation);
+            return "reactivate";
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @GetMapping("/{code}")
@@ -90,5 +127,26 @@ public class ReactivationController {
 
     private boolean isDomainInAgency(String newDomain) {
         return agencyTokenService.isDomainInAgencyToken(newDomain);
+    }
+
+    private String getDecryptedTextFromCode(String code) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        Key aesKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.DECRYPT_MODE, aesKey);
+
+        byte[] plainText = cipher.doFinal(Base64.getDecoder()
+                .decode(code));
+
+        String decryptedText = new String(plainText);
+        return decryptedText;
+    }
+    private void notifyUserByEmail(Reactivation reactivation){
+        String learnerName = reactivation.getEmail();
+
+        Map<String, String> emailPersonalisation = new HashMap<>();
+        emailPersonalisation.put("learnerName", learnerName);
+        emailPersonalisation.put("reactivationUrl", reactivationBaseUrl + reactivation.getCode());
+
+        notifyService.notifyWithPersonalisation(reactivation.getEmail(), reactivationEmailTemplateId, emailPersonalisation);
     }
 }

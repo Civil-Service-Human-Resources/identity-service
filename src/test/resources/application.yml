@@ -82,3 +82,13 @@ registry:
   agencyTokensByDomainFormat: "${registry.serviceUrl}/agencyTokens?domain=%s"
   agencyTokensByDomainAndOrganisationFormat: "${registry.serviceUrl}/agencyTokens?domain=%s&code=%s"
   organisationalUnitsFlatUrl: "${registry.serviceUrl}/organisationalUnits/flat"
+
+identity:
+  identityBaseUrl: ${IDENTITY_BASE_URL:http://identity:8080}
+
+reactivation:
+  reactivationUrl: "${identity.identityBaseUrl}/account/reactivate/"
+  emailTemplateId: ${EMAIL_TEMPLATE_ID:abfb2e5f-3905-4817-b041-c53afd1eb3e5}
+
+textEncryption:
+  encryptionKey: ${ENCRYPTION_KEY:0123456789abcdef0123456789abcdef}
