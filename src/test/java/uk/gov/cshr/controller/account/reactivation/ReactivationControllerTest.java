@@ -154,10 +154,12 @@ public class ReactivationControllerTest {
         when(reactivationService.getReactivationByCodeAndStatus(CODE, ReactivationStatus.PENDING))
                 .thenReturn(expiredReactivation);
 
+        String encryptedUsername = "jFwK%2FMPj%2BmHqdD4q7KhcBoqjYkH96N8FTcMlxsaVuJ4%3D";
+
         mockMvc.perform(
                 get("/account/reactivate/" + CODE))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?error=deactivated-expired&username=" + URLEncoder.encode(EMAIL_ADDRESS, "UTF-8")));
+                .andExpect(redirectedUrl("/login?error=deactivated-expired&username=" + encryptedUsername));
 
     }
 }

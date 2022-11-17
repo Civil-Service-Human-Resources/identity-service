@@ -53,6 +53,9 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
             case("Pending reactivation already exists for user"):
                 response.sendRedirect("/login?error=pending-reactivation");
                 break;
+            case("Reactivation request has expired"):
+                response.sendRedirect("/login?error=deactivated-expired&username=" + getEncryptedText(request.getParameter("username")));
+                break;
             default:
                 response.sendRedirect("/login?error=failed");
         }

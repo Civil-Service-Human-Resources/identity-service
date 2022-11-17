@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cshr.domain.Reactivation;
 import uk.gov.cshr.domain.ReactivationStatus;
+import uk.gov.cshr.exception.ReactivationRequestExpiredException;
 import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.service.*;
 import uk.gov.cshr.service.security.IdentityService;
@@ -100,7 +101,7 @@ public class ReactivationController {
 
             if(reactivationRequestHasExpired(reactivation)){
                 log.debug("Reactivation with code {} has expired.", reactivation.getCode());
-                return "redirect:/login?error=deactivated-expired&username=" + URLEncoder.encode(reactivation.getEmail(), "UTF-8");
+                return "redirect:/login?error=deactivated-expired&username=" + URLEncoder.encode(getEncryptedText(reactivation.getEmail()), "UTF-8");
             }
 
             String domain = identityService.getDomainFromEmailAddress(reactivation.getEmail());
@@ -163,5 +164,15 @@ public class ReactivationController {
         Instant oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS);
         return reactivation.getReactivationStatus() == ReactivationStatus.PENDING
             && reactivation.getRequestedAt().toInstant().isBefore(oneDayAgo);
+    }
+
+    private String getEncryptedText(String rawText) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        Key aesKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.ENCRYPT_MODE, aesKey);
+
+        byte[] encrypted = cipher.doFinal(rawText.getBytes());
+        String encryptedText = Base64.getEncoder().encodeToString(encrypted);
+        return encryptedText;
     }
 }
