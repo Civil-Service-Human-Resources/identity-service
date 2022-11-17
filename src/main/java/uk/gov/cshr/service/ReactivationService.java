@@ -12,6 +12,9 @@ import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.repository.ReactivationRepository;
 import uk.gov.cshr.service.security.IdentityService;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 @Slf4j
@@ -40,7 +43,7 @@ public class ReactivationService {
 
     public boolean pendingExistsByEmail(String email){
         return reactivationRepository
-                .existsByEmailAndReactivationStatusEquals(email, ReactivationStatus.PENDING);
+                .existsByEmailAndReactivationStatusEqualsAndRequestedAtAfter(email, ReactivationStatus.PENDING, getDateOneDayAgo());
     }
 
     public void reactivateIdentity(Reactivation reactivation) {
@@ -68,4 +71,12 @@ public class ReactivationService {
         Reactivation reactivation = new Reactivation(reactivationCode, ReactivationStatus.PENDING, new Date(), email);
         return saveReactivation(reactivation);
     }
+
+    private Date getDateOneDayAgo(){
+        LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
+        Date date = Date.from(oneDayAgo.toInstant(ZoneOffset.UTC));
+        return date;
+    }
+
+
 }

@@ -15,10 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cshr.domain.*;
-import uk.gov.cshr.exception.AccountDeactivatedException;
-import uk.gov.cshr.exception.IdentityNotFoundException;
-import uk.gov.cshr.exception.ResourceNotFoundException;
-import uk.gov.cshr.exception.UnableToAllocateAgencyTokenException;
+import uk.gov.cshr.exception.*;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.*;
@@ -83,7 +80,7 @@ public class IdentityService implements UserDetailsService {
             boolean pendingReactivationExistsForAccount = reactivationService.pendingExistsByEmail(identity.getEmail());
 
             if(pendingReactivationExistsForAccount){
-                throw new AccountDeactivatedException("Pending reactivation already exists for user");
+                throw new PendingReactivationExistsException("Pending reactivation already exists for user");
             }
             throw new AccountDeactivatedException("User account is deactivated");
         }

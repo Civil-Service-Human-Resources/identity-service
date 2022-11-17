@@ -24,6 +24,8 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -94,6 +96,12 @@ public class ReactivationController {
             RedirectAttributes redirectAttributes) {
         try {
             Reactivation reactivation = reactivationService.getReactivationByCodeAndStatus(code, ReactivationStatus.PENDING);
+
+            if(reactivationRequestHasExpired(reactivation)){
+                log.debug("Reactivation with code {} has expired.", reactivation.getCode());
+                return "redirect:/login?error=deactivated-expired";
+            }
+
             String domain = identityService.getDomainFromEmailAddress(reactivation.getEmail());
 
             log.debug("Reactivating account using Reactivation: {}", reactivation);
@@ -148,5 +156,11 @@ public class ReactivationController {
         emailPersonalisation.put("reactivationUrl", reactivationBaseUrl + reactivation.getCode());
 
         notifyService.notifyWithPersonalisation(reactivation.getEmail(), reactivationEmailTemplateId, emailPersonalisation);
+    }
+
+    private boolean reactivationRequestHasExpired(Reactivation reactivation){
+        Instant oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS);
+        return reactivation.getReactivationStatus() == ReactivationStatus.PENDING
+            && reactivation.getRequestedAt().toInstant().isBefore(oneDayAgo);
     }
 }
