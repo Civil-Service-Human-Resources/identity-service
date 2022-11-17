@@ -21,6 +21,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -99,7 +100,7 @@ public class ReactivationController {
 
             if(reactivationRequestHasExpired(reactivation)){
                 log.debug("Reactivation with code {} has expired.", reactivation.getCode());
-                return "redirect:/login?error=deactivated-expired";
+                return "redirect:/login?error=deactivated-expired&username=" + URLEncoder.encode(reactivation.getEmail(), "UTF-8");
             }
 
             String domain = identityService.getDomainFromEmailAddress(reactivation.getEmail());

@@ -19,6 +19,7 @@ import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
 import uk.gov.cshr.utils.MockMVCFilterOverrider;
 
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -148,6 +149,7 @@ public class ReactivationControllerTest {
         expiredReactivation.setReactivationStatus(ReactivationStatus.PENDING);
         expiredReactivation.setRequestedAt(dateOfReactivationRequest);
         expiredReactivation.setCode(CODE);
+        expiredReactivation.setEmail(EMAIL_ADDRESS);
 
         when(reactivationService.getReactivationByCodeAndStatus(CODE, ReactivationStatus.PENDING))
                 .thenReturn(expiredReactivation);
@@ -155,7 +157,7 @@ public class ReactivationControllerTest {
         mockMvc.perform(
                 get("/account/reactivate/" + CODE))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login?error=deactivated-expired"));
+                .andExpect(redirectedUrl("/login?error=deactivated-expired&username=" + URLEncoder.encode(EMAIL_ADDRESS, "UTF-8")));
 
     }
 }
