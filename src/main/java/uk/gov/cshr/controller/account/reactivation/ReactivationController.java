@@ -84,8 +84,12 @@ public class ReactivationController {
 
         try {
             String email = getDecryptedTextFromCode(code);
-            Reactivation reactivation = reactivationService.saveReactivation(email);
-            notifyUserByEmail(reactivation);
+
+            if(!reactivationService.pendingExistsByEmail(email)){
+                Reactivation reactivation = reactivationService.saveReactivation(email);
+                notifyUserByEmail(reactivation);
+            }
+
             return "reactivate";
         } catch (Exception e) {
             throw new RuntimeException(e);
