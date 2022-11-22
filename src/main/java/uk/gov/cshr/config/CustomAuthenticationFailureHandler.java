@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import uk.gov.cshr.utils.TextEncryptionUtils;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -46,7 +47,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                 break;
             case ("User account is deactivated"):
                 String username = request.getParameter("username");
-                String encryptedUsername = getEncryptedText(username);
+                String encryptedUsername = TextEncryptionUtils.getEncryptedText(username, encryptionKey);
 
                 response.sendRedirect("/login?error=deactivated&username=" + URLEncoder.encode(encryptedUsername, "UTF-8"));
                 break;
@@ -54,20 +55,10 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                 response.sendRedirect("/login?error=pending-reactivation");
                 break;
             case("Reactivation request has expired"):
-                response.sendRedirect("/login?error=deactivated-expired&username=" + getEncryptedText(request.getParameter("username")));
+                response.sendRedirect("/login?error=deactivated-expired&username=" + TextEncryptionUtils.getEncryptedText(request.getParameter("username"), encryptionKey));
                 break;
             default:
                 response.sendRedirect("/login?error=failed");
         }
-    }
-
-    public String getEncryptedText(String rawText) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Key aesKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.ENCRYPT_MODE, aesKey);
-
-        byte[] encrypted = cipher.doFinal(rawText.getBytes());
-        String encryptedText = Base64.getEncoder().encodeToString(encrypted);
-        return encryptedText;
     }
 }

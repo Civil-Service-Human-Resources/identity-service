@@ -16,6 +16,7 @@ import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.service.*;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
+import uk.gov.cshr.utils.TextEncryptionUtils;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -83,7 +84,7 @@ public class ReactivationController {
     public String sendReactivationEmail(@RequestParam String code){
 
         try {
-            String email = getDecryptedTextFromCode(code);
+            String email = TextEncryptionUtils.getDecryptedText(code, encryptionKey);
 
             if(!reactivationService.pendingExistsByEmail(email)){
                 Reactivation reactivation = reactivationService.saveReactivation(email);
@@ -105,7 +106,7 @@ public class ReactivationController {
 
             if(reactivationRequestHasExpired(reactivation)){
                 log.debug("Reactivation with code {} has expired.", reactivation.getCode());
-                return "redirect:/login?error=deactivated-expired&username=" + URLEncoder.encode(getEncryptedText(reactivation.getEmail()), "UTF-8");
+                return "redirect:/login?error=deactivated-expired&username=" + URLEncoder.encode(TextEncryptionUtils.getEncryptedText(reactivation.getEmail(), encryptionKey), "UTF-8");
             }
 
             String domain = identityService.getDomainFromEmailAddress(reactivation.getEmail());
@@ -142,18 +143,6 @@ public class ReactivationController {
     private boolean isDomainInAgency(String newDomain) {
         return agencyTokenService.isDomainInAgencyToken(newDomain);
     }
-
-    private String getDecryptedTextFromCode(String code) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Key aesKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.DECRYPT_MODE, aesKey);
-
-        byte[] plainText = cipher.doFinal(Base64.getDecoder()
-                .decode(code));
-
-        String decryptedText = new String(plainText);
-        return decryptedText;
-    }
     private void notifyUserByEmail(Reactivation reactivation){
         String learnerName = reactivation.getEmail();
 
@@ -168,15 +157,5 @@ public class ReactivationController {
         Instant oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS);
         return reactivation.getReactivationStatus() == ReactivationStatus.PENDING
             && reactivation.getRequestedAt().toInstant().isBefore(oneDayAgo);
-    }
-
-    private String getEncryptedText(String rawText) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Key aesKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.ENCRYPT_MODE, aesKey);
-
-        byte[] encrypted = cipher.doFinal(rawText.getBytes());
-        String encryptedText = Base64.getEncoder().encodeToString(encrypted);
-        return encryptedText;
     }
 }
