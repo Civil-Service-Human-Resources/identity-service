@@ -11,19 +11,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cshr.domain.Reactivation;
 import uk.gov.cshr.domain.ReactivationStatus;
+import uk.gov.cshr.exception.ReactivationRequestExpiredException;
 import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.service.*;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
+import uk.gov.cshr.utils.TextEncryptionUtils;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
+import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,9 +84,13 @@ public class ReactivationController {
     public String sendReactivationEmail(@RequestParam String code){
 
         try {
-            String email = getDecryptedTextFromCode(code);
-            Reactivation reactivation = reactivationService.saveReactivation(email);
-            notifyUserByEmail(reactivation);
+            String email = TextEncryptionUtils.getDecryptedText(code, encryptionKey);
+
+            if(!reactivationService.pendingExistsByEmail(email)){
+                Reactivation reactivation = reactivationService.saveReactivation(email);
+                notifyUserByEmail(reactivation);
+            }
+
             return "reactivate";
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -94,6 +103,12 @@ public class ReactivationController {
             RedirectAttributes redirectAttributes) {
         try {
             Reactivation reactivation = reactivationService.getReactivationByCodeAndStatus(code, ReactivationStatus.PENDING);
+
+            if(reactivationRequestHasExpired(reactivation)){
+                log.debug("Reactivation with code {} has expired.", reactivation.getCode());
+                return "redirect:/login?error=deactivated-expired&username=" + URLEncoder.encode(TextEncryptionUtils.getEncryptedText(reactivation.getEmail(), encryptionKey), "UTF-8");
+            }
+
             String domain = identityService.getDomainFromEmailAddress(reactivation.getEmail());
 
             log.debug("Reactivating account using Reactivation: {}", reactivation);
@@ -128,18 +143,6 @@ public class ReactivationController {
     private boolean isDomainInAgency(String newDomain) {
         return agencyTokenService.isDomainInAgencyToken(newDomain);
     }
-
-    private String getDecryptedTextFromCode(String code) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-        Key aesKey = new SecretKeySpec(encryptionKey.getBytes(), "AES");
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.DECRYPT_MODE, aesKey);
-
-        byte[] plainText = cipher.doFinal(Base64.getDecoder()
-                .decode(code));
-
-        String decryptedText = new String(plainText);
-        return decryptedText;
-    }
     private void notifyUserByEmail(Reactivation reactivation){
         String learnerName = reactivation.getEmail();
 
@@ -148,5 +151,11 @@ public class ReactivationController {
         emailPersonalisation.put("reactivationUrl", reactivationBaseUrl + reactivation.getCode());
 
         notifyService.notifyWithPersonalisation(reactivation.getEmail(), reactivationEmailTemplateId, emailPersonalisation);
+    }
+
+    private boolean reactivationRequestHasExpired(Reactivation reactivation){
+        Instant oneDayAgo = Instant.now().minus(1, ChronoUnit.DAYS);
+        return reactivation.getReactivationStatus() == ReactivationStatus.PENDING
+            && reactivation.getRequestedAt().toInstant().isBefore(oneDayAgo);
     }
 }

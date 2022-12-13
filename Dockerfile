@@ -1,4 +1,4 @@
-FROM java:8
+FROM amazoncorretto:8
 
 ENV SPRING_PROFILES_ACTIVE production
 

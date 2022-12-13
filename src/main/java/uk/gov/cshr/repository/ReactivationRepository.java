@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.cshr.domain.Reactivation;
 import uk.gov.cshr.domain.ReactivationStatus;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Repository
@@ -14,6 +15,6 @@ public interface ReactivationRepository extends CrudRepository<Reactivation, Lon
 
     boolean existsByCodeAndReactivationStatusEquals(String code, ReactivationStatus reactivationStatus);
 
-    boolean existsByEmailAndReactivationStatusEquals(String email, ReactivationStatus reactivationStatus);
+    boolean existsByEmailAndReactivationStatusEqualsAndRequestedAtAfter(String email, ReactivationStatus reactivationStatus, Date requestedAt);
 
 }

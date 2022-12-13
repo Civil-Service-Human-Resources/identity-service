@@ -7,6 +7,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.powermock.modules.junit4.PowerMockRunner;
 import uk.gov.cshr.domain.AgencyToken;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Reactivation;
@@ -16,6 +17,12 @@ import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.repository.ReactivationRepository;
 import uk.gov.cshr.service.security.IdentityService;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -124,25 +131,26 @@ public class ReactivationServiceTest {
     }
 
     @Test
-    public void pendingExistsByEmailShouldReturnTrueIfPendingReactivationExistsForEmail(){
+    public void pendingExistsByEmailReturnsTrueIfPendingReactivationsExistForEmail(){
         String email = "my.name@myorg.gov.uk";
 
-        when(reactivationRepository.existsByEmailAndReactivationStatusEquals(email, ReactivationStatus.PENDING))
+        when(reactivationRepository.existsByEmailAndReactivationStatusEqualsAndRequestedAtAfter(eq(email), eq(ReactivationStatus.PENDING), any(Date.class)))
                 .thenReturn(true);
 
-        boolean pendingReactivationExistsForEmail = reactivationService.pendingExistsByEmail(email);
-        assertTrue(pendingReactivationExistsForEmail);
+        boolean pendingReactivationExists = reactivationService.pendingExistsByEmail(email);
+        assertTrue(pendingReactivationExists);
     }
 
     @Test
-    public void pendingExistsByEmailShouldReturnFalseIfPendingReactivationDoesNotExistForEmail(){
-        String email = "my.name2@myorg.gov.uk";
+    public void pendingExistsByEmailReturnsFalseIfNoPendingReactivationsExistForEmail(){
+        String email = "my.name@myorg.gov.uk";
 
-        when(reactivationRepository.existsByEmailAndReactivationStatusEquals(email, ReactivationStatus.PENDING))
+        when(reactivationRepository.existsByEmailAndReactivationStatusEqualsAndRequestedAtAfter(eq(email), eq(ReactivationStatus.PENDING), any(Date.class)))
                 .thenReturn(false);
 
-        boolean pendingReactivationExistsForEmail = reactivationService.pendingExistsByEmail(email);
-        assertFalse(pendingReactivationExistsForEmail);
+        boolean pendingReactivationExists = reactivationService.pendingExistsByEmail(email);
+        assertFalse(pendingReactivationExists);
     }
+
 
 }

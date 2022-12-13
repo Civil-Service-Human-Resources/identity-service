@@ -19,6 +19,12 @@ import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
 import uk.gov.cshr.utils.MockMVCFilterOverrider;
 
+import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.doThrow;
@@ -132,5 +138,28 @@ public class ReactivationControllerTest {
         mockMvc.perform(get("/account/reactivate/updated"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("account/accountReactivated"));
+    }
+
+    @Test
+    public void shouldShowUserReactivationRequestHasExpired() throws Exception {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
+        Date dateOfReactivationRequest = formatter.parse("10-Nov-2022");
+
+        Reactivation expiredReactivation = new Reactivation();
+        expiredReactivation.setReactivationStatus(ReactivationStatus.PENDING);
+        expiredReactivation.setRequestedAt(dateOfReactivationRequest);
+        expiredReactivation.setCode(CODE);
+        expiredReactivation.setEmail(EMAIL_ADDRESS);
+
+        when(reactivationService.getReactivationByCodeAndStatus(CODE, ReactivationStatus.PENDING))
+                .thenReturn(expiredReactivation);
+
+        String encryptedUsername = "jFwK%2FMPj%2BmHqdD4q7KhcBoqjYkH96N8FTcMlxsaVuJ4%3D";
+
+        mockMvc.perform(
+                get("/account/reactivate/" + CODE))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?error=deactivated-expired&username=" + encryptedUsername));
+
     }
 }
