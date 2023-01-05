@@ -1,6 +1,7 @@
 package uk.gov.cshr.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.cshr.domain.AgencyToken;
 import uk.gov.cshr.domain.Identity;
@@ -11,6 +12,9 @@ import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.repository.ReactivationRepository;
 import uk.gov.cshr.service.security.IdentityService;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 @Slf4j
@@ -37,6 +41,11 @@ public class ReactivationService {
                 .existsByCodeAndReactivationStatusEquals(code, reactivationStatus);
     }
 
+    public boolean pendingExistsByEmail(String email){
+        return reactivationRepository
+                .existsByEmailAndReactivationStatusEqualsAndRequestedAtAfter(email, ReactivationStatus.PENDING, getDateOneDayAgo());
+    }
+
     public void reactivateIdentity(Reactivation reactivation) {
         reactivateIdentity(reactivation, null);
     }
@@ -51,4 +60,23 @@ public class ReactivationService {
         log.debug("Identity reactivated for Reactivation: {}", reactivation);
         reactivationRepository.save(reactivation);
     }
+
+    public Reactivation saveReactivation(Reactivation reactivation){
+        return reactivationRepository.save(reactivation);
+    }
+
+    public Reactivation saveReactivation(String email){
+        String reactivationCode = RandomStringUtils.random(40, true, true);
+
+        Reactivation reactivation = new Reactivation(reactivationCode, ReactivationStatus.PENDING, new Date(), email);
+        return saveReactivation(reactivation);
+    }
+
+    private Date getDateOneDayAgo(){
+        LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
+        Date date = Date.from(oneDayAgo.toInstant(ZoneOffset.UTC));
+        return date;
+    }
+
+
 }

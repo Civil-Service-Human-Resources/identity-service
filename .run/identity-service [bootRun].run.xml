@@ -1,31 +1,31 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="identity-service" type="GradleRunConfiguration" factoryName="Gradle" nameIsGenerated="true">
-    <ExternalSystemSettings>
-      <option name="env">
-        <map>
-          <entry key="DATASOURCE" value="jdbc:mysql://localhost:3306/identity?user=root&amp;password=my-secret-pw&amp;useSSL=false" />
-          <entry key="LPG_UI_URL" value="http://localhost:3001" />
-          <entry key="REGISTRY_SERVICE_URL" value="http://localhost:9002" />
-          <entry key="ROOT_LOGGING_LEVEL" value="INFO" />
-          <entry key="SPRING_PROFILES_ACTIVE" value="default" />
-          <entry key="jwt_key" value="key" />
-        </map>
-      </option>
-      <option name="executionName" />
-      <option name="externalProjectPath" value="$PROJECT_DIR$" />
-      <option name="externalSystemIdString" value="GRADLE" />
-      <option name="scriptParameters" value="bootRun --stacktrace" />
-      <option name="taskDescriptions">
-        <list />
-      </option>
-      <option name="taskNames">
-        <list />
-      </option>
-      <option name="vmOptions" />
-    </ExternalSystemSettings>
-    <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-    <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-    <DebugAllEnabled>false</DebugAllEnabled>
-    <method v="2" />
-  </configuration>
+    <configuration default="false" name="identity-service" type="GradleRunConfiguration" factoryName="Gradle" nameIsGenerated="true">
+        <ExternalSystemSettings>
+            <option name="env">
+                <map>
+                    <entry key="DATASOURCE" value="jdbc:mysql://localhost:3306/identity?user=root&amp;password=my-secret-pw&amp;useSSL=false" />
+                    <entry key="LPG_UI_URL" value="http://localhost:3001" />
+                    <entry key="REGISTRY_SERVICE_URL" value="http://localhost:9002" />
+                    <entry key="ROOT_LOGGING_LEVEL" value="INFO" />
+                    <entry key="SPRING_PROFILES_ACTIVE" value="default" />
+                    <entry key="jwt_key" value="key" />
+                </map>
+            </option>
+            <option name="executionName" />
+            <option name="externalProjectPath" value="$PROJECT_DIR$" />
+            <option name="externalSystemIdString" value="GRADLE" />
+            <option name="scriptParameters" value="bootRun --stacktrace" />
+            <option name="taskDescriptions">
+                <list />
+            </option>
+            <option name="taskNames">
+                <list />
+            </option>
+            <option name="vmOptions" />
+        </ExternalSystemSettings>
+        <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+        <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+        <DebugAllEnabled>false</DebugAllEnabled>
+        <method v="2" />
+    </configuration>
 </component>

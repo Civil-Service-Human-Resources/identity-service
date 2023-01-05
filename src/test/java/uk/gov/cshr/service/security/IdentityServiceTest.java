@@ -15,12 +15,10 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import uk.gov.cshr.domain.*;
 import uk.gov.cshr.exception.AccountDeactivatedException;
 import uk.gov.cshr.exception.IdentityNotFoundException;
+import uk.gov.cshr.exception.PendingReactivationExistsException;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
-import uk.gov.cshr.service.AgencyTokenCapacityService;
-import uk.gov.cshr.service.CsrsService;
-import uk.gov.cshr.service.InviteService;
-import uk.gov.cshr.service.NotifyService;
+import uk.gov.cshr.service.*;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -76,6 +74,8 @@ public class IdentityServiceTest {
     @Mock
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
+    @Mock
+    private ReactivationService reactivationService;
 
     @Captor
     private ArgumentCaptor<Identity> identityArgumentCaptor;
@@ -91,7 +91,8 @@ public class IdentityServiceTest {
                 notifyService,
                 csrsService,
                 whitelistedDomains,
-                agencyTokenCapacityService
+                agencyTokenCapacityService,
+                reactivationService
         );
 
         request = new MockHttpServletRequest();
@@ -131,9 +132,27 @@ public class IdentityServiceTest {
         final String emailAddress = "test@example.org";
         Identity identity = new Identity();
         identity.setActive(false);
+        identity.setEmail(emailAddress);
 
         when(identityRepository.findFirstByEmailEquals(emailAddress))
                 .thenReturn(identity);
+        when(reactivationService.pendingExistsByEmail(emailAddress))
+                .thenReturn(false);
+
+        identityService.loadUserByUsername(emailAddress);
+    }
+
+    @Test(expected = PendingReactivationExistsException.class)
+    public void loadUserByUsernameShouldThrowPendingReactivationExistsExceptionIfPendingReactivationRequestIsNotExpired(){
+        final String emailAddress = "test@example.org";
+        Identity identity = new Identity();
+        identity.setEmail(emailAddress);
+        identity.setActive(false);
+
+        when(identityRepository.findFirstByEmailEquals(emailAddress))
+                .thenReturn(identity);
+        when(reactivationService.pendingExistsByEmail(emailAddress))
+                .thenReturn(true);
 
         identityService.loadUserByUsername(emailAddress);
     }
