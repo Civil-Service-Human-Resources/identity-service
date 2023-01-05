@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${DATASOURCE:jdbc:mysql://localhost:3306/identity?user=root&password=password&useSSL=false}
+    url: ${DATASOURCE:jdbc:mysql://localhost:3306/identity?user=root&password=my-secret-pw&useSSL=false}
     platform: mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
@@ -107,7 +107,7 @@ spring:
     cache: true
     check-template: true
   datasource:
-    url: ${DATASOURCE:jdbc:mysql://localhost:3306/identity?user=root&password=password&useSSL=false}
+    url: ${DATASOURCE:jdbc:mysql://localhost:3306/identity?user=root&password=my-secret-pw&useSSL=false}
     platform: mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
