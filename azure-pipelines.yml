@@ -1,0 +1,42 @@
+trigger:
+  branches:
+    include:
+      - master
+      - idt-develop
+      - idt-feature-LC-*
+      - idt-release-v*
+      - idt-hotfix-v*
+  tags:
+    include:
+      - '*'
+
+variables:
+  - name: acr_repo
+    value: identity-service
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: Gradle@3
+    inputs:
+      gradleWrapperFile: 'gradlew'
+      jdkVersionOption: '1.8'
+      javaHomeOption: 'JDKVersion'
+      jdkArchitectureOption: 'x64'
+      publishJUnitResults: false
+      testResultsFiles: 'build/test-results/**/TEST-*.xml'
+      tasks: 'clean build'
+    displayName: 'Install Gradle and Java 8 and build'
+
+  - task: Docker@2
+    inputs:
+      ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags') }}:
+        containerRegistry: 'csl production ACR'
+      ${{ else }}:
+        containerRegistry: 'csl staging ACR'
+      repository: '${{ variables.acr_repo }}'
+      command: 'buildAndPush'
+      Dockerfile: '**/Dockerfile'
+      tags: '$(Build.SourceBranchName)'
+
