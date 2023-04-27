@@ -86,7 +86,7 @@ registry:
   agencyTokensByDomainFormat: "${registry.serviceUrl}/agencyTokens?domain=%s"
   agencyTokensByDomainAndOrganisationFormat: "${registry.serviceUrl}/agencyTokens?domain=%s&code=%s"
   organisationalUnitsFlatUrl: "${registry.serviceUrl}/organisationalUnits/flat"
----
+
 identity:
   identityBaseUrl: ${IDENTITY_BASE_URL:http://identity:8080}
 
@@ -96,6 +96,8 @@ reactivation:
 
 textEncryption:
   encryptionKey: ${ENCRYPTION_KEY:0123456789abcdef0123456789abcdef}
+
+---
 
 spring:
   profiles: test, production
