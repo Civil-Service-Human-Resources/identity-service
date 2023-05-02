@@ -1,0 +1,2 @@
+INSERT INTO `client` (active, uid, password, redirect_uri)
+VALUES (true, '89e1b5f4-01e6-470a-b2dc-78969140052a', '$2a$10$AbxhLGtIx7yv8jhF0BePiOxnb1mlHHq/Ge4R3PxCL2wIsoEov1VaS', 'http://develop.learn.civilservice.gov.uk:3005/authenticate');
