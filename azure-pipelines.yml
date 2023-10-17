@@ -1,0 +1,44 @@
+trigger:
+  branches:
+    include:
+      - master
+      - idt-develop
+      - idt-feature-LC-*
+      - idt-release-v*
+      - idt-hotfix-v*
+  tags:
+    include:
+      - '*'
+
+variables:
+  - name: acr_repo_suffix
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags') }}:
+      value: 'prod'
+    ${{ else }}:
+      value: 'test'
+
+name: '$(SourceBranchName)-$(Rev:r)'
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - task: Gradle@3
+    inputs:
+      gradleWrapperFile: 'gradlew'
+      jdkVersionOption: '1.8'
+      javaHomeOption: 'JDKVersion'
+      jdkArchitectureOption: 'x64'
+      publishJUnitResults: false
+      testResultsFiles: 'build/test-results/**/TEST-*.xml'
+      tasks: 'clean build'
+    displayName: 'Install Gradle and Java 8 and build'
+
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'lpgregistry ACR'
+      repository: 'identity-service/${{ variables.acr_repo_suffix }}'
+      command: 'buildAndPush'
+      Dockerfile: '**/Dockerfile'
+      tags: '$(Build.SourceBranchName)'
+
