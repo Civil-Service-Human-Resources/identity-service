@@ -39,7 +39,6 @@ public class IdentityService implements UserDetailsService {
     private final NotifyService notifyService;
     private final CsrsService csrsService;
     private InviteService inviteService;
-    private String[] whitelistedDomains;
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
     private ReactivationService reactivationService;
@@ -51,7 +50,6 @@ public class IdentityService implements UserDetailsService {
                            @Qualifier("tokenRepository") TokenRepository tokenRepository,
                            @Qualifier("notifyServiceImpl") NotifyService notifyService,
                            CsrsService csrsService,
-                           @Value("${invite.whitelist.domains}") String[] whitelistedDomains,
                            AgencyTokenCapacityService agencyTokenCapacityService,
                            @Lazy ReactivationService reactivationService) {
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
@@ -61,7 +59,6 @@ public class IdentityService implements UserDetailsService {
         this.tokenRepository = tokenRepository;
         this.notifyService = notifyService;
         this.csrsService = csrsService;
-        this.whitelistedDomains = whitelistedDomains;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
         this.reactivationService = reactivationService;
     }
@@ -114,8 +111,8 @@ public class IdentityService implements UserDetailsService {
                     .orElseThrow(ResourceNotFoundException::new);
 
             log.info("Identity request has agency uid = {}", agencyTokenUid);
-        } else if (!isWhitelistedDomain(domain) && !isEmailInvitedViaIDM(invite.getForEmail())) {
-            log.info("Invited request neither agency, nor whitelisted, nor invited via IDM: {}", invite);
+        } else if (!isAllowlistedDomain(domain) && !isEmailInvitedViaIDM(invite.getForEmail())) {
+            log.info("Invited request neither agency, nor allowlisted, nor invited via IDM: {}", invite);
             throw new ResourceNotFoundException();
         }
 
@@ -201,18 +198,13 @@ public class IdentityService implements UserDetailsService {
         identityRepository.save(savedIdentity);
     }
 
-    public boolean isWhitelistedDomain(String domain) {
-        return Arrays.asList(whitelistedDomains).stream().anyMatch(domain::equalsIgnoreCase);
-    }
-
     public String getDomainFromEmailAddress(String emailAddress) {
         return emailAddress.substring(emailAddress.indexOf('@') + 1);
     }
 
     public boolean checkValidEmail(String email) {
         final String domain = getDomainFromEmailAddress(email);
-
-        return (isWhitelistedDomain(domain) || csrsService.isDomainInAgency(domain));
+        return (isAllowlistedDomain(domain) || csrsService.isDomainInAgency(domain));
     }
 
     private boolean requestHasTokenData(TokenRequest tokenRequest) {
@@ -235,5 +227,9 @@ public class IdentityService implements UserDetailsService {
 
     private boolean isEmailInvitedViaIDM(String email) {
         return inviteService.isEmailInvited(email);
+    }
+
+    public boolean isAllowlistedDomain(String domain) {
+        return csrsService.getAllowlist().contains(domain.toLowerCase());
     }
 }

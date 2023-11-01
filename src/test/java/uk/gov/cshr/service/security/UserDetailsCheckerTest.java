@@ -34,14 +34,14 @@ public class UserDetailsCheckerTest {
     private UserDetailsChecker userDetailsChecker;
 
     @Test
-    public void shouldNotThrowExceptionIfEmailIsWhitelisted() {
+    public void shouldNotThrowExceptionIfEmailIsallowlisted() {
         Identity identity = new Identity();
         identity.setLocked(false);
         identity.setEmail(EMAIL_ADDRESS);
         UserDetails userDetails = new IdentityDetails(identity);
 
         when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(identityService.isWhitelistedDomain(DOMAIN)).thenReturn(true);
+        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
 
         Assertions.assertThatCode(() -> userDetailsChecker.check(userDetails))
                 .doesNotThrowAnyException();
@@ -56,7 +56,7 @@ public class UserDetailsCheckerTest {
         UserDetails userDetails = new IdentityDetails(identity);
 
         when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(identityService.isWhitelistedDomain(DOMAIN)).thenReturn(false);
+        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
         when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(true);
 
         Assertions.assertThatCode(() -> userDetailsChecker.check(userDetails))
@@ -71,7 +71,7 @@ public class UserDetailsCheckerTest {
         UserDetails userDetails = new IdentityDetails(identity);
 
         when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(identityService.isWhitelistedDomain(DOMAIN)).thenReturn(false);
+        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
         when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(false);
         when(inviteService.isEmailInvited(EMAIL_ADDRESS)).thenReturn(true);
 
@@ -80,14 +80,14 @@ public class UserDetailsCheckerTest {
     }
 
     @Test(expected = AccountBlockedException.class)
-    public void shouldThrowExceptionIfEmailIsNotWhitelistedOrAgencyOrInvited() {
+    public void shouldThrowExceptionIfEmailIsNotallowlistedOrAgencyOrInvited() {
         Identity identity = new Identity();
         identity.setLocked(false);
         identity.setEmail(EMAIL_ADDRESS);
         UserDetails userDetails = new IdentityDetails(identity);
 
         when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(identityService.isWhitelistedDomain(DOMAIN)).thenReturn(false);
+        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
         when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(false);
         when(inviteService.isEmailInvited(EMAIL_ADDRESS)).thenReturn(false);
 

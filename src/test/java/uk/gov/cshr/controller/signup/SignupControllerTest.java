@@ -77,14 +77,14 @@ public class SignupControllerTest {
     }
 
     @Test
-    public void shouldConfirmInviteSentIfWhitelistedDomainAndNotAgency() throws Exception {
+    public void shouldConfirmInviteSentIfallowlistedDomainAndNotAgency() throws Exception {
         String email = "user@domain.com";
         String domain = "domain.com";
 
         when(inviteRepository.existsByForEmailAndStatus(email, InviteStatus.PENDING)).thenReturn(false);
         when(identityService.existsByEmail(email)).thenReturn(false);
         when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
-        when(identityService.isWhitelistedDomain(domain)).thenReturn(true);
+        when(identityService.isAllowlistedDomain(domain)).thenReturn(true);
         when(csrsService.isDomainInAgency(domain)).thenReturn(false);
         mockMvc.perform(
                 post("/signup/request")
@@ -112,7 +112,7 @@ public class SignupControllerTest {
         when(inviteService.isInviteCodeExpired(invite.get())).thenReturn(false);
 
         when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
-        when(identityService.isWhitelistedDomain(domain)).thenReturn(true);
+        when(identityService.isAllowlistedDomain(domain)).thenReturn(true);
         when(csrsService.isDomainInAgency(domain)).thenReturn(false);
         mockMvc.perform(
                 post("/signup/request")
@@ -207,14 +207,14 @@ public class SignupControllerTest {
     }
 
     @Test 
-    public void shouldNotSendInviteIfNotWhitelistedAndNotAgencyTokenEmail() throws Exception {
+    public void shouldNotSendInviteIfNotallowlistedAndNotAgencyTokenEmail() throws Exception {
         String email = "user@domain.com";
         String domain = "domain.com";
 
         when(inviteRepository.existsByForEmailAndStatus(email, InviteStatus.PENDING)).thenReturn(false);
         when(identityService.existsByEmail(email)).thenReturn(false);
         when(identityService.getDomainFromEmailAddress(email)).thenReturn(domain);
-        when(identityService.isWhitelistedDomain(domain)).thenReturn(false);
+        when(identityService.isAllowlistedDomain(domain)).thenReturn(false);
         when(csrsService.isDomainInAgency(domain)).thenReturn(false);
 
         mockMvc.perform(

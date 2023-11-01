@@ -95,7 +95,7 @@ public class EmailUpdateServiceTest {
     }
 
     @Test
-    public void givenAValidIdentity_whenNewDomainWhitelistedAndNotAgency_shouldReturnSuccessfully() throws Exception {
+    public void givenAValidIdentity_whenNewDomainallowlistedAndNotAgency_shouldReturnSuccessfully() throws Exception {
         Identity identity = new Identity();
         identity.setEmail(EMAIL);
 

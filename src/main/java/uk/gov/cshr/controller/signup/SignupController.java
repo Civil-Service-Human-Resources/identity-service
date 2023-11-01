@@ -136,12 +136,12 @@ public class SignupController {
             inviteService.sendSelfSignupInvite(email, false);
             return INVITE_SENT_TEMPLATE;
         } else {
-            if (identityService.isWhitelistedDomain(domain)) {
-                log.debug("Sending invite to whitelisted user {}", email);
+            if (identityService.isAllowlistedDomain(domain)) {
+                log.debug("Sending invite to allowlisted user {}", email);
                 inviteService.sendSelfSignupInvite(email, true);
                 return INVITE_SENT_TEMPLATE;
             } else {
-                log.debug("The domain of user {} is neither Whitelisted nor part of an Agency token", email);
+                log.debug("The domain of user {} is neither allowlisted nor part of an Agency token", email);
                 redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, "Your organisation is unable to use this service. Please contact your line manager.");
                 return REDIRECT_SIGNUP_REQUEST;
             }

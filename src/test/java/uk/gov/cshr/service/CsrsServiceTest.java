@@ -13,6 +13,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.cshr.domain.AgencyToken;
 import uk.gov.cshr.domain.OrganisationalUnitDto;
+import uk.gov.cshr.service.security.IdentityClientTokenService;
 
 import java.util.Optional;
 
@@ -27,7 +28,9 @@ public class CsrsServiceTest {
 
     @Mock
     private RestTemplate restTemplate;
-
+    @Mock
+    private IdentityClientTokenService identityClientTokenService;
+    private String domainsUrl;
     private String agencyTokensFormat;
     private String agencyTokensByDomainFormat;
     private String agencyTokensByDomainAndOrganisationFormat;
@@ -36,14 +39,14 @@ public class CsrsServiceTest {
 
     @Before
     public void setUp() {
+        domainsUrl = "http://locahost:9002/domains";
         agencyTokensFormat = "http://locahost:9002/agencyTokens?domain=%s&token=%s&code=%s";
         agencyTokensByDomainFormat = "http://locahost:9002/agencyTokens?domain=%s";
         agencyTokensByDomainAndOrganisationFormat = "http://locahost:9002/agencyTokens?domain=%s&code=%s";
         organisationalUnitsFlatUrl = "http://locahost:9002/organisationalUnits/flat";
 
-        csrsService = new CsrsService(restTemplate,
-                agencyTokensFormat, agencyTokensByDomainFormat, agencyTokensByDomainAndOrganisationFormat,
-                organisationalUnitsFlatUrl);
+        csrsService = new CsrsService(restTemplate, domainsUrl, identityClientTokenService, agencyTokensFormat,
+                agencyTokensByDomainFormat, agencyTokensByDomainAndOrganisationFormat, organisationalUnitsFlatUrl);
 
         ReflectionTestUtils.setField(csrsService, "restTemplate", restTemplate);
         ReflectionTestUtils.setField(csrsService, "agencyTokensFormat", agencyTokensFormat);

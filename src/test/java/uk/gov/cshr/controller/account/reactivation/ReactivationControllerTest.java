@@ -59,13 +59,13 @@ public class ReactivationControllerTest {
     }
 
     @Test
-    public void shouldRedirectIfAccountIsAgencyAndWhitelisted() throws Exception {
+    public void shouldRedirectIfAccountIsAgencyAndallowlisted() throws Exception {
         Reactivation reactivation = new Reactivation();
         reactivation.setEmail(EMAIL_ADDRESS);
 
         when(reactivationService.getReactivationByCodeAndStatus(CODE, ReactivationStatus.PENDING)).thenReturn(reactivation);
         when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(identityService.isWhitelistedDomain(DOMAIN)).thenReturn(true);
+        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
         when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(true);
 
         doNothing().when(reactivationService).reactivateIdentity(reactivation);
@@ -77,13 +77,13 @@ public class ReactivationControllerTest {
     }
 
     @Test
-    public void shouldRedirectIfAccountIsAgencyAndNotWhitelisted() throws Exception {
+    public void shouldRedirectIfAccountIsAgencyAndNotallowlisted() throws Exception {
         Reactivation reactivation = new Reactivation();
         reactivation.setEmail(EMAIL_ADDRESS);
 
         when(reactivationService.getReactivationByCodeAndStatus(CODE, ReactivationStatus.PENDING)).thenReturn(reactivation);
         when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(identityService.isWhitelistedDomain(DOMAIN)).thenReturn(false);
+        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
         when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(true);
 
         doNothing().when(reactivationService).reactivateIdentity(reactivation);
@@ -101,7 +101,7 @@ public class ReactivationControllerTest {
 
         when(reactivationService.getReactivationByCodeAndStatus(CODE, ReactivationStatus.PENDING)).thenReturn(reactivation);
         when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(identityService.isWhitelistedDomain(DOMAIN)).thenReturn(true);
+        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
 
         doNothing().when(reactivationService).reactivateIdentity(reactivation);
 

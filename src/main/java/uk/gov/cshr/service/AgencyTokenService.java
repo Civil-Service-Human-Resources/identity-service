@@ -17,8 +17,8 @@ public class AgencyTokenService {
         this.csrsService = csrsService;
     }
 
-    public boolean isDomainWhiteListed(String domain) {
-        return identityService.isWhitelistedDomain(domain);
+    public boolean isDomainAllowListed(String domain) {
+        return identityService.isAllowlistedDomain(domain);
     }
 
     public boolean isDomainAnAgencyTokenDomain(String domain) {
