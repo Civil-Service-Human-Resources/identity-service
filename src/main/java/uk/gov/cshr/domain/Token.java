@@ -6,13 +6,14 @@ import org.springframework.security.oauth2.common.util.SerializationUtils;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @Entity
-public class Token {
+public class Token implements Serializable {
 
     public static String extractTokenKey(String value) {
         if (value == null) {

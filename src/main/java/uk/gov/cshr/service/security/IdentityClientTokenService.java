@@ -1,12 +1,16 @@
 package uk.gov.cshr.service.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.omg.CORBA.ARG_OUT;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
+@Slf4j
 public class IdentityClientTokenService {
     private final String baseUrl;
     private final String clientId;
@@ -21,8 +25,15 @@ public class IdentityClientTokenService {
     }
 
     public OAuthToken getClientToken() {
+        log.info("Making request to get client token");
+        String url = String.format("%s/oauth/token?grant_type=client_credentials", baseUrl);
         RestTemplate restTemplate = new RestTemplateBuilder()
                 .basicAuthorization(clientId, clientSecret).build();
-        return restTemplate.postForObject(String.format("%s/oauth/token?grant_type=client_credentials", baseUrl), null, OAuthToken.class);
+        ResponseEntity<OAuthToken> resp = restTemplate.exchange(url, HttpMethod.POST, null, OAuthToken.class);
+        if (resp.getStatusCode().isError()) {
+            throw new RuntimeException(String.format("Request failed with status %s, body: %s", resp.getStatusCode(), resp.getBody()));
+        }
+        log.info("Successfully fetched client token");
+        return resp.getBody();
     }
 }

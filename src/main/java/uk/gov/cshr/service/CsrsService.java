@@ -49,6 +49,7 @@ public class CsrsService {
 
     @Cacheable("allowlist")
     public List<String> getAllowlist() {
+        log.info("Fetching allowlist from CSRS API");
         OAuthToken token = identityClientTokenService.getClientToken();
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token.getAccessToken());
@@ -63,7 +64,7 @@ public class CsrsService {
 
     @CacheEvict(value = "allowlist", allEntries = true)
     @Scheduled(fixedRateString = "${registry.cache.allowlistTTL}")
-    public void emptyHotelsCache() {
+    public void emptyAllowlistCache() {
         log.info("emptying Allowlist cache");
     }
 
