@@ -27,25 +27,25 @@ public class AgencyTokenServiceTest {
     private AgencyTokenService agencyTokenService;
 
     @Test
-    public void givenAWhitelistedDomain_whenIsDomainWhiteListed_thenShouldReturnTrue() {
-        when(identityService.isWhitelistedDomain(anyString())).thenReturn(true);
+    public void givenAallowlistedDomain_whenIsDomainallowlisted_thenShouldReturnTrue() {
+        when(identityService.isAllowlistedDomain(anyString())).thenReturn(true);
 
-        boolean actual = agencyTokenService.isDomainWhiteListed(DOMAIN);
+        boolean actual = agencyTokenService.isDomainAllowListed(DOMAIN);
 
         assertTrue(actual);
     }
 
     @Test
-    public void givenANonWhitelistedDomain_whenIsDomainWhiteListed_thenShouldReturnFalse() {
-        when(identityService.isWhitelistedDomain(anyString())).thenReturn(false);
+    public void givenANonallowlistedDomain_whenIsDomainallowlisted_thenShouldReturnFalse() {
+        when(identityService.isAllowlistedDomain(anyString())).thenReturn(false);
 
-        boolean actual = agencyTokenService.isDomainWhiteListed(DOMAIN);
+        boolean actual = agencyTokenService.isDomainAllowListed(DOMAIN);
 
         assertFalse(actual);
     }
 
     @Test
-    public void givenNonWhitelistedDomainWithAgencyTokenDomains_whenIsDomainAnAgencyTokenDomain_thenShouldReturnTrue() {
+    public void givenNonallowlistedDomainWithAgencyTokenDomains_whenIsDomainAnAgencyTokenDomain_thenShouldReturnTrue() {
         AgencyToken [] agencyTokens = new AgencyToken[3];
         agencyTokens[0] = new AgencyToken();
         agencyTokens[1] = new AgencyToken();
@@ -58,7 +58,7 @@ public class AgencyTokenServiceTest {
     }
 
     @Test
-    public void givenNonWhitelistedDomainWithNoAgencyTokenDomains_whenIsDomainAnAgencyTokenDomain_thenShouldReturnFalse() {
+    public void givenNonallowlistedDomainWithNoAgencyTokenDomains_whenIsDomainAnAgencyTokenDomain_thenShouldReturnFalse() {
         AgencyToken [] agencyTokens = new AgencyToken[0];
         when(csrsService.getAgencyTokensForDomain(anyString())).thenReturn(agencyTokens);
 

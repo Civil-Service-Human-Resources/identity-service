@@ -3,33 +3,69 @@ package uk.gov.cshr.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.cshr.domain.AgencyToken;
+import uk.gov.cshr.domain.DomainsResponse;
 import uk.gov.cshr.domain.OrganisationalUnitDto;
+import uk.gov.cshr.service.security.IdentityClientTokenService;
+import uk.gov.cshr.service.security.OAuthToken;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class CsrsService {
     private RestTemplate restTemplate;
+    private String domainsUrl;
+    private IdentityClientTokenService identityClientTokenService;
     private String agencyTokensFormat;
     private String agencyTokensByDomainFormat;
     private String agencyTokensByDomainAndOrganisationFormat;
     private String organisationalUnitsFlatUrl;
 
     public CsrsService(@Autowired RestTemplate restTemplate,
+                       @Value("${registry.domainsUrl}") String domainsUrl,
+                       IdentityClientTokenService identityClientTokenService,
                        @Value("${registry.agencyTokensFormat}") String agencyTokensFormat,
                        @Value("${registry.agencyTokensByDomainFormat}") String agencyTokensByDomainFormat,
                        @Value("${registry.agencyTokensByDomainAndOrganisationFormat}") String agencyTokensByDomainAndOrganisationFormat,
                        @Value("${registry.organisationalUnitsFlatUrl}") String organisationalUnitsFlatUrl) {
         this.restTemplate = restTemplate;
+        this.domainsUrl = domainsUrl;
+        this.identityClientTokenService = identityClientTokenService;
         this.agencyTokensFormat = agencyTokensFormat;
         this.agencyTokensByDomainFormat = agencyTokensByDomainFormat;
         this.agencyTokensByDomainAndOrganisationFormat = agencyTokensByDomainAndOrganisationFormat;
         this.organisationalUnitsFlatUrl = organisationalUnitsFlatUrl;
+    }
+
+    @Cacheable("allowlist")
+    public List<String> getAllowlist() {
+        log.info("Fetching allowlist from CSRS API");
+        OAuthToken token = identityClientTokenService.getClientToken();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + token.getAccessToken());
+        HttpEntity<HttpHeaders> request = new HttpEntity<>(headers);
+        ResponseEntity<DomainsResponse> response = restTemplate.exchange(domainsUrl, HttpMethod.GET, request, DomainsResponse.class);
+        DomainsResponse body = response.getBody();
+        if (body == null) {
+            throw new RuntimeException("Allowlist returned null");
+        }
+        return response.getBody().getDomains().stream().map(d -> d.getDomain().toLowerCase()).collect(Collectors.toList());
+    }
+
+    @CacheEvict(value = "allowlist", allEntries = true)
+    @Scheduled(fixedRateString = "${registry.cache.allowlistTTL}")
+    public void emptyAllowlistCache() {
+        log.info("emptying Allowlist cache");
     }
 
     public Boolean isDomainInAgency(String domain) {
