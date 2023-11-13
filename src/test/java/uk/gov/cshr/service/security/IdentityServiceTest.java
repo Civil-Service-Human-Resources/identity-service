@@ -81,7 +81,7 @@ public class IdentityServiceTest {
         identityService = new IdentityService(
                 updatePasswordEmailTemplateId,
                 identityRepository,
-                passwordEncoder,
+                new CompoundRoleRepositoryImpl(), passwordEncoder,
                 tokenServices,
                 tokenRepository,
                 notifyService,

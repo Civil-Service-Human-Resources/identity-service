@@ -10,9 +10,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.cshr.domain.AgencyToken;
-import uk.gov.cshr.domain.DomainsResponse;
-import uk.gov.cshr.domain.OrganisationalUnitDto;
+import uk.gov.cshr.domain.*;
+import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.security.IdentityClientTokenService;
 import uk.gov.cshr.service.security.OAuthToken;
 
@@ -25,7 +24,9 @@ import java.util.stream.Collectors;
 public class CsrsService {
     private RestTemplate restTemplate;
     private String domainsUrl;
+    private TokenRepository tokenRepository;
     private IdentityClientTokenService identityClientTokenService;
+    private final String civilServantUrl;
     private String agencyTokensFormat;
     private String agencyTokensByDomainFormat;
     private String agencyTokensByDomainAndOrganisationFormat;
@@ -33,14 +34,17 @@ public class CsrsService {
 
     public CsrsService(@Autowired RestTemplate restTemplate,
                        @Value("${registry.domainsUrl}") String domainsUrl,
-                       IdentityClientTokenService identityClientTokenService,
+                       TokenRepository tokenRepository, IdentityClientTokenService identityClientTokenService,
+                       @Value("${registry.civilServantUrl}") String civilServantUrl,
                        @Value("${registry.agencyTokensFormat}") String agencyTokensFormat,
                        @Value("${registry.agencyTokensByDomainFormat}") String agencyTokensByDomainFormat,
                        @Value("${registry.agencyTokensByDomainAndOrganisationFormat}") String agencyTokensByDomainAndOrganisationFormat,
                        @Value("${registry.organisationalUnitsFlatUrl}") String organisationalUnitsFlatUrl) {
         this.restTemplate = restTemplate;
         this.domainsUrl = domainsUrl;
+        this.tokenRepository = tokenRepository;
         this.identityClientTokenService = identityClientTokenService;
+        this.civilServantUrl = civilServantUrl;
         this.agencyTokensFormat = agencyTokensFormat;
         this.agencyTokensByDomainFormat = agencyTokensByDomainFormat;
         this.agencyTokensByDomainAndOrganisationFormat = agencyTokensByDomainAndOrganisationFormat;
@@ -109,5 +113,16 @@ public class CsrsService {
             organisationalUnitDtos = new OrganisationalUnitDto[0];
         }
         return organisationalUnitDtos;
+    }
+
+    public void removeOrganisationalUnitFromCivilServant(String uid) {
+        Token token = tokenRepository.findAllByUserName(uid).stream().filter(t -> t.getStatus().equals(TokenStatus.ACTIVE)).findFirst()
+                .orElseThrow(() -> new RuntimeException(String.format("Token for user %s not found", uid)));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + token.getToken().getValue());
+        HttpEntity<HttpHeaders> request = new HttpEntity<>(headers);
+        String url = String.format("%s/resource/%s/remove_organisation", civilServantUrl, uid);
+        log.debug(String.format("Removing organisation from user %s", uid));
+        restTemplate.exchange(url, HttpMethod.POST, request, Void.class);
     }
 }
