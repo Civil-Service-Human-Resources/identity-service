@@ -51,13 +51,26 @@ public class CsrsService {
         this.organisationalUnitsFlatUrl = organisationalUnitsFlatUrl;
     }
 
+    private HttpEntity<HttpHeaders> buildCsrsClientTokenRequest() {
+        OAuthToken token = fetchClientToken();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + token.getAccessToken());
+        return new HttpEntity<>(headers);
+    }
+
+    private OAuthToken fetchClientToken() {
+        OAuthToken token = identityClientTokenService.getClientToken();
+        if (token.isExpired()) {
+            identityClientTokenService.clearTokenCache();
+            token = identityClientTokenService.getClientToken();
+        }
+        return token;
+    }
+
     @Cacheable("allowlist")
     public List<String> getAllowlist() {
         log.info("Fetching allowlist from CSRS API");
-        OAuthToken token = identityClientTokenService.getClientToken();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + token.getAccessToken());
-        HttpEntity<HttpHeaders> request = new HttpEntity<>(headers);
+        HttpEntity<HttpHeaders> request = buildCsrsClientTokenRequest();
         ResponseEntity<DomainsResponse> response = restTemplate.exchange(domainsUrl, HttpMethod.GET, request, DomainsResponse.class);
         DomainsResponse body = response.getBody();
         if (body == null) {
@@ -116,13 +129,9 @@ public class CsrsService {
     }
 
     public void removeOrganisationalUnitFromCivilServant(String uid) {
-        Token token = tokenRepository.findAllByUserName(uid).stream().filter(t -> t.getStatus().equals(TokenStatus.ACTIVE)).findFirst()
-                .orElseThrow(() -> new RuntimeException(String.format("Token for user %s not found", uid)));
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + token.getToken().getValue());
-        HttpEntity<HttpHeaders> request = new HttpEntity<>(headers);
+        log.info(String.format("Removing organisation from user %s", uid));
+        HttpEntity<HttpHeaders> request = buildCsrsClientTokenRequest();
         String url = String.format("%s/resource/%s/remove_organisation", civilServantUrl, uid);
-        log.debug(String.format("Removing organisation from user %s", uid));
         restTemplate.exchange(url, HttpMethod.POST, request, Void.class);
     }
 }

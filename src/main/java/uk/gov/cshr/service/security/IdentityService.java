@@ -185,20 +185,17 @@ public class IdentityService implements UserDetailsService {
     }
 
     public void updateEmailAddress(Identity identity, String email, AgencyToken newAgencyToken) {
-        Identity savedIdentity = identityRepository.findById(identity.getId())
-                .orElseThrow(() -> new IdentityNotFoundException("No such identity: " + identity.getId()));
-
         if (newAgencyToken != null && newAgencyToken.getUid() != null) {
             log.debug("Updating agency token for user: oldAgencyToken = {}, newAgencyToken = {}", identity.getAgencyTokenUid(), newAgencyToken.getUid());
-            savedIdentity.setAgencyTokenUid(newAgencyToken.getUid());
+            identity.setAgencyTokenUid(newAgencyToken.getUid());
         } else {
             log.debug("Setting existing agency token UID to null");
-            savedIdentity.setAgencyTokenUid(null);
+            identity.setAgencyTokenUid(null);
         }
-        savedIdentity.setEmail(email);
+        identity.setEmail(email);
         Collection<String> reportingRoles = compoundRoleRepository.getReportingRoles();
-        savedIdentity.removeRoles(reportingRoles);
-        identityRepository.save(savedIdentity);
+        identity.removeRoles(reportingRoles);
+        identityRepository.save(identity);
     }
 
     public String getDomainFromEmailAddress(String emailAddress) {

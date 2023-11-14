@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.omg.CORBA.ARG_OUT;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,10 @@ public class IdentityClientTokenService {
         this.clientSecret = clientSecret;
     }
 
+    @CacheEvict("csrs-token")
+    public void clearTokenCache() {}
+
+    @Cacheable("csrs-token")
     public OAuthToken getClientToken() {
         log.info("Making request to get client token");
         String url = String.format("%s/oauth/token?grant_type=client_credentials", baseUrl);
@@ -32,8 +38,12 @@ public class IdentityClientTokenService {
         ResponseEntity<OAuthToken> resp = restTemplate.exchange(url, HttpMethod.POST, null, OAuthToken.class);
         if (resp.getStatusCode().isError()) {
             throw new RuntimeException(String.format("Request failed with status %s, body: %s", resp.getStatusCode(), resp.getBody()));
+        } else if (resp.getBody() == null) {
+            throw new RuntimeException("Client token is null");
         }
-        log.info("Successfully fetched client token");
-        return resp.getBody();
+        OAuthToken token = resp.getBody();
+        token.setExpiryDateTimeFromExpiresIn();
+        log.info(String.format("Successfully fetched client token. Expiry is %s", token.getExpiryDateTime()));
+        return token;
     }
 }

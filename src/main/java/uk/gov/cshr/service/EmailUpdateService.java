@@ -77,14 +77,14 @@ public class EmailUpdateService {
 
         String newEmail = emailUpdate.getEmail();
 
-        log.debug("Updating email address for: oldEmail = {}, newEmail = {}", existingIdentity.getEmail(), newEmail);
+        log.info("Updating email address for: oldEmail = {}, newEmail = {}", existingIdentity.getEmail(), newEmail);
 
         identityService.updateEmailAddress(existingIdentity, newEmail, agencyToken);
         csrsService.removeOrganisationalUnitFromCivilServant(emailUpdate.getIdentity().getUid());
+
+        log.info("Deleting emailUpdateObject: {}", emailUpdate);
         emailUpdateRepository.delete(emailUpdate);
 
-        log.debug("Email address {} has been updated to {} successfully", existingIdentity.getEmail(), newEmail);
-
-        log.debug("Deleting emailUpdateObject: {}", emailUpdate);
+        log.info("Email address {} has been updated to {} successfully", existingIdentity.getEmail(), newEmail);
     }
 }
