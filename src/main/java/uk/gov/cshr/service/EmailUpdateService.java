@@ -74,10 +74,11 @@ public class EmailUpdateService {
     public void updateEmailAddress(EmailUpdate emailUpdate, AgencyToken agencyToken) {
         Identity emailUpdateIdentity = emailUpdate.getIdentity();
         Identity existingIdentity = identityService.getIdentityByEmail(emailUpdateIdentity.getEmail());
+        String existingEmail = existingIdentity.getEmail();
 
         String newEmail = emailUpdate.getEmail();
 
-        log.info("Updating email address for: oldEmail = {}, newEmail = {}", existingIdentity.getEmail(), newEmail);
+        log.info("Updating email address for: oldEmail = {}, newEmail = {}", existingEmail, newEmail);
 
         identityService.updateEmailAddress(existingIdentity, newEmail, agencyToken);
         csrsService.removeOrganisationalUnitFromCivilServant(emailUpdate.getIdentity().getUid());
@@ -85,6 +86,6 @@ public class EmailUpdateService {
         log.info("Deleting emailUpdateObject: {}", emailUpdate);
         emailUpdateRepository.delete(emailUpdate);
 
-        log.info("Email address {} has been updated to {} successfully", existingIdentity.getEmail(), newEmail);
+        log.info("Email address {} has been updated to {} successfully", existingEmail, newEmail);
     }
 }
