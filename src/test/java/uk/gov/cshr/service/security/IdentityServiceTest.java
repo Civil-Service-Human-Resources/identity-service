@@ -334,7 +334,6 @@ public class IdentityServiceTest {
         Identity identityParam = new Identity();
         identityParam.setRoles(new HashSet<>());
         identityParam.setId(new Long(123l));
-        when(identityRepository.findById(anyLong())).thenReturn(Optional.of(identityParam));
         when(identityRepository.save(identityArgumentCaptor.capture())).thenReturn(new Identity());
 
 
@@ -355,7 +354,6 @@ public class IdentityServiceTest {
         identityParam.setRoles(new HashSet<>());
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(UID);
-        when(identityRepository.findById(anyLong())).thenReturn(Optional.of(identityParam));
         when(identityRepository.save(identityArgumentCaptor.capture())).thenReturn(new Identity());
 
         // when
