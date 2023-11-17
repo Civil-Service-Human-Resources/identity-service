@@ -32,7 +32,7 @@ public class UserDetailsChecker extends AccountStatusUserDetailsChecker {
             String email = identity.getEmail();
             final String domain = identityService.getDomainFromEmailAddress(email);
 
-            if (!isWhitelistedDomain(domain) && !isAgencyDomain(domain, identity) && !isEmailInvited(email)) {
+            if (!isAllowlistedDomain(domain) && !isAgencyDomain(domain, identity) && !isEmailInvited(email)) {
                 throw new AccountBlockedException(messages.getMessage("UserDetailsChecker.blocked", "User account is blocked"));
             }
 
@@ -41,8 +41,8 @@ public class UserDetailsChecker extends AccountStatusUserDetailsChecker {
         }
     }
 
-    private boolean isWhitelistedDomain(String domain) {
-        return identityService.isWhitelistedDomain(domain);
+    private boolean isAllowlistedDomain(String domain) {
+        return identityService.isAllowlistedDomain(domain);
     }
 
     private boolean isAgencyDomain(String domain, Identity identity) {

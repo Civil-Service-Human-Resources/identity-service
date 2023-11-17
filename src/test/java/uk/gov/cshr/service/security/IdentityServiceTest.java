@@ -21,10 +21,7 @@ import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.*;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -44,7 +41,6 @@ public class IdentityServiceTest {
     private static final Set<Role> ROLES = new HashSet();
     private static Identity IDENTITY = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now(), false, false);
     private final String updatePasswordEmailTemplateId = "template-id";
-    private final String[] whitelistedDomains = new String[]{"whitelisted.gov.uk", "example.com"};
     private final String orgCode = "AB";
     private MockHttpServletRequest request;
 
@@ -90,12 +86,11 @@ public class IdentityServiceTest {
                 tokenRepository,
                 notifyService,
                 csrsService,
-                whitelistedDomains,
                 agencyTokenCapacityService,
                 reactivationService
         );
-
         request = new MockHttpServletRequest();
+        when(csrsService.getAllowlist()).thenReturn(Arrays.asList("allowlisted.gov.uk", "example.com"));
     }
 
     @Test
@@ -173,7 +168,7 @@ public class IdentityServiceTest {
     }
 
     @Test
-    public void createIdentityFromInviteCodeWithoutAgencyButIsWhitelisted() {
+    public void createIdentityFromInviteCodeWithoutAgencyButIsallowlisted() {
         final String code = "123abc";
         final String email = "test@example.com";
         Role role = new Role();
@@ -340,11 +335,11 @@ public class IdentityServiceTest {
         Identity identityParam = new Identity();
         identityParam.setId(new Long(123l));
 
-        identityService.updateEmailAddress(identityParam, "mynewemail@whitelisted.gov.uk", null);
+        identityService.updateEmailAddress(identityParam, "mynewemail@allowlisted.gov.uk", null);
     }
 
     @Test
-    public void givenAValidIdentityWithAWhitelistedDomain_whenUpdateEmailAddress_shouldReturnSuccessfully(){
+    public void givenAValidIdentityWithAallowlistedDomain_whenUpdateEmailAddress_shouldReturnSuccessfully(){
         // given
         Optional<Identity> optionalIdentity = Optional.of(IDENTITY);
         when(identityRepository.findById(anyLong())).thenReturn(optionalIdentity);
@@ -354,7 +349,7 @@ public class IdentityServiceTest {
         identityParam.setId(new Long(123l));
 
         // when
-        identityService.updateEmailAddress(identityParam, "mynewemail@whitelisted.gov.uk", null);
+        identityService.updateEmailAddress(identityParam, "mynewemail@allowlisted.gov.uk", null);
 
         // then
         verify(identityRepository, times(1)).findById(anyLong());
@@ -377,7 +372,7 @@ public class IdentityServiceTest {
         agencyToken.setUid(UID);
 
         // when
-        identityService.updateEmailAddress(identityParam, "mynewemail@whitelisted.gov.uk", agencyToken);
+        identityService.updateEmailAddress(identityParam, "mynewemail@allowlisted.gov.uk", agencyToken);
 
         // then
         verify(identityRepository, times(1)).findById(anyLong());
@@ -387,16 +382,16 @@ public class IdentityServiceTest {
     }
 
     @Test
-    public void givenAValidWhitelistedEmail_whenCheckValidEmail_shouldReturnTrue(){
+    public void givenAValidallowlistedEmail_whenCheckValidEmail_shouldReturnTrue(){
         // given
-        // whitelisted.gov.uk which is whitelisted
+        // allowlisted.gov.uk which is allowlisted
 
         // when
-        boolean actual = identityService.checkValidEmail("someone@whitelisted.gov.uk");
+        boolean actual = identityService.checkValidEmail("someone@allowlisted.gov.uk");
 
         // then
         assertTrue(actual);
-        verifyZeroInteractions(csrsService);
+        verify(csrsService, atLeastOnce()).getAllowlist();
     }
 
     @Test
@@ -464,22 +459,22 @@ public class IdentityServiceTest {
     }
 
     @Test
-    public void testIsWhitelistedDomainMixedCase(){
-        boolean validDomain = identityService.isWhitelistedDomain("ExAmPlE.cOm");
+    public void testIsallowlistedDomainMixedCase(){
+        boolean validDomain = identityService.isAllowlistedDomain("ExAmPlE.cOm");
 
         assertTrue(validDomain);
     }
 
     @Test
-    public void testIsWhitelistedDomainLowerCase(){
-        boolean validDomain = identityService.isWhitelistedDomain("example.com");
+    public void testIsallowlistedDomainLowerCase(){
+        boolean validDomain = identityService.isAllowlistedDomain("example.com");
 
         assertTrue(validDomain);
     }
 
     @Test
-    public void testIsWhitelistedDomainUpperCase(){
-        boolean validDomain = identityService.isWhitelistedDomain("EXAMPLE.COM");
+    public void testIsallowlistedDomainUpperCase(){
+        boolean validDomain = identityService.isAllowlistedDomain("EXAMPLE.COM");
 
         assertTrue(validDomain);
     }

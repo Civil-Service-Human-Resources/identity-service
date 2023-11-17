@@ -246,7 +246,7 @@ public class ChangeEmailControllerTest {
 
 
     @Test
-    public void shouldRedirectToEmailUpdateIfNewEmailIsWhitelistedButNotAgency() throws Exception {
+    public void shouldRedirectToEmailUpdateIfNewEmailIsallowlistedButNotAgency() throws Exception {
         /*
          *  SpringSecurityTestConfig sets up 2 users, uid and specialuid.  See @Import(SpringSecurityTestConfig.class)
          *
@@ -276,7 +276,7 @@ public class ChangeEmailControllerTest {
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
 
-        when(identityService.isWhitelistedDomain(DOMAIN)).thenReturn(true);
+        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
         when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(false);
 
         doNothing().when(emailUpdateService).updateEmailAddress(eq(emailUpdate));
@@ -293,7 +293,7 @@ public class ChangeEmailControllerTest {
     }
 
     @Test
-    public void shouldRedirectToEmailUpdateIfNewEmailIsNotWhitelistedButIsAgency() throws Exception {
+    public void shouldRedirectToEmailUpdateIfNewEmailIsNotallowlistedButIsAgency() throws Exception {
         Authentication authentication = prepareAuthentication(UID);
 
         IdentityDetails identityDetails = (IdentityDetails) authentication.getPrincipal();
@@ -307,7 +307,7 @@ public class ChangeEmailControllerTest {
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
 
-        when(identityService.isWhitelistedDomain(DOMAIN)).thenReturn(false);
+        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
         when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(true);
 
         doNothing().when(emailUpdateService).updateEmailAddress(eq(emailUpdate));
@@ -325,7 +325,7 @@ public class ChangeEmailControllerTest {
     }
 
     @Test
-    public void shouldRedirectToErrorOccuredIfNewEmailIsNotWhitelistedAndNotAgency() throws Exception {
+    public void shouldRedirectToErrorOccuredIfNewEmailIsNotallowlistedAndNotAgency() throws Exception {
         Authentication authentication = prepareAuthentication(UID);
 
         IdentityDetails identityDetails = (IdentityDetails) authentication.getPrincipal();
@@ -339,7 +339,7 @@ public class ChangeEmailControllerTest {
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
 
-        when(identityService.isWhitelistedDomain(DOMAIN)).thenReturn(false);
+        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
         when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(false);
 
         mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
@@ -388,7 +388,7 @@ public class ChangeEmailControllerTest {
         when(emailUpdateService.existsByCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
-        when(identityService.isWhitelistedDomain(DOMAIN)).thenReturn(true);
+        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
         when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(false);
 
         doThrow(new ResourceNotFoundException()).when(emailUpdateService).updateEmailAddress(any(EmailUpdate.class));
@@ -423,7 +423,7 @@ public class ChangeEmailControllerTest {
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
 
-        when(identityService.isWhitelistedDomain(DOMAIN)).thenReturn(true);
+        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
         when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(false);
 
         doThrow(new RuntimeException()).when(emailUpdateService).updateEmailAddress(any(EmailUpdate.class));

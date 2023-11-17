@@ -4,7 +4,7 @@ import org.springframework.security.authentication.AccountStatusException;
 
 /**
  * Thrown if an authentication request is rejected because the account is blocked.
- * This means the username is neither whitelisted, nor part of an agency domain, nor invited via LPG identity-management.
+ * This means the username is neither allowlisted, nor part of an agency domain, nor invited via LPG identity-management.
  * Makes no assertion as to whether or not the credentials were valid.
  */
 public class AccountBlockedException extends AccountStatusException {
