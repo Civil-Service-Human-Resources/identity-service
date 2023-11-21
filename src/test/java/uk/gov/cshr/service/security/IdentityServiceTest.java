@@ -81,7 +81,7 @@ public class IdentityServiceTest {
         identityService = new IdentityService(
                 updatePasswordEmailTemplateId,
                 identityRepository,
-                passwordEncoder,
+                new CompoundRoleRepositoryImpl(), passwordEncoder,
                 tokenServices,
                 tokenRepository,
                 notifyService,
@@ -328,32 +328,20 @@ public class IdentityServiceTest {
         verify(notifyService).notify(email, updatePasswordEmailTemplateId);
     }
 
-    @Test(expected = IdentityNotFoundException.class)
-    public void identityRepositoryShouldThrowExceptionIfNotFound() {
-        when(identityRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        Identity identityParam = new Identity();
-        identityParam.setId(new Long(123l));
-
-        identityService.updateEmailAddress(identityParam, "mynewemail@allowlisted.gov.uk", null);
-    }
-
     @Test
     public void givenAValidIdentityWithAallowlistedDomain_whenUpdateEmailAddress_shouldReturnSuccessfully(){
         // given
-        Optional<Identity> optionalIdentity = Optional.of(IDENTITY);
-        when(identityRepository.findById(anyLong())).thenReturn(optionalIdentity);
+        Identity identityParam = new Identity();
+        identityParam.setRoles(new HashSet<>());
+        identityParam.setId(new Long(123l));
         when(identityRepository.save(identityArgumentCaptor.capture())).thenReturn(new Identity());
 
-        Identity identityParam = new Identity();
-        identityParam.setId(new Long(123l));
 
         // when
         identityService.updateEmailAddress(identityParam, "mynewemail@allowlisted.gov.uk", null);
 
         // then
-        verify(identityRepository, times(1)).findById(anyLong());
-        verify(identityRepository, times(1)).save(optionalIdentity.get());
+        verify(identityRepository, times(1)).save(identityParam);
         Identity actualSavedIdentity = identityArgumentCaptor.getValue();
         assertThat(actualSavedIdentity.getAgencyTokenUid(), equalTo(null));
     }
@@ -361,22 +349,18 @@ public class IdentityServiceTest {
     @Test
     public void givenAValidIdentityWithAnAgencyDomain_whenUpdateEmailAddress_shouldReturnSuccessfully() {
         // given
-        Optional<Identity> optionalIdentity = Optional.of(IDENTITY);
-        when(identityRepository.findById(anyLong())).thenReturn(optionalIdentity);
-        when(identityRepository.save(identityArgumentCaptor.capture())).thenReturn(new Identity());
-
         Identity identityParam = new Identity();
         identityParam.setId(new Long(123l));
-
+        identityParam.setRoles(new HashSet<>());
         AgencyToken agencyToken = new AgencyToken();
         agencyToken.setUid(UID);
+        when(identityRepository.save(identityArgumentCaptor.capture())).thenReturn(new Identity());
 
         // when
         identityService.updateEmailAddress(identityParam, "mynewemail@allowlisted.gov.uk", agencyToken);
 
         // then
-        verify(identityRepository, times(1)).findById(anyLong());
-        verify(identityRepository, times(1)).save(optionalIdentity.get());
+        verify(identityRepository, times(1)).save(identityParam);
         Identity actualSavedIdentity = identityArgumentCaptor.getValue();
         assertThat(actualSavedIdentity.getAgencyTokenUid(), equalTo(UID));
     }

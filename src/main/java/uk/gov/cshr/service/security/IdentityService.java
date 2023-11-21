@@ -33,6 +33,7 @@ public class IdentityService implements UserDetailsService {
     private final String updatePasswordEmailTemplateId;
 
     private final IdentityRepository identityRepository;
+    private final CompoundRoleRepository compoundRoleRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenServices tokenServices;
     private final TokenRepository tokenRepository;
@@ -45,7 +46,7 @@ public class IdentityService implements UserDetailsService {
 
     public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
                            IdentityRepository identityRepository,
-                           PasswordEncoder passwordEncoder,
+                           CompoundRoleRepository compoundRoleRepository, PasswordEncoder passwordEncoder,
                            TokenServices tokenServices,
                            @Qualifier("tokenRepository") TokenRepository tokenRepository,
                            @Qualifier("notifyServiceImpl") NotifyService notifyService,
@@ -54,6 +55,7 @@ public class IdentityService implements UserDetailsService {
                            @Lazy ReactivationService reactivationService) {
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.identityRepository = identityRepository;
+        this.compoundRoleRepository = compoundRoleRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenServices = tokenServices;
         this.tokenRepository = tokenRepository;
@@ -183,19 +185,17 @@ public class IdentityService implements UserDetailsService {
     }
 
     public void updateEmailAddress(Identity identity, String email, AgencyToken newAgencyToken) {
-        Identity savedIdentity = identityRepository.findById(identity.getId())
-                .orElseThrow(() -> new IdentityNotFoundException("No such identity: " + identity.getId()));
-
         if (newAgencyToken != null && newAgencyToken.getUid() != null) {
             log.debug("Updating agency token for user: oldAgencyToken = {}, newAgencyToken = {}", identity.getAgencyTokenUid(), newAgencyToken.getUid());
-            savedIdentity.setAgencyTokenUid(newAgencyToken.getUid());
+            identity.setAgencyTokenUid(newAgencyToken.getUid());
         } else {
             log.debug("Setting existing agency token UID to null");
-            savedIdentity.setAgencyTokenUid(null);
+            identity.setAgencyTokenUid(null);
         }
-
-        savedIdentity.setEmail(email);
-        identityRepository.save(savedIdentity);
+        identity.setEmail(email);
+        Collection<String> reportingRoles = compoundRoleRepository.getReportingRoles();
+        identity.removeRoles(reportingRoles);
+        identityRepository.save(identity);
     }
 
     public String getDomainFromEmailAddress(String emailAddress) {

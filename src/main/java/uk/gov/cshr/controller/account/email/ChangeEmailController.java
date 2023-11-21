@@ -13,6 +13,7 @@ import uk.gov.cshr.domain.EmailUpdate;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.service.AgencyTokenService;
+import uk.gov.cshr.service.CsrsService;
 import uk.gov.cshr.service.EmailUpdateService;
 import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
@@ -122,8 +123,7 @@ public class ChangeEmailController {
                 return REDIRECT_ACCOUNT_EMAIL_INVALID_EMAIL_TRUE;
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.CHANGE_EMAIL_ERROR_MESSAGE);
-
-                log.error("Unable to update email: {} {}", code, identity);
+                log.error("Unable to update email: {} {}. {}", code, identity, e.toString());
                 return REDIRECT_LOGIN;
             }
         } else {
