@@ -49,6 +49,7 @@ public class ChangePasswordController {
 
     @GetMapping("/passwordUpdated")
     public String passwordUpdated() {
+        System.out.println("Inside passwordUpdated endpoint");
         return "account/passwordUpdated";
     }
 }
