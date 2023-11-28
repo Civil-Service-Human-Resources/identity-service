@@ -164,17 +164,12 @@ public class IdentityService implements UserDetailsService {
 
     public void updatePasswordAndRevokeTokens(Identity identity, String password) {
         identity.setPassword(passwordEncoder.encode(password));
-        System.out.println("Password set");
         identityRepository.save(identity);
-        System.out.println("Saved");
         revokeAccessTokens(identity);
-        System.out.println("revokeAccessTokens completed");
         notifyService.notify(identity.getEmail(), updatePasswordEmailTemplateId );
-        System.out.println("Notified");
     }
 
     public void revokeAccessTokens(Identity identity) {
-        System.out.println("revokeAccessTokens");
         tokenRepository.findAllByUserName(identity.getUid())
                 .forEach(token -> tokenServices.revokeToken(token.getToken().getValue()));
     }
