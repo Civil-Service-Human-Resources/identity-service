@@ -28,7 +28,7 @@ public interface IdentityRepository extends JpaRepository<Identity, Long> {
                 "from Identity i")
         List<IdentityDTO> findAllNormalised();
 
-        @Query("select new uk.gov.cshr.dto.IdentityDTO(i.email, i.uid) " +
+        @Query("select new uk.gov.cshr.dto.IdentityDTO(i) " +
                 "from Identity i where i.uid in (?1)")
         List<IdentityDTO> findIdentitiesByUidsNormalised(List<String> uids);
 
