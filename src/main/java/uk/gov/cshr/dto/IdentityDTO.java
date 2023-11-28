@@ -4,6 +4,8 @@ import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Role;
 
 import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 public class IdentityDTO {
@@ -14,7 +16,8 @@ public class IdentityDTO {
     public IdentityDTO(Identity identity) {
         this.username = identity.getEmail();
         this.uid = identity.getUid();
-        identity.getRoles().forEach(role -> this.roles.add(role.getName()));
+        Set<Role> roles = identity.getRoles() == null ? new HashSet<>() : identity.getRoles();
+        roles.forEach(role -> this.roles.add(role.getName()));
     }
 
     public IdentityDTO(String username, String uid, Set<Role> roles) {
