@@ -40,6 +40,15 @@ public class IdentityRepositoryTest {
     }
 
     @Test
+    public void testFindByByDomain() {
+        Identity identity = createIdentity();
+        identityRepository.save(identity);
+        List<Identity> identities = identityRepository.findByEmailEndsWith("example.org");
+        assertThat(identities.size(), equalTo(1));
+
+    }
+
+    @Test
     public void removeAgencyToken_shouldRemoveAgencyTokenAndSetInactiveOnSingleMatch() {
 
         Identity originalIdentity = createIdentity(UUID.randomUUID().toString());
