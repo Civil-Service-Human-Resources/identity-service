@@ -187,6 +187,7 @@ public class IdentityService implements UserDetailsService {
     }
 
     public BatchProcessResponse removeReportingRoles(List<String> uids) {
+        log.info(String.format("Removing reporting access from the following users: %s", uids));
         BatchProcessResponse response = new BatchProcessResponse();
         List<Identity> identities = identityRepository.findIdentitiesByUids(uids);
         Collection<String> reportingRoles = compoundRoleRepository.getReportingRoles();
@@ -198,6 +199,7 @@ public class IdentityService implements UserDetailsService {
             }
         });
         if (!identitiesToSave.isEmpty()) {
+            log.info(String.format("Reporting access removed from the following users: %s", uids));
             identityRepository.saveAll(identitiesToSave);
             response.setSuccessfulIds(identitiesToSave.stream().map(Identity::getUid).collect(Collectors.toList()));
         }
