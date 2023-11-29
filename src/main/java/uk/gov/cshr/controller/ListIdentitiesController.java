@@ -5,15 +5,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.cshr.domain.Identity;
+import uk.gov.cshr.dto.BatchProcessResponse;
 import uk.gov.cshr.dto.IdentityAgencyDTO;
 import uk.gov.cshr.dto.IdentityDTO;
+import uk.gov.cshr.dto.UidList;
 import uk.gov.cshr.repository.IdentityRepository;
+import uk.gov.cshr.service.security.IdentityService;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,11 +27,20 @@ import static java.util.stream.Collectors.toList;
 @RestController
 public class ListIdentitiesController {
 
-    private IdentityRepository identityRepository;
+    private final IdentityRepository identityRepository;
+    private final IdentityService identityService;
 
     @Autowired
-    public ListIdentitiesController(IdentityRepository identityRepository) {
+    public ListIdentitiesController(IdentityRepository identityRepository, IdentityService identityService) {
         this.identityRepository = identityRepository;
+        this.identityService = identityService;
+    }
+
+    @PostMapping("/api/identities/remove_reporting_roles")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    public BatchProcessResponse removeAdminAccessFromUsers(@RequestBody @Valid UidList uids) {
+        return identityService.removeReportingRoles(uids.getUids());
     }
 
     @GetMapping("/api/identities")

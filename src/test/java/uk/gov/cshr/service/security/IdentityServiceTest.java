@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import uk.gov.cshr.domain.*;
+import uk.gov.cshr.dto.BatchProcessResponse;
 import uk.gov.cshr.exception.AccountDeactivatedException;
 import uk.gov.cshr.exception.IdentityNotFoundException;
 import uk.gov.cshr.exception.PendingReactivationExistsException;
@@ -28,6 +29,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+import static uk.gov.cshr.utils.DataUtils.createIdentity;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IdentityServiceTest {
@@ -461,6 +463,30 @@ public class IdentityServiceTest {
         boolean validDomain = identityService.isAllowlistedDomain("EXAMPLE.COM");
 
         assertTrue(validDomain);
+    }
+
+    @Test
+    public void shouldRemoveReportingRoles() {
+        Role orgReporter = new Role("ORGANISATION_REPORTER", "");
+        Role professionReporter = new Role("PROFESSION_REPORTER", "");
+        Role learner = new Role("LEARNER", "");
+
+        Identity reporter = createIdentity("uid123", "reporter@email.com", null);
+        reporter.setRoles(new HashSet<>(Arrays.asList(learner, orgReporter)));
+
+        Identity reporter1 = createIdentity("uid456", "reporter1@email.com", null);
+        reporter1.setRoles(new HashSet<>(Arrays.asList(learner, orgReporter, professionReporter)));
+
+        Identity user = createIdentity("uid789", "user@email.com", null);
+        user.setRoles(new HashSet<>(Collections.singletonList(learner)));
+        List<Identity> identities = Arrays.asList(reporter, reporter1, user);
+
+        when(identityRepository.findIdentitiesByUids(Arrays.asList("uid123", "uid456", "uid789"))).thenReturn(identities);
+        BatchProcessResponse resp = identityService.removeReportingRoles(Arrays.asList("uid123", "uid456", "uid789"));
+        List<String> successfulIds = resp.getSuccessfulIds();
+        assertEquals(2, successfulIds.size());
+        assertEquals("uid123", successfulIds.get(0));
+        assertEquals("uid456", successfulIds.get(1));
     }
 
 }

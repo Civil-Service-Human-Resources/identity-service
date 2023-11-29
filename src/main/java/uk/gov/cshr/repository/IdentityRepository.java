@@ -32,6 +32,9 @@ public interface IdentityRepository extends JpaRepository<Identity, Long> {
                 "from Identity i where i.uid in (?1)")
         List<IdentityDTO> findIdentitiesByUidsNormalised(List<String> uids);
 
+        @Query("select i from Identity i where i.uid in (?1)")
+        List<Identity> findIdentitiesByUids(List<String> uids);
+
         Long countByAgencyTokenUid(String uid);
 
         @Transactional
