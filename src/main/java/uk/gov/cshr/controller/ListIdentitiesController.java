@@ -36,7 +36,7 @@ public class ListIdentitiesController {
         this.identityService = identityService;
     }
 
-    @PostMapping("/api/identities/remove_reporting_roles")
+    @PostMapping("/api/identities/remove-reporting-roles")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     public BatchProcessResponse removeAdminAccessFromUsers(@RequestBody @Valid UidList uids) {
