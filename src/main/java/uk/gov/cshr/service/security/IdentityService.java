@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,10 +21,7 @@ import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
-import uk.gov.cshr.service.AgencyTokenCapacityService;
-import uk.gov.cshr.service.CsrsService;
-import uk.gov.cshr.service.InviteService;
-import uk.gov.cshr.service.NotifyService;
+import uk.gov.cshr.service.*;
 
 import java.time.Instant;
 import java.util.*;
@@ -47,6 +45,8 @@ public class IdentityService implements UserDetailsService {
     private String[] whitelistedDomains;
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
+    private ReactivationService reactivationService;
+
     public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
                            IdentityRepository identityRepository,
                            PasswordEncoder passwordEncoder,
@@ -54,7 +54,9 @@ public class IdentityService implements UserDetailsService {
                            @Qualifier("tokenRepository") TokenRepository tokenRepository,
                            @Qualifier("notifyServiceImpl") NotifyService notifyService,
                            CsrsService csrsService,
-                           @Value("${invite.whitelist.domains}") String[] whitelistedDomains, AgencyTokenCapacityService agencyTokenCapacityService) {
+                           @Value("${invite.whitelist.domains}") String[] whitelistedDomains,
+                           AgencyTokenCapacityService agencyTokenCapacityService,
+                           @Lazy ReactivationService reactivationService) {
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.identityRepository = identityRepository;
         this.passwordEncoder = passwordEncoder;
@@ -64,6 +66,7 @@ public class IdentityService implements UserDetailsService {
         this.csrsService = csrsService;
         this.whitelistedDomains = whitelistedDomains;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
+        this.reactivationService = reactivationService;
     }
 
     @Autowired
@@ -77,6 +80,11 @@ public class IdentityService implements UserDetailsService {
         if (identity == null) {
             throw new UsernameNotFoundException("No user found with email address " + username);
         } else if (!identity.isActive()) {
+            boolean pendingReactivationExistsForAccount = reactivationService.pendingExistsByEmail(identity.getEmail());
+
+            if(pendingReactivationExistsForAccount){
+                throw new AccountDeactivatedException("Pending reactivation already exists for user");
+            }
             throw new AccountDeactivatedException("User account is deactivated");
         }
         return new IdentityDetails(identity);
