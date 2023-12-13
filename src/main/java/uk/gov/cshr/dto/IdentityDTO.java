@@ -14,7 +14,10 @@ public class IdentityDTO {
     public IdentityDTO(Identity identity) {
         this.username = identity.getEmail();
         this.uid = identity.getUid();
-        identity.getRoles().forEach(role -> this.roles.add(role.getName()));
+        Set<Role> identityRoles = identity.getRoles();
+        if (identityRoles != null) {
+            identityRoles.forEach(role -> this.roles.add(role.getName()));
+        }
     }
 
     public IdentityDTO(String username, String uid, Set<Role> roles) {
