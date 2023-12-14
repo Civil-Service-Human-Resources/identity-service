@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cshr.domain.*;
+import uk.gov.cshr.dto.BatchProcessResponse;
 import uk.gov.cshr.exception.*;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
@@ -22,6 +23,7 @@ import uk.gov.cshr.service.*;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -184,6 +186,26 @@ public class IdentityService implements UserDetailsService {
         return identityRepository.save(identity);
     }
 
+    public BatchProcessResponse removeReportingRoles(List<String> uids) {
+        log.info(String.format("Removing reporting access from the following users: %s", uids));
+        BatchProcessResponse response = new BatchProcessResponse();
+        List<Identity> identities = identityRepository.findIdentitiesByUids(uids);
+        Collection<String> reportingRoles = compoundRoleRepository.getReportingRoles();
+        List<Identity> identitiesToSave = new ArrayList<>();
+        identities.forEach(i -> {
+            if (i.hasAnyRole(reportingRoles)) {
+                i.removeRoles(reportingRoles);
+                identitiesToSave.add(i);
+            }
+        });
+        if (!identitiesToSave.isEmpty()) {
+            log.info(String.format("Reporting access removed from the following users: %s", uids));
+            identityRepository.saveAll(identitiesToSave);
+            response.setSuccessfulIds(identitiesToSave.stream().map(Identity::getUid).collect(Collectors.toList()));
+        }
+        return response;
+    }
+
     public void updateEmailAddress(Identity identity, String email, AgencyToken newAgencyToken) {
         if (newAgencyToken != null && newAgencyToken.getUid() != null) {
             log.debug("Updating agency token for user: oldAgencyToken = {}, newAgencyToken = {}", identity.getAgencyTokenUid(), newAgencyToken.getUid());
@@ -193,8 +215,7 @@ public class IdentityService implements UserDetailsService {
             identity.setAgencyTokenUid(null);
         }
         identity.setEmail(email);
-        Collection<String> reportingRoles = compoundRoleRepository.getReportingRoles();
-        identity.removeRoles(reportingRoles);
+        identity.removeRoles(compoundRoleRepository.getReportingRoles());
         identityRepository.save(identity);
     }
 

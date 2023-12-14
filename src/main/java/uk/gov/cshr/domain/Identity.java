@@ -80,6 +80,11 @@ public class Identity implements Serializable {
         this.setRoles(newRoles);
     }
 
+    @JsonIgnore
+    public boolean hasAnyRole(Collection<String> rolesToCheck) {
+        return this.roles.stream().anyMatch(r -> rolesToCheck.contains(r.getName()));
+    }
+
     public boolean isActive() {
         return active;
     }
