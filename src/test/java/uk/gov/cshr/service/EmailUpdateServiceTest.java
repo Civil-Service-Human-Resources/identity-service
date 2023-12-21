@@ -54,6 +54,9 @@ public class EmailUpdateServiceTest {
     @MockBean
     private IdentityService identityService;
 
+    @MockBean
+    private CsrsService csrsService;
+
     @Value("${govNotify.template.emailUpdate}")
     private String updateEmailTemplateId;
 
@@ -95,7 +98,7 @@ public class EmailUpdateServiceTest {
     }
 
     @Test
-    public void givenAValidIdentity_whenNewDomainWhitelistedAndNotAgency_shouldReturnSuccessfully() throws Exception {
+    public void givenAValidIdentity_whenNewDomainallowlistedAndNotAgency_shouldReturnSuccessfully() throws Exception {
         Identity identity = new Identity();
         identity.setEmail(EMAIL);
 
@@ -111,6 +114,7 @@ public class EmailUpdateServiceTest {
 
         emailUpdateService.updateEmailAddress(emailUpdate);
 
+        verify(csrsService, times(1)).removeOrganisationalUnitFromCivilServant(any());
         verify(identityService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(), eq(emailUpdate.getEmail()), isNull());
         verify(emailUpdateRepository, times(1)).delete(emailUpdateArgumentCaptor.capture());
 
@@ -141,6 +145,7 @@ public class EmailUpdateServiceTest {
 
         emailUpdateService.updateEmailAddress(emailUpdate, agencyToken);
 
+        verify(csrsService, times(1)).removeOrganisationalUnitFromCivilServant(any());
         verify(identityService, times(1)).updateEmailAddress(identityArgumentCaptor.capture(), eq(emailUpdate.getEmail()), eq(agencyToken));
         verify(emailUpdateRepository, times(1)).delete(emailUpdateArgumentCaptor.capture());
 

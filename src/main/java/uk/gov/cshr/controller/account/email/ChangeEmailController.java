@@ -13,6 +13,7 @@ import uk.gov.cshr.domain.EmailUpdate;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.service.AgencyTokenService;
+import uk.gov.cshr.service.CsrsService;
 import uk.gov.cshr.service.EmailUpdateService;
 import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
@@ -79,7 +80,7 @@ public class ChangeEmailController {
         }
 
         if (!identityService.checkValidEmail(newEmail)) {
-            log.error("Email is neither whitelisted or for an agency token: {}", newEmail);
+            log.error("Email is neither allowlisted or for an agency token: {}", newEmail);
             model.addAttribute(UPDATE_EMAIL_FORM, form);
             return REDIRECT_UPDATE_EMAIL_NOT_VALID_EMAIL_DOMAIN_TRUE;
         }
@@ -111,8 +112,8 @@ public class ChangeEmailController {
             log.debug("New email is agency: oldEmail = {}, newEmail = {}", identity.getEmail(), emailUpdate.getEmail());
             redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getEmail());
             return REDIRECT_ACCOUNT_ENTER_TOKEN + code;
-        } else if (isWhitelisted(newDomain)) {
-            log.debug("New email is whitelisted: oldEmail = {}, newEmail = {}", identity.getEmail(), emailUpdate.getEmail());
+        } else if (isAllowListed(newDomain)) {
+            log.debug("New email is allowlisted: oldEmail = {}, newEmail = {}", identity.getEmail(), emailUpdate.getEmail());
             try {
                 emailUpdateService.updateEmailAddress(emailUpdate);
                 redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getEmail());
@@ -122,12 +123,11 @@ public class ChangeEmailController {
                 return REDIRECT_ACCOUNT_EMAIL_INVALID_EMAIL_TRUE;
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.CHANGE_EMAIL_ERROR_MESSAGE);
-
-                log.error("Unable to update email: {} {}", code, identity);
+                log.error("Unable to update email: {} {}. {}", code, identity, e.toString());
                 return REDIRECT_LOGIN;
             }
         } else {
-            log.error("User trying to verify change email where new email is not whitelisted or agency: oldEmail = {}, newEmail = {}", identity.getEmail(), emailUpdate.getEmail());
+            log.error("User trying to verify change email where new email is not allowlisted or agency: oldEmail = {}, newEmail = {}", identity.getEmail(), emailUpdate.getEmail());
             redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.CHANGE_EMAIL_ERROR_MESSAGE);
 
             return REDIRECT_LOGIN;
@@ -146,8 +146,8 @@ public class ChangeEmailController {
         return EMAIL_UPDATED_TEMPLATE;
     }
 
-    private boolean isWhitelisted(String newDomain) {
-        return identityService.isWhitelistedDomain(newDomain);
+    private boolean isAllowListed(String newDomain) {
+        return identityService.isAllowlistedDomain(newDomain);
     }
 
     private boolean isAgencyDomain(String newDomain) {

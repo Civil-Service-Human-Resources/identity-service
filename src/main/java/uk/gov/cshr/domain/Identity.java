@@ -1,12 +1,18 @@
 package uk.gov.cshr.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.extern.slf4j.Slf4j;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
+@Slf4j
 public class Identity implements Serializable {
 
     @Id
@@ -65,6 +71,18 @@ public class Identity implements Serializable {
         this.lastLoggedIn = lastLoggedIn;
         this.deletionNotificationSent = deletionNotificationSent;
         this.agencyTokenUid = agencyTokenUid;
+    }
+
+    @JsonIgnore
+    public void removeRoles(Collection<String> roleNamesToRemove) {
+        log.info(String.format("Removing roles: %s", roleNamesToRemove));
+        Set<Role> newRoles = this.getRoles().stream().filter(role -> !roleNamesToRemove.contains(role.getName())).collect(Collectors.toSet());
+        this.setRoles(newRoles);
+    }
+
+    @JsonIgnore
+    public boolean hasAnyRole(Collection<String> rolesToCheck) {
+        return this.roles.stream().anyMatch(r -> rolesToCheck.contains(r.getName()));
     }
 
     public boolean isActive() {

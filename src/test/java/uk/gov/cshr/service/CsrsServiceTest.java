@@ -13,6 +13,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.cshr.domain.AgencyToken;
 import uk.gov.cshr.domain.OrganisationalUnitDto;
+import uk.gov.cshr.repository.TokenRepository;
+import uk.gov.cshr.service.security.IdentityClientTokenService;
 
 import java.util.Optional;
 
@@ -27,23 +29,30 @@ public class CsrsServiceTest {
 
     @Mock
     private RestTemplate restTemplate;
-
+    @Mock
+    private IdentityClientTokenService identityClientTokenService;
+    @Mock
+    private TokenRepository tokenRepository;
+    private String domainsUrl;
     private String agencyTokensFormat;
     private String agencyTokensByDomainFormat;
     private String agencyTokensByDomainAndOrganisationFormat;
     private String organisationalUnitsFlatUrl;
+    private String civilServantUrl;
     private CsrsService csrsService;
 
     @Before
     public void setUp() {
+        domainsUrl = "http://locahost:9002/domains";
         agencyTokensFormat = "http://locahost:9002/agencyTokens?domain=%s&token=%s&code=%s";
         agencyTokensByDomainFormat = "http://locahost:9002/agencyTokens?domain=%s";
         agencyTokensByDomainAndOrganisationFormat = "http://locahost:9002/agencyTokens?domain=%s&code=%s";
         organisationalUnitsFlatUrl = "http://locahost:9002/organisationalUnits/flat";
+        civilServantUrl = "http://locahost:9002/civilServants";
 
-        csrsService = new CsrsService(restTemplate,
-                agencyTokensFormat, agencyTokensByDomainFormat, agencyTokensByDomainAndOrganisationFormat,
-                organisationalUnitsFlatUrl);
+        csrsService = new CsrsService(restTemplate, domainsUrl, tokenRepository, identityClientTokenService,
+                agencyTokensFormat, civilServantUrl, agencyTokensByDomainFormat,
+                agencyTokensByDomainAndOrganisationFormat, organisationalUnitsFlatUrl);
 
         ReflectionTestUtils.setField(csrsService, "restTemplate", restTemplate);
         ReflectionTestUtils.setField(csrsService, "agencyTokensFormat", agencyTokensFormat);

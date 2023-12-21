@@ -23,6 +23,7 @@ public class EmailUpdateService {
     private final EmailUpdateRepository emailUpdateRepository;
     private final EmailUpdateFactory emailUpdateFactory;
     private final NotifyService notifyService;
+    private final CsrsService csrsService;
     private final IdentityService identityService;
     private final String updateEmailTemplateId;
     private final String inviteUrlFormat;
@@ -30,12 +31,13 @@ public class EmailUpdateService {
     public EmailUpdateService(EmailUpdateRepository emailUpdateRepository,
                               EmailUpdateFactory emailUpdateFactory,
                               @Qualifier("notifyServiceImpl") NotifyService notifyService,
-                              IdentityService identityService,
+                              CsrsService csrsService, IdentityService identityService,
                               @Value("${govNotify.template.emailUpdate}") String updateEmailTemplateId,
                               @Value("${emailUpdate.urlFormat}") String inviteUrlFormat) {
         this.emailUpdateRepository = emailUpdateRepository;
         this.emailUpdateFactory = emailUpdateFactory;
         this.notifyService = notifyService;
+        this.csrsService = csrsService;
         this.identityService = identityService;
         this.updateEmailTemplateId = updateEmailTemplateId;
         this.inviteUrlFormat = inviteUrlFormat;
@@ -72,17 +74,18 @@ public class EmailUpdateService {
     public void updateEmailAddress(EmailUpdate emailUpdate, AgencyToken agencyToken) {
         Identity emailUpdateIdentity = emailUpdate.getIdentity();
         Identity existingIdentity = identityService.getIdentityByEmail(emailUpdateIdentity.getEmail());
+        String existingEmail = existingIdentity.getEmail();
 
         String newEmail = emailUpdate.getEmail();
 
-        log.debug("Updating email address for: oldEmail = {}, newEmail = {}", existingIdentity.getEmail(), newEmail);
+        log.info("Updating email address for: oldEmail = {}, newEmail = {}", existingEmail, newEmail);
 
         identityService.updateEmailAddress(existingIdentity, newEmail, agencyToken);
+        csrsService.removeOrganisationalUnitFromCivilServant(emailUpdate.getIdentity().getUid());
 
+        log.info("Deleting emailUpdateObject: {}", emailUpdate);
         emailUpdateRepository.delete(emailUpdate);
 
-        log.debug("Email address {} has been updated to {} successfully", existingIdentity.getEmail(), newEmail);
-
-        log.debug("Deleting emailUpdateObject: {}", emailUpdate);
+        log.info("Email address {} has been updated to {} successfully", existingEmail, newEmail);
     }
 }
