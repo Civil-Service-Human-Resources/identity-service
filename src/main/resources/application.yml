@@ -113,7 +113,8 @@ spring:
     database: ${DATASOURCE_DATABASE:identity}
     username: ${DATASOURCE_USERNAME:root}
     password: ${DATASOURCE_PASSWORD:password}
-    url: ${DATASOURCE:jdbc:mysql://${spring.datasource.host}:3306/${spring.datasource.database}?user=${spring.datasource.username}&password=${spring.datasource.password}&useSSL=false}
+    use-ssl: ${DATASOURCE_USESSL:false}
+    url: ${DATASOURCE:"jdbc:mysql://${spring.datasource.host}:3306/${spring.datasource.database}?user=${spring.datasource.username}&password=${spring.datasource.password}&useSSL=${spring.datasource.use-ssl"}
     platform: mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
