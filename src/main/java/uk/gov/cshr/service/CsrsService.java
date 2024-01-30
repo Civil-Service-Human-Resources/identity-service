@@ -67,7 +67,7 @@ public class CsrsService {
         return token;
     }
 
-    @Cacheable("allowlist")
+    @Cacheable(value = "allowlist")
     public List<String> getAllowlist() {
         log.info("Fetching allowlist from CSRS API");
         HttpEntity<HttpHeaders> request = buildCsrsClientTokenRequest();
@@ -80,7 +80,6 @@ public class CsrsService {
     }
 
     @CacheEvict(value = "allowlist", allEntries = true)
-    @Scheduled(fixedRateString = "${registry.cache.allowlistTTL}")
     public void emptyAllowlistCache() {
         log.info("emptying Allowlist cache");
     }

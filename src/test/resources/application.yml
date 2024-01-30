@@ -82,6 +82,8 @@ registry:
   civilServantUrl: "${registry.serviceUrl}/civilServants"
   domainsUrl: "${registry.serviceUrl}/domains"
   organisationalUnitsFlatUrl: "${registry.serviceUrl}/organisationalUnits/flat"
+  cache:
+    allowlistTTLSeconds: ${ALLOWLIST_TTL_SECONDS:21600}
 
 identity:
   identityBaseUrl: ${IDENTITY_BASE_URL:http://identity:8080}

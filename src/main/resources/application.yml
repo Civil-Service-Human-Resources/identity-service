@@ -87,7 +87,7 @@ registry:
   domainsUrl: "${registry.serviceUrl}/domains"
   organisationalUnitsFlatUrl: "${registry.serviceUrl}/organisationalUnits/flat"
   cache:
-    allowlistTTL: ${ALLOWLIST_TTL:10800000}
+    allowlistTTLSeconds: ${ALLOWLIST_TTL_SECONDS:21600}
 
 identity:
   identityBaseUrl: ${IDENTITY_BASE_URL:http://identity:8080}
@@ -123,7 +123,7 @@ spring:
         enabled: false
   redis:
     host: ${REDIS_HOST:localhost}
-    password: ${REDIS_PASSWORD:redispassword}
+    password: ${REDIS_PASSWORD:}
     port: ${REDIS_PORT:6379}
   session:
     redis:
