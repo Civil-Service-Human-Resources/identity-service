@@ -114,7 +114,7 @@ spring:
     cache: true
     check-template: true
   datasource:
-    url: ${DATASOURCE_URL:${database.host}/${database.name}?useSSL=${database.use-ssl}&requireSSL=true}
+    url: ${DATASOURCE_URL:${database.host}/${database.name}?useSSL=${database.use-ssl}&requireSSL=false}
     username: ${DATASOURCE_USERNAME:username}
     password: ${DATASOURCE_PASSWORD:password}
     platform: mysql
