@@ -113,7 +113,7 @@ Will respond like
 
 Significant configuration properties are highlighted here. For the full configuration file see `src/main/resources/application.yml`
 
-- `invite` invite signup path, validity and **domain whitelist**
+- `invite` invite signup path and validity
 - `govNotify` GOV.UK Notify API key and template references
 - `accountValidation` password complexity regex
 - `account` configuration for max login attempts before account lockout

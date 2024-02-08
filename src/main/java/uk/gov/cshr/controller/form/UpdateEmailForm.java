@@ -2,7 +2,6 @@ package uk.gov.cshr.controller.form;
 
 import lombok.Data;
 import uk.gov.cshr.validation.annotation.FieldMatch;
-import uk.gov.cshr.validation.annotations.Whitelisted;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;

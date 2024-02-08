@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.cshr.domain.*;
+import uk.gov.cshr.dto.BatchProcessResponse;
 import uk.gov.cshr.exception.*;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
@@ -22,6 +23,7 @@ import uk.gov.cshr.service.*;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,35 +35,34 @@ public class IdentityService implements UserDetailsService {
     private final String updatePasswordEmailTemplateId;
 
     private final IdentityRepository identityRepository;
+    private final CompoundRoleRepository compoundRoleRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenServices tokenServices;
     private final TokenRepository tokenRepository;
     private final NotifyService notifyService;
     private final CsrsService csrsService;
     private InviteService inviteService;
-    private String[] whitelistedDomains;
     private AgencyTokenCapacityService agencyTokenCapacityService;
 
     private ReactivationService reactivationService;
 
     public IdentityService(@Value("${govNotify.template.passwordUpdate}") String updatePasswordEmailTemplateId,
                            IdentityRepository identityRepository,
-                           PasswordEncoder passwordEncoder,
+                           CompoundRoleRepository compoundRoleRepository, PasswordEncoder passwordEncoder,
                            TokenServices tokenServices,
                            @Qualifier("tokenRepository") TokenRepository tokenRepository,
                            @Qualifier("notifyServiceImpl") NotifyService notifyService,
                            CsrsService csrsService,
-                           @Value("${invite.whitelist.domains}") String[] whitelistedDomains,
                            AgencyTokenCapacityService agencyTokenCapacityService,
                            @Lazy ReactivationService reactivationService) {
         this.updatePasswordEmailTemplateId = updatePasswordEmailTemplateId;
         this.identityRepository = identityRepository;
+        this.compoundRoleRepository = compoundRoleRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenServices = tokenServices;
         this.tokenRepository = tokenRepository;
         this.notifyService = notifyService;
         this.csrsService = csrsService;
-        this.whitelistedDomains = whitelistedDomains;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
         this.reactivationService = reactivationService;
     }
@@ -114,8 +115,8 @@ public class IdentityService implements UserDetailsService {
                     .orElseThrow(ResourceNotFoundException::new);
 
             log.info("Identity request has agency uid = {}", agencyTokenUid);
-        } else if (!isWhitelistedDomain(domain) && !isEmailInvitedViaIDM(invite.getForEmail())) {
-            log.info("Invited request neither agency, nor whitelisted, nor invited via IDM: {}", invite);
+        } else if (!isAllowlistedDomain(domain) && !isEmailInvitedViaIDM(invite.getForEmail())) {
+            log.info("Invited request neither agency, nor allowlisted, nor invited via IDM: {}", invite);
             throw new ResourceNotFoundException();
         }
 
@@ -185,24 +186,37 @@ public class IdentityService implements UserDetailsService {
         return identityRepository.save(identity);
     }
 
-    public void updateEmailAddress(Identity identity, String email, AgencyToken newAgencyToken) {
-        Identity savedIdentity = identityRepository.findById(identity.getId())
-                .orElseThrow(() -> new IdentityNotFoundException("No such identity: " + identity.getId()));
-
-        if (newAgencyToken != null && newAgencyToken.getUid() != null) {
-            log.debug("Updating agency token for user: oldAgencyToken = {}, newAgencyToken = {}", identity.getAgencyTokenUid(), newAgencyToken.getUid());
-            savedIdentity.setAgencyTokenUid(newAgencyToken.getUid());
-        } else {
-            log.debug("Setting existing agency token UID to null");
-            savedIdentity.setAgencyTokenUid(null);
+    public BatchProcessResponse removeReportingRoles(List<String> uids) {
+        log.info(String.format("Removing reporting access from the following users: %s", uids));
+        BatchProcessResponse response = new BatchProcessResponse();
+        List<Identity> identities = identityRepository.findIdentitiesByUids(uids);
+        Collection<String> reportingRoles = compoundRoleRepository.getReportingRoles();
+        List<Identity> identitiesToSave = new ArrayList<>();
+        identities.forEach(i -> {
+            if (i.hasAnyRole(reportingRoles)) {
+                i.removeRoles(reportingRoles);
+                identitiesToSave.add(i);
+            }
+        });
+        if (!identitiesToSave.isEmpty()) {
+            log.info(String.format("Reporting access removed from the following users: %s", uids));
+            identityRepository.saveAll(identitiesToSave);
+            response.setSuccessfulIds(identitiesToSave.stream().map(Identity::getUid).collect(Collectors.toList()));
         }
-
-        savedIdentity.setEmail(email);
-        identityRepository.save(savedIdentity);
+        return response;
     }
 
-    public boolean isWhitelistedDomain(String domain) {
-        return Arrays.asList(whitelistedDomains).stream().anyMatch(domain::equalsIgnoreCase);
+    public void updateEmailAddress(Identity identity, String email, AgencyToken newAgencyToken) {
+        if (newAgencyToken != null && newAgencyToken.getUid() != null) {
+            log.debug("Updating agency token for user: oldAgencyToken = {}, newAgencyToken = {}", identity.getAgencyTokenUid(), newAgencyToken.getUid());
+            identity.setAgencyTokenUid(newAgencyToken.getUid());
+        } else {
+            log.debug("Setting existing agency token UID to null");
+            identity.setAgencyTokenUid(null);
+        }
+        identity.setEmail(email);
+        identity.removeRoles(compoundRoleRepository.getReportingRoles());
+        identityRepository.save(identity);
     }
 
     public String getDomainFromEmailAddress(String emailAddress) {
@@ -211,8 +225,7 @@ public class IdentityService implements UserDetailsService {
 
     public boolean checkValidEmail(String email) {
         final String domain = getDomainFromEmailAddress(email);
-
-        return (isWhitelistedDomain(domain) || csrsService.isDomainInAgency(domain));
+        return (isAllowlistedDomain(domain) || csrsService.isDomainInAgency(domain));
     }
 
     private boolean requestHasTokenData(TokenRequest tokenRequest) {
@@ -235,5 +248,9 @@ public class IdentityService implements UserDetailsService {
 
     private boolean isEmailInvitedViaIDM(String email) {
         return inviteService.isEmailInvited(email);
+    }
+
+    public boolean isAllowlistedDomain(String domain) {
+        return csrsService.getAllowlist().contains(domain.toLowerCase());
     }
 }

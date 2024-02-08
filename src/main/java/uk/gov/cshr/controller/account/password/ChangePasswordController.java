@@ -40,7 +40,6 @@ public class ChangePasswordController {
         }
 
         identityService.updatePasswordAndRevokeTokens(((IdentityDetails) authentication.getPrincipal()).getIdentity(), form.getNewPassword());
-
         return "redirect:/account/password/passwordUpdated";
     }
 

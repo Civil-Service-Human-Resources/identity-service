@@ -50,8 +50,6 @@ invite:
   url: ${INVITE_SIGNUP_URL:http://localhost:8080/signup/%s}
   validityInSeconds: ${INVITE_VALIDITY:259200}
   durationAfterReRegAllowedInSeconds: ${DURATION_AFTER_REREG_ALLOWED_SECONDS:86400}
-  whitelist:
-    domains: ${WHITELISTED_DOMAINS:example.com, domain.com, gov.uk}
 
 reset:
   url: ${RESET_URL:http://localhost:8080/reset/%s}
@@ -85,10 +83,16 @@ registry:
   agencyTokensFormat: "${registry.serviceUrl}/agencyTokens?domain=%s&token=%s&code=%s"
   agencyTokensByDomainFormat: "${registry.serviceUrl}/agencyTokens?domain=%s"
   agencyTokensByDomainAndOrganisationFormat: "${registry.serviceUrl}/agencyTokens?domain=%s&code=%s"
+  civilServantUrl: "${registry.serviceUrl}/civilServants"
+  domainsUrl: "${registry.serviceUrl}/domains"
   organisationalUnitsFlatUrl: "${registry.serviceUrl}/organisationalUnits/flat"
----
+  cache:
+    allowlistTTL: ${ALLOWLIST_TTL:10800000}
+
 identity:
   identityBaseUrl: ${IDENTITY_BASE_URL:http://identity:8080}
+  clientId: ${IDENTITY_CLIENT_ID:identity}
+  clientSecret: ${IDENTITY_CLIENT_SECRET:test}
 
 reactivation:
   reactivationUrl: "${identity.identityBaseUrl}/account/reactivate/"
@@ -96,6 +100,8 @@ reactivation:
 
 textEncryption:
   encryptionKey: ${ENCRYPTION_KEY:0123456789abcdef0123456789abcdef}
+
+---
 
 spring:
   profiles: test, production
