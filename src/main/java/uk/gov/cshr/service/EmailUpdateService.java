@@ -12,6 +12,7 @@ import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.repository.EmailUpdateRepository;
 import uk.gov.cshr.service.security.IdentityService;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -79,8 +80,8 @@ public class EmailUpdateService {
         String newEmail = emailUpdate.getEmail();
 
         log.info("Updating email address for: oldEmail = {}, newEmail = {}", existingEmail, newEmail);
-
         identityService.updateEmailAddress(existingIdentity, newEmail, agencyToken);
+        identityService.removeReportingRoles(Collections.singletonList(emailUpdate.getIdentity().getUid()));
         csrsService.removeOrganisationalUnitFromCivilServant(emailUpdate.getIdentity().getUid());
 
         log.info("Deleting emailUpdateObject: {}", emailUpdate);
