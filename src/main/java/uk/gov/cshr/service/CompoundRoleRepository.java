@@ -4,5 +4,5 @@ import java.util.List;
 
 public interface CompoundRoleRepository {
 
-    List<String> getReportingRoles();
+    List<String> getRoles(ICompoundRole role);
 }

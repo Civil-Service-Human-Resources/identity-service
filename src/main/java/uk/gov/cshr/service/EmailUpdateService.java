@@ -81,7 +81,6 @@ public class EmailUpdateService {
 
         log.info("Updating email address for: oldEmail = {}, newEmail = {}", existingEmail, newEmail);
         identityService.updateEmailAddress(existingIdentity, newEmail, agencyToken);
-        identityService.removeReportingRoles(Collections.singletonList(emailUpdate.getIdentity().getUid()));
         csrsService.removeOrganisationalUnitFromCivilServant(emailUpdate.getIdentity().getUid());
 
         log.info("Deleting emailUpdateObject: {}", emailUpdate);
