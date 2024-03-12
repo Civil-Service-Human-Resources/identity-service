@@ -3,6 +3,7 @@ package uk.gov.cshr.service;
 import org.springframework.stereotype.Repository;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,4 +13,5 @@ public class CompoundRoleRepositoryImpl implements CompoundRoleRepository {
     public List<String> getRoles(ICompoundRole role) {
         return role.getRoles();
     }
+
 }

@@ -223,8 +223,10 @@ public class IdentityService implements UserDetailsService {
             identity.setAgencyTokenUid(null);
         }
         identity.setEmail(email);
-        identity.removeRoles(compoundRoleRepository.getRoles(CompoundRole.REPORTER));
-        identity.removeRoles(compoundRoleRepository.getRoles(CompoundRole.UNRESTRICTED_ORGANISATION));
+        identity.removeRoles(compoundRoleRepository.getRoles(Arrays.asList(
+                CompoundRole.REPORTER,
+                CompoundRole.UNRESTRICTED_ORGANISATION
+        )));
         identityRepository.save(identity);
     }
 
