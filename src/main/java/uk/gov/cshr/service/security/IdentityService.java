@@ -186,15 +186,11 @@ public class IdentityService implements UserDetailsService {
         return identityRepository.save(identity);
     }
 
-    public BatchProcessResponse removeRoles(List<String> uids, CompoundRole compoundRole) {
-        return removeRoles(uids, Collections.singletonList(compoundRole));
-    }
-
-    public BatchProcessResponse removeRoles(List<String> uids, List<CompoundRole> compoundRoles) {
-        log.info(String.format("Removing %s access from the following users: %s", compoundRoles, uids));
+    public BatchProcessResponse removeReportingRoles(List<String> uids) {
+        log.info(String.format("Removing reporting access from the following users: %s", uids));
         BatchProcessResponse response = new BatchProcessResponse();
         List<Identity> identities = identityRepository.findIdentitiesByUids(uids);
-        Collection<String> reportingRoles = compoundRoles.stream().flatMap(cr -> compoundRoleRepository.getRoles(cr).stream()).collect(Collectors.toList());
+        Collection<String> reportingRoles = compoundRoleRepository.getReportingRoles();
         List<Identity> identitiesToSave = new ArrayList<>();
         identities.forEach(i -> {
             if (i.hasAnyRole(reportingRoles)) {
@@ -203,15 +199,11 @@ public class IdentityService implements UserDetailsService {
             }
         });
         if (!identitiesToSave.isEmpty()) {
-            log.info(String.format("%s access removed from the following users: %s", compoundRoles, uids));
+            log.info(String.format("Reporting access removed from the following users: %s", uids));
             identityRepository.saveAll(identitiesToSave);
             response.setSuccessfulIds(identitiesToSave.stream().map(Identity::getUid).collect(Collectors.toList()));
         }
         return response;
-    }
-
-    public BatchProcessResponse removeReportingRoles(List<String> uids) {
-        return removeRoles(uids, CompoundRole.REPORTER);
     }
 
     public void updateEmailAddress(Identity identity, String email, AgencyToken newAgencyToken) {
@@ -223,10 +215,7 @@ public class IdentityService implements UserDetailsService {
             identity.setAgencyTokenUid(null);
         }
         identity.setEmail(email);
-        identity.removeRoles(compoundRoleRepository.getRoles(Arrays.asList(
-                CompoundRole.REPORTER,
-                CompoundRole.UNRESTRICTED_ORGANISATION
-        )));
+        identity.removeRoles(compoundRoleRepository.getReportingRoles());
         identityRepository.save(identity);
     }
 
