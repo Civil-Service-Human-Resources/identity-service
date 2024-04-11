@@ -13,41 +13,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CsrsServiceDataTransformer {
 
-//    /**
-//     * - Format the agency token from parents onto descendants
-//     * @param organisationalUnitDtos
-//     * @return
-//     */
-//    public List<OrganisationalUnitDto> transformOrganisations(List<OrganisationalUnitDto> organisationalUnitDtos) {
-//        List<OrganisationalUnitDto> result = new ArrayList<>();
-//        List<Integer> agencyOrganisations = new ArrayList<>();
-//        Map<Integer, OrganisationalUnitDto> orgMap = organisationalUnitDtos.stream().collect(Collectors.toMap(OrganisationalUnitDto::getId, Function.identity()));
-//        orgMap.forEach((id, org) -> {
-//            Integer parentId = org.getParentId();
-//            if (parentId != null) {
-//                orgMap.get(parentId).addDescendant(org);
-//            }
-//            result.add(org);
-//            if (org.getAgencyToken() != null) {
-//                agencyOrganisations.add(org.getId());
-//            }
-//        });
-//        agencyOrganisations.forEach(i -> {
-//            OrganisationalUnitDto agencyOrganisation = orgMap.get(i);
-//            AgencyTokenDTO agencyToken = agencyOrganisation.getAgencyToken();
-//            List<OrganisationalUnitDto> orgs = agencyOrganisation.getHierarchyAsFlatList().stream()
-//                    .peek(o -> {
-//                        if (o.getAgencyToken() == null) {
-//                            o.setAgencyToken(agencyToken);
-//                        }
-//                    })
-//                    .collect(Collectors.toList());
-//            result.addAll(orgs);
-//        });
-//        result.sort(Comparator.comparing(OrganisationalUnitDto::getFormattedName));
-//        return result;
-//    }
-
     /**
      * - Format the agency token from parents onto descendants
      * @param organisationalUnitDtos
