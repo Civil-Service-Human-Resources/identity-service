@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import uk.gov.cshr.domain.*;
+import uk.gov.cshr.dto.AgencyTokenDTO;
 import uk.gov.cshr.dto.BatchProcessResponse;
 import uk.gov.cshr.exception.AccountDeactivatedException;
 import uk.gov.cshr.exception.IdentityNotFoundException;
@@ -20,6 +21,7 @@ import uk.gov.cshr.exception.PendingReactivationExistsException;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.*;
+import uk.gov.cshr.service.csrs.CsrsService;
 
 import java.time.Instant;
 import java.util.*;
@@ -229,7 +231,7 @@ public class IdentityServiceTest {
         tokenRequest.setToken(tokenToken);
 
         String uid = "UID";
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(uid);
 
         when(inviteService.findByCode(code)).thenReturn(invite);
@@ -354,7 +356,7 @@ public class IdentityServiceTest {
         Identity identityParam = new Identity();
         identityParam.setId(new Long(123l));
         identityParam.setRoles(new HashSet<>());
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(UID);
         when(identityRepository.save(identityArgumentCaptor.capture())).thenReturn(new Identity());
 
@@ -410,7 +412,7 @@ public class IdentityServiceTest {
     @Test
     public void shouldReactivateIdentity() {
         Identity identity = new Identity();
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(UID);
 
         identityService.reactivateIdentity(identity, agencyToken);

@@ -13,14 +13,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cshr.domain.Reactivation;
 import uk.gov.cshr.domain.ReactivationStatus;
 import uk.gov.cshr.exception.ResourceNotFoundException;
-import uk.gov.cshr.service.AgencyTokenService;
 import uk.gov.cshr.service.ReactivationService;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
 import uk.gov.cshr.utils.MockMVCFilterOverrider;
 
-import java.net.URLEncoder;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -50,9 +47,6 @@ public class ReactivationControllerTest {
     @MockBean
     private IdentityService identityService;
 
-    @MockBean
-    private AgencyTokenService agencyTokenService;
-
     @Before
     public void overridePatternMappingFilterProxyFilter() throws IllegalAccessException {
         MockMVCFilterOverrider.overrideFilterOf(mockMvc, "PatternMappingFilterProxy");
@@ -66,7 +60,6 @@ public class ReactivationControllerTest {
         when(reactivationService.getReactivationByCodeAndStatus(CODE, ReactivationStatus.PENDING)).thenReturn(reactivation);
         when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
         when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
-        when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(true);
 
         doNothing().when(reactivationService).reactivateIdentity(reactivation);
 
@@ -84,7 +77,6 @@ public class ReactivationControllerTest {
         when(reactivationService.getReactivationByCodeAndStatus(CODE, ReactivationStatus.PENDING)).thenReturn(reactivation);
         when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
         when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
-        when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(true);
 
         doNothing().when(reactivationService).reactivateIdentity(reactivation);
 

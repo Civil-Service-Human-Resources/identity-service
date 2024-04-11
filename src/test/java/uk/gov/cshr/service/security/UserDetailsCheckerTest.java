@@ -9,8 +9,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.core.userdetails.UserDetails;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.exception.AccountBlockedException;
-import uk.gov.cshr.service.CsrsService;
 import uk.gov.cshr.service.InviteService;
+import uk.gov.cshr.service.csrs.CsrsService;
 
 import static org.powermock.api.mockito.PowerMockito.when;
 

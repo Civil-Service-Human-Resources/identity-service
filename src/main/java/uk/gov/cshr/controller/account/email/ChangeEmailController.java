@@ -12,9 +12,8 @@ import uk.gov.cshr.controller.form.UpdateEmailForm;
 import uk.gov.cshr.domain.EmailUpdate;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.exception.ResourceNotFoundException;
-import uk.gov.cshr.service.AgencyTokenService;
-import uk.gov.cshr.service.CsrsService;
 import uk.gov.cshr.service.EmailUpdateService;
+import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
@@ -43,16 +42,16 @@ public class ChangeEmailController {
 
     private final IdentityService identityService;
     private final EmailUpdateService emailUpdateService;
-    private final AgencyTokenService agencyTokenService;
+    private final CsrsService csrsService;
     private final String lpgUiUrl;
 
     public ChangeEmailController(IdentityService identityService,
                                  EmailUpdateService emailUpdateService,
-                                 AgencyTokenService agencyTokenService,
+                                 CsrsService csrsService,
                                  @Value("${lpg.uiUrl}") String lpgUiUrl) {
         this.identityService = identityService;
         this.emailUpdateService = emailUpdateService;
-        this.agencyTokenService = agencyTokenService;
+        this.csrsService = csrsService;
         this.lpgUiUrl = lpgUiUrl;
     }
 
@@ -108,11 +107,11 @@ public class ChangeEmailController {
 
         log.debug("Attempting update email verification with domain: {}", newDomain);
 
-        if (isAgencyDomain(newDomain)) {
+        if (csrsService.isDomainInAgency(newDomain)) {
             log.debug("New email is agency: oldEmail = {}, newEmail = {}", identity.getEmail(), emailUpdate.getEmail());
             redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getEmail());
             return REDIRECT_ACCOUNT_ENTER_TOKEN + code;
-        } else if (isAllowListed(newDomain)) {
+        } else if (csrsService.getAllowlist().contains(newDomain)) {
             log.debug("New email is allowlisted: oldEmail = {}, newEmail = {}", identity.getEmail(), emailUpdate.getEmail());
             try {
                 emailUpdateService.updateEmailAddress(emailUpdate);
@@ -146,11 +145,4 @@ public class ChangeEmailController {
         return EMAIL_UPDATED_TEMPLATE;
     }
 
-    private boolean isAllowListed(String newDomain) {
-        return identityService.isAllowlistedDomain(newDomain);
-    }
-
-    private boolean isAgencyDomain(String newDomain) {
-        return agencyTokenService.isDomainInAgencyToken(newDomain);
-    }
 }

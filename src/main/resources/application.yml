@@ -28,7 +28,7 @@ logging:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
   level:
     root: ${ROOT_LOGGING_LEVEL:INFO}
-    org.apache.http: WARN
+    org.apache.http: INFO
 
 templates:
   assetCdn: ${ASSET_CDN:}
@@ -80,14 +80,12 @@ lpg:
 
 registry:
   serviceUrl: ${REGISTRY_SERVICE_URL:http://localhost:9002}
-  agencyTokensFormat: "${registry.serviceUrl}/agencyTokens?domain=%s&token=%s&code=%s"
-  agencyTokensByDomainFormat: "${registry.serviceUrl}/agencyTokens?domain=%s"
-  agencyTokensByDomainAndOrganisationFormat: "${registry.serviceUrl}/agencyTokens?domain=%s&code=%s"
   civilServantUrl: "${registry.serviceUrl}/civilServants"
-  domainsUrl: "${registry.serviceUrl}/domains"
-  organisationalUnitsFlatUrl: "${registry.serviceUrl}/organisationalUnits/flat"
+  getOrganisationsMaxPageSize: ${REGISTRY_MAXIMUM_ORGANISATION_PAGE_SIZE:200}
+  organisationalUnitsFlatUrl: "${registry.serviceUrl}/v2/organisationalUnits"
   cache:
-    allowlistTTL: ${ALLOWLIST_TTL:10800000}
+    allowlistTTLSeconds: ${ALLOWLIST_TTL:100000}
+    organisationsTTLSeconds: ${ORGANISATIONS_TTL:100000}
 
 identity:
   identityBaseUrl: ${IDENTITY_BASE_URL:http://identity:8080}
@@ -115,8 +113,8 @@ spring:
     check-template: true
   datasource:
     url: ${DATASOURCE_URL:${database.host}/${database.name}?useSSL=${database.use-ssl}&requireSSL=false}
-    username: ${DATASOURCE_USERNAME:username}
-    password: ${DATASOURCE_PASSWORD:password}
+    username: ${DATASOURCE_USERNAME:root}
+    password: ${DATASOURCE_PASSWORD:my-secret-pw}
     platform: mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
@@ -130,7 +128,7 @@ spring:
         enabled: false
   redis:
     host: ${REDIS_HOST:localhost}
-    password: ${REDIS_PASSWORD:redispassword}
+    password: ${REDIS_PASSWORD:}
     port: ${REDIS_PORT:6379}
   session:
     redis:

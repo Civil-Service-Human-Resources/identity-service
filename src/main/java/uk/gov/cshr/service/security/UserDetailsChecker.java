@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.exception.AccountBlockedException;
 import uk.gov.cshr.exception.InvalidUserDetailsType;
-import uk.gov.cshr.service.CsrsService;
 import uk.gov.cshr.service.InviteService;
+import uk.gov.cshr.service.csrs.CsrsService;
 
 @Component
 public class UserDetailsChecker extends AccountStatusUserDetailsChecker {

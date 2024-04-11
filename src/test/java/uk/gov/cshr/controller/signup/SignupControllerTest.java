@@ -11,18 +11,24 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.cshr.domain.*;
+import uk.gov.cshr.domain.Invite;
+import uk.gov.cshr.domain.InviteStatus;
+import uk.gov.cshr.domain.OrganisationalUnitDto;
+import uk.gov.cshr.domain.TokenRequest;
+import uk.gov.cshr.dto.AgencyTokenDTO;
 import uk.gov.cshr.exception.UnableToAllocateAgencyTokenException;
 import uk.gov.cshr.repository.InviteRepository;
 import uk.gov.cshr.service.AgencyTokenCapacityService;
-import uk.gov.cshr.service.CsrsService;
 import uk.gov.cshr.service.InviteService;
+import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
 import uk.gov.cshr.utils.CsrfRequestPostProcessor;
 import uk.gov.cshr.utils.MockMVCFilterOverrider;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
@@ -439,7 +445,7 @@ public class SignupControllerTest {
         String code = "abc123";
         String email = "test@example.com";
 
-        OrganisationalUnitDto[] organisationalUnits = new OrganisationalUnitDto[]{new OrganisationalUnitDto()};
+        List<OrganisationalUnitDto> organisationalUnits = Collections.singletonList(new OrganisationalUnitDto());
 
         Invite invite = new Invite();
         invite.setForEmail(email);
@@ -448,7 +454,7 @@ public class SignupControllerTest {
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteRepository.findByCode(code)).thenReturn(invite);
 
-        when(csrsService.getOrganisationalUnitsFormatted()).thenReturn(organisationalUnits);
+        when(csrsService.getAllOrganisations()).thenReturn(organisationalUnits);
 
         mockMvc.perform(
                 get("/signup/enterToken/" + code)
@@ -466,12 +472,12 @@ public class SignupControllerTest {
         invite.setForEmail(email);
         invite.setAuthorisedInvite(true);
 
-        OrganisationalUnitDto[] organisationalUnits = new OrganisationalUnitDto[]{new OrganisationalUnitDto()};
+        List<OrganisationalUnitDto> organisationalUnits = Collections.singletonList(new OrganisationalUnitDto());
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteRepository.findByCode(code)).thenReturn(invite);
 
-        when(csrsService.getOrganisationalUnitsFormatted()).thenReturn(organisationalUnits);
+        when(csrsService.getAllOrganisations()).thenReturn(organisationalUnits);
 
         mockMvc.perform(
                 get("/signup/enterToken/" + code)
@@ -511,9 +517,9 @@ public class SignupControllerTest {
         invite.setForEmail(email);
         invite.setAuthorisedInvite(true);
 
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setCapacity(10);
-        Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
+        Optional<AgencyTokenDTO> optionalAgencyToken = Optional.of(agencyToken);
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteRepository.findByCode(code)).thenReturn(invite);
@@ -543,9 +549,9 @@ public class SignupControllerTest {
         invite.setForEmail(email);
         invite.setAuthorisedInvite(true);
 
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setCapacity(10);
-        Optional<AgencyToken> optionalAgencyToken = Optional.of(agencyToken);
+        Optional<AgencyTokenDTO> optionalAgencyToken = Optional.of(agencyToken);
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteRepository.findByCode(code)).thenReturn(invite);
@@ -575,7 +581,7 @@ public class SignupControllerTest {
         invite.setForEmail(email);
         invite.setAuthorisedInvite(true);
 
-        Optional<AgencyToken> emptyOptional = Optional.empty();
+        Optional<AgencyTokenDTO> emptyOptional = Optional.empty();
 
         when(inviteService.isInviteValid(code)).thenReturn(true);
         when(inviteRepository.findByCode(code)).thenReturn(invite);
