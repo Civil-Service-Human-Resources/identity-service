@@ -62,7 +62,7 @@ public class AgencyTokenVerificationControllerTest {
     private static final String EMAIL = "test@example.com";
     private static final String ERROR_TEXT = "There was a problem with this agency token, please try again later";
     private static final String NO_SPACE_AVAIL_TEXT = "No spaces available for this token. Please contact your line manager";
-    private static final String INCORRECT_ORG_TOKEN_TEXT = "Incorrect organisation or token";
+    private static final String INCORRECT_ORG_TOKEN_TEXT = "Incorrect token";
     @Autowired
     private MockMvc mockMvc;
 

@@ -18,4 +18,15 @@ public class AgencyTokenDTO implements Serializable {
     private String token;
     private Integer capacity;
     private List<Domain> agencyDomains = Collections.emptyList();
+
+    public List<Domain> getAgencyDomains() {
+        if (agencyDomains == null) {
+            agencyDomains = Collections.emptyList();
+        }
+        return agencyDomains;
+    }
+
+    public boolean isDomainAssignedToAgencyToken(String domain) {
+        return this.getAgencyDomains().stream().anyMatch(d -> d.getDomain().equals(domain));
+    }
 }

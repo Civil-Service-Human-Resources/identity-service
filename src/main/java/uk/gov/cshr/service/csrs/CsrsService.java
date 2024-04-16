@@ -38,6 +38,18 @@ public class CsrsService {
         return getAllOrganisations().stream().anyMatch(o -> o.isDomainAgencyAssigned(domain));
     }
 
+    public Optional<OrganisationalUnitDto> getOrganisationWithAgencyTokenUid(String agencyTokenUid) {
+        return this.getAllOrganisations()
+                .stream().filter(o -> o.getAgencyToken() != null && o.getAgencyToken().getUid().equals(agencyTokenUid))
+                .findFirst();
+    }
+
+    public boolean isAgencyTokenUidValidForDomain(String agencyTokenUid, String domain) {
+        return getOrganisationWithAgencyTokenUid(agencyTokenUid)
+                .filter(o -> o.isDomainAgencyAssigned(domain))
+                .isPresent();
+    }
+
     public boolean isDomainValid(String domain) {
         return !this.getFilteredOrganisations(domain).isEmpty();
     }

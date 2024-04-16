@@ -40,6 +40,7 @@ public class SignupController {
 
     private static final String INVITE_MODEL = "invite";
     private static final String ORGANISATIONS_ATTRIBUTE = "organisations";
+    private static final String INVITE_CODE_ATTRIBUTE = "inviteCode";
     private static final String TOKEN_INFO_FLASH_ATTRIBUTE = "tokenRequest";
     private static final String REQUEST_INVITE_FORM = "requestInviteForm";
     private static final String SIGNUP_FORM = "signupForm";
@@ -301,13 +302,14 @@ public class SignupController {
         if (invite.isAuthorisedInvite()) {
             return REDIRECT_SIGNUP + code;
         }
-        if (!csrsService.getOrganisationWithCodeAndAgencyDomain(code, invite.getDomain()).isPresent()) {
+        if (!csrsService.getOrganisationWithCodeAndAgencyDomain(organisationCode, invite.getDomain()).isPresent()) {
             return REDIRECT_CHOOSE_ORGANISATION + code;
         }
 
         log.info("Invite email = {} accessing enter token screen for validation with organisation {}", invite.getForEmail(), organisationCode);
 
         model.addAttribute(ENTER_TOKEN_FORM, new EnterTokenForm());
+        model.addAttribute(INVITE_CODE_ATTRIBUTE, code);
 
         return ENTER_TOKEN_TEMPLATE;
     }

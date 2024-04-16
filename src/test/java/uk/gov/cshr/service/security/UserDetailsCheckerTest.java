@@ -22,9 +22,6 @@ public class UserDetailsCheckerTest {
     private static final String UID = "UID";
 
     @Mock
-    private IdentityService identityService;
-
-    @Mock
     private CsrsService csrsService;
 
     @Mock
@@ -40,7 +37,6 @@ public class UserDetailsCheckerTest {
         identity.setEmail(EMAIL_ADDRESS);
         UserDetails userDetails = new IdentityDetails(identity);
 
-        when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
         when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(true);
         Assertions.assertThatCode(() -> userDetailsChecker.check(userDetails))
                 .doesNotThrowAnyException();
@@ -54,9 +50,7 @@ public class UserDetailsCheckerTest {
         identity.setAgencyTokenUid(UID);
         UserDetails userDetails = new IdentityDetails(identity);
 
-        when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(false);
-        when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(true);
+        when(csrsService.isAgencyTokenUidValidForDomain(UID, DOMAIN)).thenReturn(true);
 
         Assertions.assertThatCode(() -> userDetailsChecker.check(userDetails))
                 .doesNotThrowAnyException();
@@ -69,9 +63,6 @@ public class UserDetailsCheckerTest {
         identity.setEmail(EMAIL_ADDRESS);
         UserDetails userDetails = new IdentityDetails(identity);
 
-        when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(false);
-        when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(false);
         when(inviteService.isEmailInvited(EMAIL_ADDRESS)).thenReturn(true);
 
         Assertions.assertThatCode(() -> userDetailsChecker.check(userDetails))
@@ -79,14 +70,27 @@ public class UserDetailsCheckerTest {
     }
 
     @Test(expected = AccountBlockedException.class)
-    public void shouldThrowExceptionIfEmailIsNotallowlistedOrAgencyOrInvited() {
+    public void shouldThrowExceptionIfEmailIsAgencyButNoTokensMatch() {
+        Identity identity = new Identity();
+        identity.setLocked(false);
+        identity.setEmail(EMAIL_ADDRESS);
+        identity.setAgencyTokenUid(UID);
+        UserDetails userDetails = new IdentityDetails(identity);
+
+        when(csrsService.isAgencyTokenUidValidForDomain(UID, DOMAIN)).thenReturn(false);
+        when(inviteService.isEmailInvited(EMAIL_ADDRESS)).thenReturn(false);
+
+        userDetailsChecker.check(userDetails);
+    }
+
+    @Test(expected = AccountBlockedException.class)
+    public void shouldThrowExceptionIfEmailIsNotAllowlisted() {
         Identity identity = new Identity();
         identity.setLocked(false);
         identity.setEmail(EMAIL_ADDRESS);
         UserDetails userDetails = new IdentityDetails(identity);
 
         when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(false);
-        when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(false);
         when(inviteService.isEmailInvited(EMAIL_ADDRESS)).thenReturn(false);
 
         userDetailsChecker.check(userDetails);

@@ -1,6 +1,7 @@
 package uk.gov.cshr.service.security;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import uk.gov.cshr.service.csrs.CsrsService;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class UserDetailsChecker extends AccountStatusUserDetailsChecker {
 
     private final CsrsService csrsService;
@@ -24,10 +26,8 @@ public class UserDetailsChecker extends AccountStatusUserDetailsChecker {
         if (user instanceof IdentityDetails) {
             IdentityDetails userDetails = (IdentityDetails) user;
             Identity identity = userDetails.getIdentity();
-            String email = identity.getEmail();
-            final String domain = identity.getDomain();
 
-            if (!csrsService.isDomainAllowlisted(domain) && !isAgencyDomain(domain, identity) && !isEmailInvited(email)) {
+            if (!isUserValid(identity)) {
                 throw new AccountBlockedException(messages.getMessage("UserDetailsChecker.blocked", "User account is blocked"));
             }
 
@@ -36,11 +36,21 @@ public class UserDetailsChecker extends AccountStatusUserDetailsChecker {
         }
     }
 
-    private boolean isAgencyDomain(String domain, Identity identity) {
-        return csrsService.isDomainInAgency(domain) && identity.getAgencyTokenUid() != null;
-    }
+    private boolean isUserValid(Identity identity) {
+        String email = identity.getEmail();
+        String domain = identity.getDomain();
+        String agencyTokenUid = identity.getAgencyTokenUid();
+        if (inviteService.isEmailInvited(email)) {
+            log.debug(String.format("User %s has a valid invite from another user", identity.getId()));
+            return true;
+        }
+        if (agencyTokenUid != null) {
+            log.debug(String.format("Checking domain %s against agency token %s for user %s", domain, agencyTokenUid, identity.getId()));
+            return csrsService.isAgencyTokenUidValidForDomain(agencyTokenUid, domain);
+        }
 
-    private boolean isEmailInvited(String email) {
-        return inviteService.isEmailInvited(email);
+        log.debug(String.format("Checking domain %s against allowlist for user %s", domain, identity.getId()));
+        return csrsService.isDomainAllowlisted(domain);
+
     }
 }
