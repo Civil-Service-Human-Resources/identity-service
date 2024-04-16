@@ -48,27 +48,13 @@ public class InviteService {
     }
 
     @ReadOnlyProperty
-    public Invite findByForEmail(String email) {
-        return inviteRepository.findByForEmail(email);
-    }
-
-    @ReadOnlyProperty
     public Optional<Invite> findByForEmailAndStatus(String email, InviteStatus status) {
         return inviteRepository.findByForEmailAndStatus(email, status);
     }
 
-    public boolean isCodeExpired(String code) {
-        Invite invite = inviteRepository.findByCode(code);
-        return isInviteCodeExpired(invite);
-    }
-
     public boolean isInviteCodeExpired(Invite invite) {
         long diffInMs = new Date().getTime() - invite.getInvitedAt().getTime();
-
-        if (diffInMs > validityInSeconds * 1000) {
-            return true;
-        }
-        return false;
+        return diffInMs > validityInSeconds * 1000L;
     }
 
     public void updateInviteByCode(String code, InviteStatus newStatus) {
@@ -95,15 +81,20 @@ public class InviteService {
         inviteRepository.save(invite);
     }
 
-    public boolean isInviteValid(String code) {
-        return inviteRepository.existsByCode(code) && !isCodeExpired(code);
-    }
-
-    public boolean isCodeExists(String code) {
-        return inviteRepository.existsByCode(code);
+    public Invite fetchValidInviteWithCode(String code) {
+        Invite invite = inviteRepository.findByCode(code);
+        if (invite != null && isInviteCodeExpired(invite)) {
+            return null;
+        }
+        return invite;
     }
 
     public boolean isEmailInvited(String email) {
         return inviteRepository.existsByForEmailAndInviterIdIsNotNull(email);
+    }
+
+    public void authoriseAndSave(Invite invite) {
+        invite.setAuthorisedInvite(true);
+        inviteRepository.save(invite);
     }
 }

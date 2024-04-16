@@ -274,7 +274,8 @@ public class ChangeEmailControllerTest {
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
 
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
+        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(true);
+        when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(false);
 
         doNothing().when(emailUpdateService).updateEmailAddress(eq(emailUpdate));
 
@@ -304,7 +305,8 @@ public class ChangeEmailControllerTest {
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
 
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
+        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(false);
+        when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(true);
 
         doNothing().when(emailUpdateService).updateEmailAddress(eq(emailUpdate));
 
@@ -335,7 +337,8 @@ public class ChangeEmailControllerTest {
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
 
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
+        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(false);
+        when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(false);
 
         mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
                 .with(request1 -> {
@@ -382,7 +385,9 @@ public class ChangeEmailControllerTest {
         when(emailUpdateService.existsByCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
+
+        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(true);
+        when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(false);
 
         doThrow(new ResourceNotFoundException()).when(emailUpdateService).updateEmailAddress(any(EmailUpdate.class));
 
@@ -416,7 +421,8 @@ public class ChangeEmailControllerTest {
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
 
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
+        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(true);
+        when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(false);
 
         doThrow(new RuntimeException()).when(emailUpdateService).updateEmailAddress(any(EmailUpdate.class));
 

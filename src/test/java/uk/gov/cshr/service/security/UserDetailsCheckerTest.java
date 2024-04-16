@@ -41,8 +41,7 @@ public class UserDetailsCheckerTest {
         UserDetails userDetails = new IdentityDetails(identity);
 
         when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
-
+        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(true);
         Assertions.assertThatCode(() -> userDetailsChecker.check(userDetails))
                 .doesNotThrowAnyException();
     }
@@ -56,7 +55,7 @@ public class UserDetailsCheckerTest {
         UserDetails userDetails = new IdentityDetails(identity);
 
         when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
+        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(false);
         when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(true);
 
         Assertions.assertThatCode(() -> userDetailsChecker.check(userDetails))
@@ -71,7 +70,7 @@ public class UserDetailsCheckerTest {
         UserDetails userDetails = new IdentityDetails(identity);
 
         when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
+        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(false);
         when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(false);
         when(inviteService.isEmailInvited(EMAIL_ADDRESS)).thenReturn(true);
 
@@ -86,8 +85,7 @@ public class UserDetailsCheckerTest {
         identity.setEmail(EMAIL_ADDRESS);
         UserDetails userDetails = new IdentityDetails(identity);
 
-        when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
+        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(false);
         when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(false);
         when(inviteService.isEmailInvited(EMAIL_ADDRESS)).thenReturn(false);
 

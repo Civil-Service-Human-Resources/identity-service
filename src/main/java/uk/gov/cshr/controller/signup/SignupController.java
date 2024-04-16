@@ -14,7 +14,6 @@ import uk.gov.cshr.domain.OrganisationalUnitDto;
 import uk.gov.cshr.domain.TokenRequest;
 import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.exception.UnableToAllocateAgencyTokenException;
-import uk.gov.cshr.repository.InviteRepository;
 import uk.gov.cshr.service.AgencyTokenCapacityService;
 import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.csrs.CsrsService;
@@ -60,8 +59,6 @@ public class SignupController {
 
     private final CsrsService csrsService;
 
-    private final InviteRepository inviteRepository;
-
     private final AgencyTokenCapacityService agencyTokenCapacityService;
 
     private final String lpgUiUrl;
@@ -71,14 +68,12 @@ public class SignupController {
     public SignupController(InviteService inviteService,
                             IdentityService identityService,
                             CsrsService csrsService,
-                            InviteRepository inviteRepository,
                             AgencyTokenCapacityService agencyTokenCapacityService,
                             @Value("${lpg.uiUrl}") String lpgUiUrl,
                             @Value("${invite.durationAfterReRegAllowedInSeconds}") long durationAfterReRegAllowedInSeconds) {
         this.inviteService = inviteService;
         this.identityService = identityService;
         this.csrsService = csrsService;
-        this.inviteRepository = inviteRepository;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
         this.lpgUiUrl = lpgUiUrl;
         this.durationAfterReRegAllowedInSeconds = durationAfterReRegAllowedInSeconds;
@@ -139,7 +134,7 @@ public class SignupController {
             inviteService.sendSelfSignupInvite(email, false);
             return INVITE_SENT_TEMPLATE;
         } else {
-            if (csrsService.getAllowlist().contains(domain)) {
+            if (csrsService.isDomainAllowlisted(domain)) {
                 log.info("Sending invite to allowlisted user {}", email);
                 inviteService.sendSelfSignupInvite(email, true);
                 return INVITE_SENT_TEMPLATE;
@@ -154,41 +149,41 @@ public class SignupController {
     @GetMapping("/{code}")
     public String signup(Model model, @PathVariable(value = "code") String code,
                                             RedirectAttributes redirectAttributes) {
-        if (inviteService.isCodeExists(code)) {
-            if (inviteService.isCodeExpired(code)) {
-                log.info("Signup code for invite is expired - redirecting to signup");
-                redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
-                        "This registration link has now expired.\n" +
-                                "Please re-enter your details to create an account.");
-                inviteService.updateInviteByCode(code, InviteStatus.EXPIRED);
-                return REDIRECT_SIGNUP_REQUEST;
-            } else {
-                Invite invite = inviteRepository.findByCode(code);
-
-                if (!invite.isAuthorisedInvite()) {
-                    log.info("Invite email = {} not yet authorised", invite.getForEmail());
-                    return REDIRECT_CHOOSE_ORGANISATION + code;
-                }
-
-                model.addAttribute(INVITE_MODEL, invite);
-                model.addAttribute(SIGNUP_FORM, new SignupForm());
-
-                if (model.containsAttribute(TOKEN_INFO_FLASH_ATTRIBUTE)) {
-                    TokenRequest tokenRequest = (TokenRequest) model.asMap().get(TOKEN_INFO_FLASH_ATTRIBUTE);
-                    model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, tokenRequest);
-                } else {
-                    model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, new TokenRequest());
-                }
-                log.info("Invite email = {} valid and authorised - redirecting to set password screen", invite.getForEmail());
-                return SIGNUP_TEMPLATE;
-            }
-        } else {
+        Invite invite = inviteService.findByCode(code);
+        if (invite == null) {
             log.info("Signup code for invite is not valid - redirecting to signup");
             redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
                     "This registration link does not match the one sent to you by email.\n " +
                             "Please check the link and try again.");
             return REDIRECT_SIGNUP_REQUEST;
         }
+
+        if (inviteService.isInviteCodeExpired(invite)) {
+            log.info("Signup code for invite is expired - redirecting to signup");
+            redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE,
+                    "This registration link has now expired.\n" +
+                            "Please re-enter your details to create an account.");
+            inviteService.updateInviteByCode(code, InviteStatus.EXPIRED);
+            return REDIRECT_SIGNUP_REQUEST;
+        }
+
+        if (!invite.isAuthorisedInvite()) {
+            log.info("Invite email = {} not yet authorised", invite.getForEmail());
+            return REDIRECT_CHOOSE_ORGANISATION + code;
+        }
+
+        model.addAttribute(INVITE_MODEL, invite);
+        model.addAttribute(SIGNUP_FORM, new SignupForm());
+
+        if (model.containsAttribute(TOKEN_INFO_FLASH_ATTRIBUTE)) {
+            TokenRequest tokenRequest = (TokenRequest) model.asMap().get(TOKEN_INFO_FLASH_ATTRIBUTE);
+            model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, tokenRequest);
+        } else {
+            model.addAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, new TokenRequest());
+        }
+        log.info("Invite email = {} valid and authorised - redirecting to set password screen", invite.getForEmail());
+        return SIGNUP_TEMPLATE;
+
     }
 
     @PostMapping("/{code}")
@@ -199,66 +194,63 @@ public class SignupController {
                          @ModelAttribute TokenRequest tokenRequest,
                          Model model,
                          RedirectAttributes redirectAttributes) {
-        if (signUpFormBindingResult.hasErrors()) {
-            model.addAttribute(INVITE_MODEL, inviteRepository.findByCode(code));
-            return SIGNUP_TEMPLATE;
-        }
-
-        if (inviteService.isInviteValid(code)) {
-            Invite invite = inviteRepository.findByCode(code);
-            if (!invite.isAuthorisedInvite()) {
-                return REDIRECT_CHOOSE_ORGANISATION + code;
-            }
-
-            log.info("Invite and signup credentials valid - creating identity and updating invite to 'Accepted'");
-            try {
-                identityService.createIdentityFromInviteCode(code, signupForm.getPassword(), tokenRequest);
-            } catch (UnableToAllocateAgencyTokenException e) {
-                log.info("UnableToAllocateAgencyTokenException. Redirecting to set password with no spaces error: " + e);
-
-                model.addAttribute(INVITE_MODEL, invite);
-                redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.SIGNUP_NO_SPACES_AVAILABLE_ERROR_MESSAGE);
-                redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, tokenRequest);
-                return REDIRECT_SIGNUP + code;
-            } catch (ResourceNotFoundException e) {
-                log.info("ResourceNotFoundException. Redirecting to set password with error: " + e);
-
-                model.addAttribute(INVITE_MODEL, invite);
-                redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.SIGNUP_RESOURCE_NOT_FOUND_ERROR_MESSAGE);
-
-                return REDIRECT_LOGIN;
-            }
-            inviteService.updateInviteByCode(code, InviteStatus.ACCEPTED);
-
-            // This provides the next template the URL for LPG-UI so a user can begin the login process
-            model.addAttribute(LPG_UI_URL, lpgUiUrl);
-
-            return SIGNUP_SUCCESS_TEMPLATE;
-        } else {
+        Invite invite = inviteService.fetchValidInviteWithCode(code);
+        if (invite == null) {
             return REDIRECT_LOGIN;
         }
+        if (signUpFormBindingResult.hasErrors()) {
+            model.addAttribute(INVITE_MODEL, invite);
+            return SIGNUP_TEMPLATE;
+        }
+        if (!invite.isAuthorisedInvite()) {
+            return REDIRECT_CHOOSE_ORGANISATION + code;
+        }
+
+        log.info("Invite and signup credentials valid - creating identity and updating invite to 'Accepted'");
+        try {
+            identityService.createIdentityFromInviteCode(code, signupForm.getPassword(), tokenRequest);
+        } catch (UnableToAllocateAgencyTokenException e) {
+            log.info("UnableToAllocateAgencyTokenException. Redirecting to set password with no spaces error: " + e);
+
+            model.addAttribute(INVITE_MODEL, invite);
+            redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.SIGNUP_NO_SPACES_AVAILABLE_ERROR_MESSAGE);
+            redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, tokenRequest);
+            return REDIRECT_SIGNUP + code;
+        } catch (ResourceNotFoundException e) {
+            log.info("ResourceNotFoundException. Redirecting to set password with error: " + e);
+
+            model.addAttribute(INVITE_MODEL, invite);
+            redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.SIGNUP_RESOURCE_NOT_FOUND_ERROR_MESSAGE);
+
+            return REDIRECT_LOGIN;
+        }
+        inviteService.updateInviteByCode(code, InviteStatus.ACCEPTED);
+
+        // This provides the next template the URL for LPG-UI so a user can begin the login process
+        model.addAttribute(LPG_UI_URL, lpgUiUrl);
+
+        return SIGNUP_SUCCESS_TEMPLATE;
     }
 
     @GetMapping(path = "chooseOrganisation/{code}")
     public String enterOrganisation(Model model, @PathVariable(value = "code") String code) {
-        if (inviteService.isInviteValid(code)) {
-            Invite invite = inviteRepository.findByCode(code);
-            if (invite.isAuthorisedInvite()) {
-                return REDIRECT_SIGNUP + code;
-            }
-
-            log.info("Invite email = {} accessing enter organisation screen for validation", invite.getForEmail());
-
-            String domain = invite.getDomain();
-            List<OrganisationalUnitDto> organisations = csrsService.getFilteredOrganisations(domain);
-
-            model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
-            model.addAttribute(CHOOSE_ORGANISATION_FORM, new ChooseOrganisationForm());
-
-            return CHOOSE_ORGANISATION_TEMPLATE;
-        } else {
+        Invite invite = inviteService.fetchValidInviteWithCode(code);
+        if (invite == null) {
             return REDIRECT_LOGIN;
         }
+        if (invite.isAuthorisedInvite()) {
+            return REDIRECT_SIGNUP + code;
+        }
+
+        log.info("Invite email = {} accessing enter organisation screen for validation", invite.getForEmail());
+
+        String domain = invite.getDomain();
+        List<OrganisationalUnitDto> organisations = csrsService.getFilteredOrganisations(domain);
+
+        model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
+        model.addAttribute(CHOOSE_ORGANISATION_FORM, new ChooseOrganisationForm());
+
+        return CHOOSE_ORGANISATION_TEMPLATE;
     }
 
     @PostMapping(path = "chooseOrganisation/{code}")
@@ -269,57 +261,55 @@ public class SignupController {
             model.addAttribute(CHOOSE_ORGANISATION_FORM, form);
             return CHOOSE_ORGANISATION_TEMPLATE;
         }
-        if (inviteService.isInviteValid(code)) {
-            Invite invite = inviteRepository.findByCode(code);
-            if (invite.isAuthorisedInvite()) {
-                return REDIRECT_SIGNUP + code;
-            }
-            String orgCode = form.getOrganisation();
-
-            log.info("Invite email = {} selected organisation {}", invite.getForEmail(), orgCode);
-
-            String domain = invite.getDomain();
-            List<OrganisationalUnitDto> organisations = csrsService.getAllOrganisations();
-            Optional<OrganisationalUnitDto> selectedOrgOpt = organisations.stream().filter(o -> o.getCode().equals(orgCode)).findFirst();
-            if (selectedOrgOpt.isPresent()) {
-                OrganisationalUnitDto selectedOrg = selectedOrgOpt.get();
-                if (selectedOrg.isDomainAgencyAssigned(domain)) {
-                    return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
-                } else if (selectedOrg.isDomainLinked(domain)) {
-                    invite.setAuthorisedInvite(true);
-                    inviteRepository.save(invite);
-                    return REDIRECT_SIGNUP + code;
-                }
-            }
-            model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
-            model.addAttribute(CHOOSE_ORGANISATION_FORM, form);
-            return CHOOSE_ORGANISATION_TEMPLATE;
-        } else {
+        Invite invite = inviteService.fetchValidInviteWithCode(code);
+        if (invite == null) {
             return REDIRECT_LOGIN;
         }
+        if (invite.isAuthorisedInvite()) {
+            return REDIRECT_SIGNUP + code;
+        }
+        String orgCode = form.getOrganisation();
+
+        log.info("Invite email = {} selected organisation {}", invite.getForEmail(), orgCode);
+
+        String domain = invite.getDomain();
+        List<OrganisationalUnitDto> organisations = csrsService.getAllOrganisations();
+        return organisations.stream().filter(o -> o.getCode().equals(orgCode)).findFirst()
+                .map(selectedOrg -> {
+                    if (selectedOrg.isDomainAgencyAssigned(domain)) {
+                        return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
+                    } else if (selectedOrg.isDomainLinked(domain)) {
+                        inviteService.authoriseAndSave(invite);
+                        return REDIRECT_SIGNUP + code;
+                    }
+                    return null;
+                })
+                .orElseGet(() -> {
+                    model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
+                    model.addAttribute(CHOOSE_ORGANISATION_FORM, form);
+                    return CHOOSE_ORGANISATION_TEMPLATE;
+                });
     }
 
     @GetMapping(path = "enterToken/{code}/{organisationCode}")
     public String enterToken(Model model, @PathVariable(value = "code") String code,
                              @PathVariable(value = "organisationCode") String organisationCode) {
-        if (inviteService.isInviteValid(code)) {
-            Invite invite = inviteRepository.findByCode(code);
-            if (invite.isAuthorisedInvite()) {
-                return REDIRECT_SIGNUP + code;
-            }
-            if (csrsService.getAllOrganisations().stream()
-                    .noneMatch(o -> o.getCode().equals(organisationCode) && o.isDomainAgencyAssigned(invite.getDomain()))) {
-                return REDIRECT_CHOOSE_ORGANISATION + code;
-            }
-
-            log.info("Invite email = {} accessing enter token screen for validation with organisation {}", invite.getForEmail(), organisationCode);
-
-            model.addAttribute(ENTER_TOKEN_FORM, new EnterTokenForm());
-
-            return ENTER_TOKEN_TEMPLATE;
-        } else {
+        Invite invite = inviteService.fetchValidInviteWithCode(code);
+        if (invite == null) {
             return REDIRECT_LOGIN;
         }
+        if (invite.isAuthorisedInvite()) {
+            return REDIRECT_SIGNUP + code;
+        }
+        if (!csrsService.getOrganisationWithCodeAndAgencyDomain(code, invite.getDomain()).isPresent()) {
+            return REDIRECT_CHOOSE_ORGANISATION + code;
+        }
+
+        log.info("Invite email = {} accessing enter token screen for validation with organisation {}", invite.getForEmail(), organisationCode);
+
+        model.addAttribute(ENTER_TOKEN_FORM, new EnterTokenForm());
+
+        return ENTER_TOKEN_TEMPLATE;
     }
 
     @PostMapping(path = "enterToken/{code}/{organisationCode}")
@@ -331,38 +321,34 @@ public class SignupController {
             model.addAttribute(CHOOSE_ORGANISATION_FORM, form);
             return CHOOSE_ORGANISATION_TEMPLATE;
         }
-        if (inviteService.isInviteValid(code)) {
-            Invite invite = inviteRepository.findByCode(code);
-
-            final String domain = invite.getDomain();
-
-            return csrsService.getAgencyTokenForDomainTokenOrganisation(domain, form.getToken(), orgCode)
-                    .map(agencyToken -> {
-                        if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
-                            log.info("Agency token uid = {}, capacity = {}, has no spaces available. User {} unable to signup", agencyToken.getUid(), agencyToken.getCapacity(),
-                                    invite.getForEmail());
-                            redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.NO_SPACES_AVAILABLE_ERROR_MESSAGE);
-                            return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
-                        }
-
-                        invite.setAuthorisedInvite(true);
-                        inviteRepository.save(invite);
-
-                        model.addAttribute(INVITE_MODEL, invite);
-
-                        redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, addAgencyTokenInfo(domain, form.getToken(), orgCode));
-
-                        log.info("Enter token form has passed domain, token, organisation validation");
-
-                        return REDIRECT_SIGNUP + code;
-                    }).orElseGet(() -> {
-                        log.info("Enter token form has failed domain, token, organisation validation");
-                        redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.ENTER_TOKEN_ERROR_MESSAGE);
-                        return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
-                    });
-        } else {
+        Invite invite = inviteService.fetchValidInviteWithCode(code);
+        if (invite == null) {
             return REDIRECT_LOGIN;
         }
+
+        final String domain = invite.getDomain();
+
+        return csrsService.getAgencyTokenForDomainTokenOrganisation(domain, form.getToken(), orgCode)
+                .map(agencyToken -> {
+                    if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
+                        log.info("Agency token uid = {}, capacity = {}, has no spaces available. User {} unable to signup", agencyToken.getUid(), agencyToken.getCapacity(),
+                                invite.getForEmail());
+                        redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.NO_SPACES_AVAILABLE_ERROR_MESSAGE);
+                        return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
+                    }
+
+                    inviteService.authoriseAndSave(invite);
+                    model.addAttribute(INVITE_MODEL, invite);
+                    redirectAttributes.addFlashAttribute(TOKEN_INFO_FLASH_ATTRIBUTE, addAgencyTokenInfo(domain, form.getToken(), orgCode));
+
+                    log.info("Enter token form has passed domain, token, organisation validation");
+
+                    return REDIRECT_SIGNUP + code;
+                }).orElseGet(() -> {
+                    log.info("Enter token form has failed domain, token, organisation validation");
+                    redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.ENTER_TOKEN_ERROR_MESSAGE);
+                    return REDIRECT_ENTER_TOKEN + String.format("%s/%s", code, orgCode);
+                });
     }
 
     private TokenRequest addAgencyTokenInfo(String domain, String token, String org) {

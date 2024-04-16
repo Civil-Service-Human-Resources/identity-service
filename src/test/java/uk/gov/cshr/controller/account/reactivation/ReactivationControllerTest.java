@@ -14,6 +14,7 @@ import uk.gov.cshr.domain.Reactivation;
 import uk.gov.cshr.domain.ReactivationStatus;
 import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.service.ReactivationService;
+import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
 import uk.gov.cshr.utils.MockMVCFilterOverrider;
@@ -45,6 +46,9 @@ public class ReactivationControllerTest {
     private ReactivationService reactivationService;
 
     @MockBean
+    private CsrsService csrsService;
+
+    @MockBean
     private IdentityService identityService;
 
     @Before
@@ -53,30 +57,13 @@ public class ReactivationControllerTest {
     }
 
     @Test
-    public void shouldRedirectIfAccountIsAgencyAndallowlisted() throws Exception {
+    public void shouldRedirectIfAccountIsAgency() throws Exception {
         Reactivation reactivation = new Reactivation();
         reactivation.setEmail(EMAIL_ADDRESS);
 
         when(reactivationService.getReactivationByCodeAndStatus(CODE, ReactivationStatus.PENDING)).thenReturn(reactivation);
         when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
-
-        doNothing().when(reactivationService).reactivateIdentity(reactivation);
-
-        mockMvc.perform(
-                get("/account/reactivate/" + CODE))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/account/verify/agency/" + CODE));
-    }
-
-    @Test
-    public void shouldRedirectIfAccountIsAgencyAndNotallowlisted() throws Exception {
-        Reactivation reactivation = new Reactivation();
-        reactivation.setEmail(EMAIL_ADDRESS);
-
-        when(reactivationService.getReactivationByCodeAndStatus(CODE, ReactivationStatus.PENDING)).thenReturn(reactivation);
-        when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
+        when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(true);
 
         doNothing().when(reactivationService).reactivateIdentity(reactivation);
 
@@ -93,7 +80,6 @@ public class ReactivationControllerTest {
 
         when(reactivationService.getReactivationByCodeAndStatus(CODE, ReactivationStatus.PENDING)).thenReturn(reactivation);
         when(identityService.getDomainFromEmailAddress(EMAIL_ADDRESS)).thenReturn(DOMAIN);
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
 
         doNothing().when(reactivationService).reactivateIdentity(reactivation);
 

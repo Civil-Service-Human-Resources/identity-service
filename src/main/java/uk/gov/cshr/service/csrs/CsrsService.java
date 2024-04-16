@@ -8,6 +8,7 @@ import uk.gov.cshr.domain.OrganisationalUnitDto;
 import uk.gov.cshr.dto.AgencyTokenDTO;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,12 +26,27 @@ public class CsrsService {
         return organisationalUnitDtos.stream().flatMap(o -> o.getDomains().stream()).collect(Collectors.toList());
     }
 
+    public boolean isDomainAllowlisted(String domain) {
+        return this.getAllowlist().contains(domain.toLowerCase(Locale.ROOT));
+    }
+
     public List<OrganisationalUnitDto> getFilteredOrganisations(String domain) {
         return this.getAllOrganisations().stream().filter(o -> o.doesDomainExist(domain)).collect(Collectors.toList());
     }
 
     public Boolean isDomainInAgency(String domain) {
         return getAllOrganisations().stream().anyMatch(o -> o.isDomainAgencyAssigned(domain));
+    }
+
+    public boolean isDomainValid(String domain) {
+        return !this.getFilteredOrganisations(domain).isEmpty();
+    }
+
+    public Optional<OrganisationalUnitDto> getOrganisationWithCodeAndAgencyDomain(String organisationCode, String domain) {
+        return this.getAllOrganisations()
+                .stream().filter(o -> o.getCode().equals(organisationCode))
+                .filter(o -> o.isDomainAgencyAssigned(domain))
+                .findFirst();
     }
 
     public Optional<AgencyTokenDTO> getAgencyTokenForDomainTokenOrganisation(String domain, String token, String organisationCode) {

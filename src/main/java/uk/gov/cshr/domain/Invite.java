@@ -47,4 +47,5 @@ public class Invite implements Serializable {
     public String getDomain() {
         return forEmail.substring(forEmail.indexOf('@') + 1);
     }
+    
 }

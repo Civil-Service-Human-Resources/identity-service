@@ -111,7 +111,7 @@ public class ChangeEmailController {
             log.debug("New email is agency: oldEmail = {}, newEmail = {}", identity.getEmail(), emailUpdate.getEmail());
             redirectAttributes.addFlashAttribute(EMAIL_ATTRIBUTE, emailUpdate.getEmail());
             return REDIRECT_ACCOUNT_ENTER_TOKEN + code;
-        } else if (csrsService.getAllowlist().contains(newDomain)) {
+        } else if (csrsService.isDomainAllowlisted(newDomain)) {
             log.debug("New email is allowlisted: oldEmail = {}, newEmail = {}", identity.getEmail(), emailUpdate.getEmail());
             try {
                 emailUpdateService.updateEmailAddress(emailUpdate);

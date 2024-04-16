@@ -9,7 +9,6 @@ import uk.gov.cshr.domain.factory.InviteFactory;
 import uk.gov.cshr.repository.InviteRepository;
 import uk.gov.service.notify.NotificationClientException;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 import static junit.framework.TestCase.assertFalse;
@@ -63,7 +62,7 @@ public class InviteServiceTest {
         when(inviteRepository.findByCode(code))
                 .thenReturn(invite);
 
-        MatcherAssert.assertThat(inviteService.isCodeExpired(code), equalTo(true));
+        MatcherAssert.assertThat(inviteService.isInviteCodeExpired(invite), equalTo(true));
     }
 
     @Test
@@ -78,7 +77,7 @@ public class InviteServiceTest {
         when(inviteRepository.findByCode(code))
                 .thenReturn(invite);
 
-        MatcherAssert.assertThat(inviteService.isCodeExpired(code), equalTo(false));
+        MatcherAssert.assertThat(inviteService.isInviteCodeExpired(invite), equalTo(false));
     }
 
     @Test

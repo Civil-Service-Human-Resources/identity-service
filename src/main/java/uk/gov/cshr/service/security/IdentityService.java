@@ -120,7 +120,7 @@ public class IdentityService implements UserDetailsService {
                     .orElseThrow(ResourceNotFoundException::new);
 
             log.info("Identity request has agency uid = {}", agencyTokenUid);
-        } else if (!isAllowlistedDomain(domain) && !isEmailInvitedViaIDM(invite.getForEmail())) {
+        } else if (!csrsService.isDomainAllowlisted(domain) && !isEmailInvitedViaIDM(invite.getForEmail())) {
             log.info("Invited request neither agency, nor allowlisted, nor invited via IDM: {}", invite);
             throw new ResourceNotFoundException();
         }
@@ -241,7 +241,7 @@ public class IdentityService implements UserDetailsService {
 
     public boolean checkValidEmail(String email) {
         final String domain = getDomainFromEmailAddress(email);
-        return (isAllowlistedDomain(domain) || csrsService.isDomainInAgency(domain));
+        return csrsService.isDomainValid(domain);
     }
 
     private boolean requestHasTokenData(TokenRequest tokenRequest) {
@@ -266,7 +266,4 @@ public class IdentityService implements UserDetailsService {
         return inviteService.isEmailInvited(email);
     }
 
-    public boolean isAllowlistedDomain(String domain) {
-        return csrsService.getAllowlist().contains(domain.toLowerCase());
-    }
 }
