@@ -16,6 +16,7 @@ import uk.gov.cshr.service.security.OAuthToken;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -68,10 +69,15 @@ public class CsrsServiceClient {
         List<OrganisationalUnitDto> organisationalUnits = new ArrayList<>();
         GetOrganisationsResponse initialResponse = getOrganisations(1, 0);
         if (initialResponse.getTotalElements() >= 1) {
-            organisationalUnits = IntStream.range(0, (int) Math.ceil((double) initialResponse.getTotalElements() / getOrganisationsMaxPageSize))
+            List<CompletableFuture<List<OrganisationalUnitDto>>> futures = IntStream.range(0, (int) Math.ceil((double) initialResponse.getTotalElements() / getOrganisationsMaxPageSize))
                     .boxed()
-                    .flatMap(i -> getOrganisations(getOrganisationsMaxPageSize, i).getContent().stream()).collect(Collectors.toList());
+                    .map(i -> CompletableFuture.supplyAsync(() -> getOrganisations(getOrganisationsMaxPageSize, i).getContent())).collect(Collectors.toList());
+
+            organisationalUnits = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                    .thenApply(i -> futures.stream().flatMap(listCompletableFuture -> listCompletableFuture.join().stream()).collect(Collectors.toList())).join();
+
         }
+        log.info(String.format("%s", organisationalUnits.size()));
         return organisationalUnits;
     }
 
