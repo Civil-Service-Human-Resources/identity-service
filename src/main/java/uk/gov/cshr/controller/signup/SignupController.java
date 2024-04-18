@@ -274,7 +274,7 @@ public class SignupController {
         log.info("Invite email = {} selected organisation {}", invite.getForEmail(), orgCode);
 
         String domain = invite.getDomain();
-        List<OrganisationalUnitDto> organisations = csrsService.getAllOrganisations();
+        List<OrganisationalUnitDto> organisations = csrsService.getFilteredOrganisations(domain);
         return organisations.stream().filter(o -> o.getCode().equals(orgCode)).findFirst()
                 .map(selectedOrg -> {
                     if (selectedOrg.isDomainAgencyAssigned(domain)) {

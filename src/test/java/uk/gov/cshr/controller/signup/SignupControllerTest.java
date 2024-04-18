@@ -456,7 +456,7 @@ public class SignupControllerTest {
         List<OrganisationalUnitDto> orgs = Collections.singletonList(org);
         Invite invite = generateBasicInvite(false);
         when(inviteService.fetchValidInviteWithCode(GENERIC_CODE)).thenReturn(invite);
-        when(csrsService.getAllOrganisations()).thenReturn(orgs);
+        when(csrsService.getFilteredOrganisations(GENERIC_DOMAIN)).thenReturn(orgs);
         mockMvc.perform(
                         post("/signup/chooseOrganisation/" + GENERIC_CODE)
                                 .with(CsrfRequestPostProcessor.csrf())
@@ -473,7 +473,7 @@ public class SignupControllerTest {
         List<OrganisationalUnitDto> orgs = Collections.singletonList(org);
         Invite invite = generateBasicInvite(false);
         when(inviteService.fetchValidInviteWithCode(GENERIC_CODE)).thenReturn(invite);
-        when(csrsService.getAllOrganisations()).thenReturn(orgs);
+        when(csrsService.getFilteredOrganisations(GENERIC_DOMAIN)).thenReturn(orgs);
         mockMvc.perform(
                         post("/signup/chooseOrganisation/" + GENERIC_CODE)
                                 .with(CsrfRequestPostProcessor.csrf())
