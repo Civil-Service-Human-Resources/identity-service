@@ -260,6 +260,7 @@ public class SignupController {
                                      BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             model.addAttribute(CHOOSE_ORGANISATION_FORM, form);
+            model.addAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.CHOOSE_ORGANISATION_ERROR_MESSAGE);
             return CHOOSE_ORGANISATION_TEMPLATE;
         }
         Invite invite = inviteService.fetchValidInviteWithCode(code);
@@ -288,6 +289,7 @@ public class SignupController {
                 .orElseGet(() -> {
                     model.addAttribute(ORGANISATIONS_ATTRIBUTE, organisations);
                     model.addAttribute(CHOOSE_ORGANISATION_FORM, form);
+                    model.addAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.CHOOSE_ORGANISATION_ERROR_MESSAGE);
                     return CHOOSE_ORGANISATION_TEMPLATE;
                 });
     }

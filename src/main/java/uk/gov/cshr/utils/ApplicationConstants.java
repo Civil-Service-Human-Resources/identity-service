@@ -5,6 +5,7 @@ public class ApplicationConstants {
     public static final String STATUS_ATTRIBUTE = "status";
 
     public static final String ENTER_TOKEN_ERROR_MESSAGE = "Incorrect token";
+    public static final String CHOOSE_ORGANISATION_ERROR_MESSAGE = "Incorrect organisation";
 
     public static final String NO_SPACES_AVAILABLE_ERROR_MESSAGE = "No spaces available for this token. Please contact your line manager";
 
