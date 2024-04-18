@@ -302,7 +302,7 @@ public class SignupController {
         if (invite.isAuthorisedInvite()) {
             return REDIRECT_SIGNUP + code;
         }
-        if (!csrsService.getOrganisationWithCodeAndAgencyDomain(organisationCode, invite.getDomain()).isPresent()) {
+        if (!csrsService.isAgencyTokenUidValidForOrgAndDomain(organisationCode, invite.getDomain())) {
             return REDIRECT_CHOOSE_ORGANISATION + code;
         }
 

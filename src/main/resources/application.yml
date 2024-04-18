@@ -83,6 +83,8 @@ registry:
   civilServantUrl: "${registry.serviceUrl}/civilServants"
   getOrganisationsMaxPageSize: ${REGISTRY_MAXIMUM_ORGANISATION_PAGE_SIZE:200}
   organisationalUnitsFlatUrl: "${registry.serviceUrl}/v2/organisationalUnits"
+  agencyTokensUrl: "${registry.serviceUrl}/agencyTokens"
+  domainsUrl: "${registry.serviceUrl}/domains"
   cache:
     allowlistTTLSeconds: ${ALLOWLIST_TTL:100000}
     organisationsTTLSeconds: ${ORGANISATIONS_TTL:100000}

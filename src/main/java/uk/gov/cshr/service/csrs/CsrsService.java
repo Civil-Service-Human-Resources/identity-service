@@ -22,8 +22,7 @@ public class CsrsService {
 
     @Cacheable("allowlist")
     public List<String> getAllowlist() {
-        List<OrganisationalUnitDto> organisationalUnitDtos = csrsServiceClient.getAllOrganisations();
-        return organisationalUnitDtos.stream().flatMap(o -> o.getDomains().stream()).collect(Collectors.toList());
+        return csrsServiceClient.getAllowlist();
     }
 
     public boolean isDomainAllowlisted(String domain) {
@@ -34,39 +33,26 @@ public class CsrsService {
         return this.getAllOrganisations().stream().filter(o -> o.doesDomainExist(domain)).collect(Collectors.toList());
     }
 
-    public Boolean isDomainInAgency(String domain) {
-        return getAllOrganisations().stream().anyMatch(o -> o.isDomainAgencyAssigned(domain));
-    }
-
-    public Optional<OrganisationalUnitDto> getOrganisationWithAgencyTokenUid(String agencyTokenUid) {
-        return this.getAllOrganisations()
-                .stream().filter(o -> o.getAgencyToken() != null && o.getAgencyToken().getUid().equals(agencyTokenUid))
-                .findFirst();
+    public boolean isDomainInAgency(String domain) {
+        return csrsServiceClient.isDomainInAnAgencyToken(domain);
     }
 
     public boolean isAgencyTokenUidValidForDomain(String agencyTokenUid, String domain) {
-        return getOrganisationWithAgencyTokenUid(agencyTokenUid)
-                .filter(o -> o.isDomainAgencyAssigned(domain))
-                .isPresent();
+        return csrsServiceClient.getAgencyTokenWithUid(agencyTokenUid)
+                .map(token -> token.getUid().equals(agencyTokenUid) && token.isDomainAssignedToAgencyToken(domain))
+                .orElse(false);
     }
 
     public boolean isDomainValid(String domain) {
         return !this.getFilteredOrganisations(domain).isEmpty();
     }
 
-    public Optional<OrganisationalUnitDto> getOrganisationWithCodeAndAgencyDomain(String organisationCode, String domain) {
-        return this.getAllOrganisations()
-                .stream().filter(o -> o.getCode().equals(organisationCode))
-                .filter(o -> o.isDomainAgencyAssigned(domain))
-                .findFirst();
+    public boolean isAgencyTokenUidValidForOrgAndDomain(String organisationCode, String domain) {
+        return csrsServiceClient.isDomainInAnAgencyTokenWithOrg(domain, organisationCode);
     }
 
     public Optional<AgencyTokenDTO> getAgencyTokenForDomainTokenOrganisation(String domain, String token, String organisationCode) {
-        return this.getAllOrganisations()
-                .stream().filter(o -> o.getCode().equals(organisationCode))
-                .filter(o -> o.getAgencyToken() != null && o.getAgencyToken().getToken().equals(token) && o.isDomainAgencyAssigned(domain))
-                .findFirst()
-                .map(OrganisationalUnitDto::getAgencyToken);
+        return csrsServiceClient.getAgencyToken(domain, token, organisationCode);
     }
 
     @Cacheable("organisations")

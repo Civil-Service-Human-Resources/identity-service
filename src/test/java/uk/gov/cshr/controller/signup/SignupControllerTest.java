@@ -508,8 +508,7 @@ public class SignupControllerTest {
 
         Invite invite = generateBasicInvite(false);
         when(inviteService.fetchValidInviteWithCode(GENERIC_CODE)).thenReturn(invite);
-        when(csrsService.getOrganisationWithCodeAndAgencyDomain(GENERIC_ORG_CODE, GENERIC_DOMAIN))
-                .thenReturn(Optional.of(new OrganisationalUnitDto()));
+        when(csrsService.isAgencyTokenUidValidForOrgAndDomain(GENERIC_ORG_CODE, GENERIC_DOMAIN)).thenReturn(true);
 
         mockMvc.perform(
                 get(enterTokenUrl())
