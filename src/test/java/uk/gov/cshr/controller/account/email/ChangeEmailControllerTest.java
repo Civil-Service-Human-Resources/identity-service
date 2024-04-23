@@ -20,8 +20,8 @@ import uk.gov.cshr.config.SpringSecurityTestConfig;
 import uk.gov.cshr.domain.EmailUpdate;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.exception.ResourceNotFoundException;
-import uk.gov.cshr.service.AgencyTokenService;
 import uk.gov.cshr.service.EmailUpdateService;
+import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
@@ -29,9 +29,7 @@ import uk.gov.cshr.utils.CsrfRequestPostProcessor;
 import uk.gov.cshr.utils.MockMVCFilterOverrider;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -71,7 +69,7 @@ public class ChangeEmailControllerTest {
     private EmailUpdateService emailUpdateService;
 
     @MockBean
-    private AgencyTokenService agencyTokenService;
+    private CsrsService csrsService;
 
     @Captor
     private ArgumentCaptor<Identity> identityArgumentCaptor;
@@ -85,7 +83,7 @@ public class ChangeEmailControllerTest {
         changeEmailController = new ChangeEmailController(
                 identityService,
                 emailUpdateService,
-                agencyTokenService,
+                csrsService,
                 lpgUiUrl);
     }
 
@@ -276,8 +274,8 @@ public class ChangeEmailControllerTest {
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
 
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
-        when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(false);
+        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(true);
+        when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(false);
 
         doNothing().when(emailUpdateService).updateEmailAddress(eq(emailUpdate));
 
@@ -307,8 +305,8 @@ public class ChangeEmailControllerTest {
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
 
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
-        when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(true);
+        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(false);
+        when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(true);
 
         doNothing().when(emailUpdateService).updateEmailAddress(eq(emailUpdate));
 
@@ -339,8 +337,8 @@ public class ChangeEmailControllerTest {
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
 
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(false);
-        when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(false);
+        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(false);
+        when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(false);
 
         mockMvc.perform(get(VERIFY_EMAIL_PATH + VERIFY_CODE)
                 .with(request1 -> {
@@ -384,12 +382,12 @@ public class ChangeEmailControllerTest {
         emailUpdate.setCode(VERIFY_CODE);
         emailUpdate.setEmail(identity.getEmail());
 
-        when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(false);
         when(emailUpdateService.existsByCode(VERIFY_CODE)).thenReturn(true);
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
-        when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(false);
+
+        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(true);
+        when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(false);
 
         doThrow(new ResourceNotFoundException()).when(emailUpdateService).updateEmailAddress(any(EmailUpdate.class));
 
@@ -423,8 +421,8 @@ public class ChangeEmailControllerTest {
         when(emailUpdateService.getEmailUpdateByCode(VERIFY_CODE)).thenReturn(emailUpdate);
         when(identityService.getDomainFromEmailAddress(identity.getEmail())).thenReturn(DOMAIN);
 
-        when(identityService.isAllowlistedDomain(DOMAIN)).thenReturn(true);
-        when(agencyTokenService.isDomainInAgencyToken(DOMAIN)).thenReturn(false);
+        when(csrsService.isDomainAllowlisted(DOMAIN)).thenReturn(true);
+        when(csrsService.isDomainInAgency(DOMAIN)).thenReturn(false);
 
         doThrow(new RuntimeException()).when(emailUpdateService).updateEmailAddress(any(EmailUpdate.class));
 

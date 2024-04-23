@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import uk.gov.cshr.domain.*;
+import uk.gov.cshr.dto.AgencyTokenDTO;
 import uk.gov.cshr.dto.BatchProcessResponse;
 import uk.gov.cshr.exception.AccountDeactivatedException;
 import uk.gov.cshr.exception.IdentityNotFoundException;
@@ -20,6 +21,7 @@ import uk.gov.cshr.exception.PendingReactivationExistsException;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.*;
+import uk.gov.cshr.service.csrs.CsrsService;
 
 import java.time.Instant;
 import java.util.*;
@@ -92,7 +94,6 @@ public class IdentityServiceTest {
                 reactivationService
         );
         request = new MockHttpServletRequest();
-        when(csrsService.getAllowlist()).thenReturn(Arrays.asList("allowlisted.gov.uk", "example.com"));
     }
 
     @Test
@@ -187,7 +188,7 @@ public class IdentityServiceTest {
         TokenRequest tokenRequest = new TokenRequest();
 
         when(inviteService.findByCode(code)).thenReturn(invite);
-
+        when(csrsService.isDomainAllowlisted("example.com")).thenReturn(true);
         when(passwordEncoder.encode("password")).thenReturn("password");
 
         identityService.setInviteService(inviteService);
@@ -229,7 +230,7 @@ public class IdentityServiceTest {
         tokenRequest.setToken(tokenToken);
 
         String uid = "UID";
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(uid);
 
         when(inviteService.findByCode(code)).thenReturn(invite);
@@ -354,7 +355,7 @@ public class IdentityServiceTest {
         Identity identityParam = new Identity();
         identityParam.setId(new Long(123l));
         identityParam.setRoles(new HashSet<>());
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(UID);
         when(identityRepository.save(identityArgumentCaptor.capture())).thenReturn(new Identity());
 
@@ -368,30 +369,17 @@ public class IdentityServiceTest {
     }
 
     @Test
-    public void givenAValidallowlistedEmail_whenCheckValidEmail_shouldReturnTrue(){
-        // given
-        // allowlisted.gov.uk which is allowlisted
-
-        // when
-        boolean actual = identityService.checkValidEmail("someone@allowlisted.gov.uk");
-
-        // then
-        assertTrue(actual);
-        verify(csrsService, atLeastOnce()).getAllowlist();
-    }
-
-    @Test
     public void givenAValidAgencyTokenEmail_whenCheckValidEmail_shouldReturnTrue(){
         String email = "someone@badger.gov.uk";
         String domain = "badger.gov.uk";
 
-        when(csrsService.isDomainInAgency(domain)).thenReturn(true);
+        when(csrsService.isDomainValid(domain)).thenReturn(true);
 
         boolean actual = identityService.checkValidEmail(email);
 
         // then
         assertTrue(actual);
-        verify(csrsService, times(1)).isDomainInAgency(eq("badger.gov.uk"));
+        verify(csrsService, times(1)).isDomainValid(eq("badger.gov.uk"));
     }
 
     @Test
@@ -399,18 +387,18 @@ public class IdentityServiceTest {
         String email = "someone@foo.com";
         String domain = "foo.com";
 
-        when(csrsService.isDomainInAgency(domain)).thenReturn(false);
+        when(csrsService.isDomainValid(domain)).thenReturn(false);
 
         boolean actual = identityService.checkValidEmail(email);
 
         assertFalse(actual);
-        verify(csrsService, times(1)).isDomainInAgency(eq("foo.com"));
+        verify(csrsService, times(1)).isDomainValid(eq("foo.com"));
     }
 
     @Test
     public void shouldReactivateIdentity() {
         Identity identity = new Identity();
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(UID);
 
         identityService.reactivateIdentity(identity, agencyToken);
@@ -442,27 +430,6 @@ public class IdentityServiceTest {
         doThrow(new IdentityNotFoundException("Identity not found")).when(identityRepository).findFirstByActiveFalseAndEmailEquals(EMAIL);
 
         identityService.getIdentityByEmailAndActiveFalse(EMAIL);
-    }
-
-    @Test
-    public void testIsallowlistedDomainMixedCase(){
-        boolean validDomain = identityService.isAllowlistedDomain("ExAmPlE.cOm");
-
-        assertTrue(validDomain);
-    }
-
-    @Test
-    public void testIsallowlistedDomainLowerCase(){
-        boolean validDomain = identityService.isAllowlistedDomain("example.com");
-
-        assertTrue(validDomain);
-    }
-
-    @Test
-    public void testIsallowlistedDomainUpperCase(){
-        boolean validDomain = identityService.isAllowlistedDomain("EXAMPLE.COM");
-
-        assertTrue(validDomain);
     }
 
     @Test
