@@ -1,6 +1,7 @@
 package uk.gov.cshr.controller;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -10,8 +11,12 @@ import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 @Controller
 public class LoginController {
+
+  private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "skipMaintenancePageForUser";
 
   @Value("${lpg.uiUrl}")
   private String lpgUiUrl;
@@ -31,15 +36,26 @@ public class LoginController {
   @Value("${maintenancePage.contentLine4}")
   private String maintenancePageContentLine4;
 
+  @Value("${maintenancePage.skipForUsers}")
+  private String skipMaintenancePageForUsers;
+
   @RequestMapping("/login")
   public String login(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
     if(maintenancePageEnabled) {
-      request.setAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
-      request.setAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
-      request.setAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
-      request.setAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
-      return "maintenance";
+      String skipMaintenancePageForUser = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
+
+      boolean skipMaintenancePage = isNotBlank(skipMaintenancePageForUser) &&
+              Arrays.stream(skipMaintenancePageForUsers.split(","))
+                      .anyMatch(u -> u.trim().equalsIgnoreCase(skipMaintenancePageForUser.trim()));
+
+      if (!skipMaintenancePage) {
+        request.setAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
+        request.setAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
+        request.setAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
+        request.setAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
+        return "maintenance";
+      }
     }
 
     DefaultSavedRequest dsr =
