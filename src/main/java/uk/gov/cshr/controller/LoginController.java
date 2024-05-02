@@ -46,9 +46,11 @@ public class LoginController {
 
     if(maintenancePageEnabled) {
       String skipMaintenancePageForUser = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
+
       boolean skipMaintenancePage = isNotBlank(skipMaintenancePageForUser) &&
               Arrays.stream(skipMaintenancePageForUsers.split(","))
                       .anyMatch(u -> u.trim().equalsIgnoreCase(skipMaintenancePageForUser.trim()));
+
       if (!skipMaintenancePage) {
         request.setAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
         request.setAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
