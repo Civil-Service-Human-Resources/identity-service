@@ -8,9 +8,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.jwt.Jwt;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import uk.gov.cshr.service.security.IdentityDetails;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -42,15 +46,34 @@ public class LoginController {
   private String skipMaintenancePageForUsers;
 
   @RequestMapping("/login")
-  public String login(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public String login(HttpServletRequest request, HttpServletResponse response,
+                      Model model, Authentication authentication) throws IOException {
 
     if(maintenancePageEnabled) {
+
+      log.info("LoginController.login.authentication: {}", authentication);
+      if (authentication != null) {
+        Object principal = authentication.getPrincipal();
+        log.info("LoginController.login.principal: {}", principal);
+        if(principal instanceof IdentityDetails) {
+          IdentityDetails identityDetails = (IdentityDetails) principal;
+          log.info("LoginController.login.identityDetails: {}", identityDetails);
+        }
+        if(principal instanceof Jwt) {
+          Jwt jwt = (Jwt) principal;
+          log.info("LoginController.login.jwt: {}", jwt);
+          String claims = jwt.getClaims();
+          log.info("LoginController.login.claims: {}", claims);
+        }
+      }
+
       String skipMaintenancePageForUser = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
       log.info("LoginController.login.skipMaintenancePageForUser.username: {}", skipMaintenancePageForUser);
 
       boolean skipMaintenancePage = isNotBlank(skipMaintenancePageForUser) &&
               Arrays.stream(skipMaintenancePageForUsers.split(","))
                       .anyMatch(u -> u.trim().equalsIgnoreCase(skipMaintenancePageForUser.trim()));
+      log.info("LoginController.login.skipMaintenancePage: {}", skipMaintenancePage);
 
       if (!skipMaintenancePage) {
         request.setAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
