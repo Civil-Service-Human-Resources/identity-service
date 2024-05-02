@@ -45,16 +45,10 @@ public class LoginController {
   public String login(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
     if(maintenancePageEnabled) {
-      log.info("LoginController.login.maintenancePageEnabled: {}", maintenancePageEnabled);
-
       String skipMaintenancePageForUser = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-      log.info("LoginController.login.skipMaintenancePageForUser.username: {}", skipMaintenancePageForUser);
-
       boolean skipMaintenancePage = isNotBlank(skipMaintenancePageForUser) &&
               Arrays.stream(skipMaintenancePageForUsers.split(","))
                       .anyMatch(u -> u.trim().equalsIgnoreCase(skipMaintenancePageForUser.trim()));
-      log.info("LoginController.login.skipMaintenancePage: {}", skipMaintenancePage);
-
       if (!skipMaintenancePage) {
         request.setAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
         request.setAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
@@ -62,6 +56,7 @@ public class LoginController {
         request.setAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
         return "maintenance";
       }
+      log.info("Maintenance page is skipped for the user: {}", skipMaintenancePageForUser);
     }
 
     DefaultSavedRequest dsr =
