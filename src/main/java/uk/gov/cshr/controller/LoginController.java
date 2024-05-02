@@ -46,26 +46,26 @@ public class LoginController {
   private String skipMaintenancePageForUsers;
 
   @RequestMapping("/login")
-  public String login(HttpServletRequest request, HttpServletResponse response,
-                      Model model, Authentication authentication) throws IOException {
+  public String login(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+
+    log.info("LoginController.login.authentication: {}", authentication);
+    if (authentication != null) {
+      Object principal = authentication.getPrincipal();
+      log.info("LoginController.login.principal: {}", principal);
+      if(principal instanceof IdentityDetails) {
+        IdentityDetails identityDetails = (IdentityDetails) principal;
+        log.info("LoginController.login.identityDetails: {}", identityDetails);
+      }
+      if(principal instanceof Jwt) {
+        Jwt jwt = (Jwt) principal;
+        log.info("LoginController.login.jwt: {}", jwt);
+        String claims = jwt.getClaims();
+        log.info("LoginController.login.claims: {}", claims);
+      }
+    }
 
     if(maintenancePageEnabled) {
-
-      log.info("LoginController.login.authentication: {}", authentication);
-      if (authentication != null) {
-        Object principal = authentication.getPrincipal();
-        log.info("LoginController.login.principal: {}", principal);
-        if(principal instanceof IdentityDetails) {
-          IdentityDetails identityDetails = (IdentityDetails) principal;
-          log.info("LoginController.login.identityDetails: {}", identityDetails);
-        }
-        if(principal instanceof Jwt) {
-          Jwt jwt = (Jwt) principal;
-          log.info("LoginController.login.jwt: {}", jwt);
-          String claims = jwt.getClaims();
-          log.info("LoginController.login.claims: {}", claims);
-        }
-      }
+      log.info("LoginController.login.maintenancePageEnabled: {}", maintenancePageEnabled);
 
       String skipMaintenancePageForUser = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
       log.info("LoginController.login.skipMaintenancePageForUser.username: {}", skipMaintenancePageForUser);
