@@ -6,6 +6,7 @@ import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.stereotype.Controller;
@@ -13,10 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@Slf4j
 @Controller
 public class LoginController {
 
-  private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "skipMaintenancePageForUser";
+  private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
 
   @Value("${lpg.uiUrl}")
   private String lpgUiUrl;
@@ -56,6 +58,7 @@ public class LoginController {
         request.setAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
         return "maintenance";
       }
+      log.info("Maintenance page is skipped for the user: {}", skipMaintenancePageForUser);
     }
 
     DefaultSavedRequest dsr =
