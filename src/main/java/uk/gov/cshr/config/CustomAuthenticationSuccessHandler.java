@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import uk.gov.cshr.domain.Identity;
+import uk.gov.cshr.exception.GenericServerException;
 import uk.gov.cshr.service.security.IdentityDetails;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,7 +44,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                     log.info("Maintenance page is skipped for the user: {}", username);
                 } else {
                     log.warn("User is not allowed to access the website due to maintenance page is enabled. Showing error page for the user: {}", username);
-                    throw new RuntimeException("User is not allowed to access the website due to maintenance page is enabled.");
+                    throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
                 }
             }
         }
