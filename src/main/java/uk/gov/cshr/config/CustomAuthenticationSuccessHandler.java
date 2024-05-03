@@ -42,8 +42,10 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 if(skipMaintenancePage) {
                     log.info("Maintenance page is skipped for the user: {}", username);
                 } else {
-                    log.info("Trying to logout the user by redirecting to lpg-ui/sign-out to Display Maintenance page for the user: {}", username);
-                    response.sendRedirect(lpgUiUrl+"/sign-out");
+//                    log.info("Trying to logout the user by redirecting to lpg-ui/sign-out to Display Maintenance page for the user: {}", username);
+//                    response.sendRedirect(lpgUiUrl+"/sign-out");
+                    log.info("User is not allowed to access the website due to maintenance page is enabled. Showing error page for the user: {}", username);
+                    throw new RuntimeException("User is not allowed to access the website due to maintenance page is enabled.");
                 }
             }
         }
