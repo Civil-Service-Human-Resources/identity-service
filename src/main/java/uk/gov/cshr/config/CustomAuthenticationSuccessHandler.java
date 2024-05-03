@@ -41,8 +41,9 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                 if(skipMaintenancePage) {
                     log.info("Maintenance page is skipped for the user: {}", username);
                 } else {
-                    log.info("Logout the user to Display Maintenance page for the user: {}", username);
+                    log.info("Trying to logout the user to Display Maintenance page for the user: {}", username);
                     response.sendRedirect(lpgUiSignOutUrl+"/sign-out");
+                    log.info("Redirecting the user {} to lpg-ui/sign-out url to logout.", username);
                 }
             }
         }
