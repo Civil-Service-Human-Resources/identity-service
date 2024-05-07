@@ -19,8 +19,10 @@ import uk.gov.cshr.service.InviteService;
 import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
+import uk.gov.cshr.utils.MaintenancePageUtil;
 import uk.gov.service.notify.NotificationClientException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
@@ -62,6 +64,8 @@ public class SignupController {
 
     private final AgencyTokenCapacityService agencyTokenCapacityService;
 
+    private final MaintenancePageUtil maintenancePageUtil;
+
     private final String lpgUiUrl;
 
     private final long durationAfterReRegAllowedInSeconds;
@@ -70,18 +74,25 @@ public class SignupController {
                             IdentityService identityService,
                             CsrsService csrsService,
                             AgencyTokenCapacityService agencyTokenCapacityService,
+                            MaintenancePageUtil maintenancePageUtil,
                             @Value("${lpg.uiUrl}") String lpgUiUrl,
                             @Value("${invite.durationAfterReRegAllowedInSeconds}") long durationAfterReRegAllowedInSeconds) {
         this.inviteService = inviteService;
         this.identityService = identityService;
         this.csrsService = csrsService;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
+        this.maintenancePageUtil = maintenancePageUtil;
         this.lpgUiUrl = lpgUiUrl;
         this.durationAfterReRegAllowedInSeconds = durationAfterReRegAllowedInSeconds;
     }
 
     @GetMapping(path = "/request")
-    public String requestInvite(Model model) {
+    public String requestInvite(HttpServletRequest request, Model model) {
+
+        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
+            return "maintenance";
+        }
+
         model.addAttribute(REQUEST_INVITE_FORM, new RequestInviteForm());
         return REQUEST_INVITE_TEMPLATE;
     }
@@ -148,8 +159,14 @@ public class SignupController {
     }
 
     @GetMapping("/{code}")
-    public String signup(Model model, @PathVariable(value = "code") String code,
-                                            RedirectAttributes redirectAttributes) {
+    public String signup(@PathVariable(value = "code") String code,
+                         RedirectAttributes redirectAttributes,
+                         HttpServletRequest request, Model model) {
+
+        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
+            return "maintenance";
+        }
+
         Invite invite = inviteService.findByCode(code);
         if (invite == null) {
             log.info("Signup code for invite is not valid - redirecting to signup");
