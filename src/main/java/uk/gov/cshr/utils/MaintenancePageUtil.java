@@ -2,8 +2,12 @@ package uk.gov.cshr.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
+import uk.gov.cshr.domain.Identity;
+import uk.gov.cshr.exception.GenericServerException;
+import uk.gov.cshr.service.security.IdentityDetails;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -55,5 +59,22 @@ public class MaintenancePageUtil {
             }
         }
         return displayMaintenancePage;
+    }
+
+    public void skipMaintenancePageCheck(Authentication authentication) {
+        Object principal = authentication.getPrincipal();
+        if (maintenancePageEnabled && principal instanceof IdentityDetails) {
+            IdentityDetails identityDetails = (IdentityDetails)principal;
+            Identity identity = identityDetails.getIdentity();
+            String email = identity.getEmail();
+            boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
+                    .anyMatch(u -> u.trim().equalsIgnoreCase(email.trim()));
+            if(skipMaintenancePage) {
+                log.info("Maintenance page is skipped for the user: {}", email);
+            } else {
+                log.warn("User is not allowed to access the website due to maintenance page is enabled. Showing error page for the user: {}", email);
+                throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
+            }
+        }
     }
 }
