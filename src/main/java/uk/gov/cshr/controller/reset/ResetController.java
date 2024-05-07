@@ -17,8 +17,10 @@ import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.ResetRepository;
 import uk.gov.cshr.service.ResetService;
 import uk.gov.cshr.service.security.IdentityService;
+import uk.gov.cshr.utils.MaintenancePageUtil;
 import uk.gov.service.notify.NotificationClientException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @Controller
@@ -41,11 +43,19 @@ public class ResetController {
     @Autowired
     private ResetFormValidator resetFormValidator;
 
+    @Autowired
+    private MaintenancePageUtil maintenancePageUtil;
+
     @Value("${lpg.uiUrl}")
     private String lpgUiUrl;
 
     @GetMapping
-    public String reset() {
+    public String reset(HttpServletRequest request, Model model) {
+
+        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
+            return "maintenance";
+        }
+
         return "reset/requestReset";
     }
 
@@ -61,7 +71,15 @@ public class ResetController {
     }
 
     @GetMapping("/{code}")
-    public String loadResetForm(@PathVariable(value = "code") String code, RedirectAttributes redirectAttributes, Model model) {
+    public String loadResetForm(@PathVariable(value = "code") String code,
+                                RedirectAttributes redirectAttributes,
+                                HttpServletRequest request,
+                                Model model) {
+
+        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
+            return "maintenance";
+        }
+
         LOGGER.debug("User on reset screen with code {}", code);
 
         checkResetCodeExists(code);

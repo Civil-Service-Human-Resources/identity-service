@@ -64,7 +64,7 @@ public class ReactivationControllerTest {
     }
 
     @Test
-    public void shouldReturnMaintenanceView() throws Exception {
+    public void shouldReturnMaintenancePage() throws Exception {
         when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
         mockMvc.perform(
                  get("/account/reactivate/" + CODE))
