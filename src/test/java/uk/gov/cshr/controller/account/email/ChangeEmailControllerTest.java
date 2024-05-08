@@ -26,9 +26,11 @@ import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
 import uk.gov.cshr.utils.CsrfRequestPostProcessor;
+import uk.gov.cshr.utils.MaintenancePageUtil;
 import uk.gov.cshr.utils.MockMVCFilterOverrider;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -71,20 +73,27 @@ public class ChangeEmailControllerTest {
     @MockBean
     private CsrsService csrsService;
 
+    @MockBean
+    private MaintenancePageUtil maintenancePageUtil;
+
     @Captor
     private ArgumentCaptor<Identity> identityArgumentCaptor;
-
-    private ChangeEmailController changeEmailController;
 
     @Before
     public void setup() throws IllegalAccessException {
         MockMVCFilterOverrider.overrideFilterOf(mockMvc, "PatternMappingFilterProxy");
+    }
 
-        changeEmailController = new ChangeEmailController(
-                identityService,
-                emailUpdateService,
-                csrsService,
-                lpgUiUrl);
+    @Test
+    public void shouldDisplayMaintenancePage() throws Exception {
+        when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
+        mockMvc.perform(
+                get(EMAIL_PATH)
+                        .with(CsrfRequestPostProcessor.csrf()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("maintenance"))
+                .andExpect(content().string(containsString("Maintenance")))
+                .andDo(print());
     }
 
     @Test

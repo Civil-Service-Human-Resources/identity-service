@@ -78,7 +78,7 @@ public class ResetControllerTest {
     }
 
     @Test
-    public void shouldReturnMaintenancePage() throws Exception {
+    public void shouldDisplayMaintenancePage() throws Exception {
         when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
         this.mockMvc.perform(get("/reset"))
                 .andExpect(status().is2xxSuccessful())
