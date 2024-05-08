@@ -15,7 +15,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cshr.config.SpringSecurityTestConfig;
-import uk.gov.cshr.controller.account.AgencyTokenVerificationController;
 import uk.gov.cshr.controller.form.VerifyTokenForm;
 import uk.gov.cshr.domain.*;
 import uk.gov.cshr.dto.AgencyTokenDTO;
@@ -29,16 +28,19 @@ import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.CsrfRequestPostProcessor;
+import uk.gov.cshr.utils.MaintenancePageUtil;
 import uk.gov.cshr.utils.MockMVCFilterOverrider;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
@@ -84,21 +86,14 @@ public class AgencyTokenVerificationControllerTest {
     @MockBean
     private IdentityService identityService;
 
-    private AgencyTokenVerificationController agencyTokenVerificationController;
+    @MockBean
+    private MaintenancePageUtil maintenancePageUtil;
 
     private List<OrganisationalUnitDto> organisations;
 
     @Before
     public void setup() throws IllegalAccessException {
         MockMVCFilterOverrider.overrideFilterOf(mockMvc, "PatternMappingFilterProxy");
-
-        agencyTokenVerificationController = new AgencyTokenVerificationController(
-                emailUpdateService,
-                csrsService,
-                agencyTokenCapacityService,
-                identityService,
-                verificationCodeDeterminationService,
-                reactivationService);
 
         organisations = new ArrayList<>();
         organisations.add(new OrganisationalUnitDto());
@@ -113,6 +108,21 @@ public class AgencyTokenVerificationControllerTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
+    }
+
+    @Test
+    public void shouldReturnMaintenancePage() throws Exception {
+        when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
+        mockMvc.perform(
+                        get(VERIFY_TOKEN_URL + CODE)
+                                .with(CsrfRequestPostProcessor.csrf())
+                                .flashAttr("uid", IDENTITY_UID)
+                                .flashAttr("email", EMAIL)
+                                .flashAttr("domain", DOMAIN))
+                .andExpect(status().isOk())
+                .andExpect(view().name("maintenance"))
+                .andExpect(content().string(containsString("Maintenance")))
+                .andDo(print());
     }
 
     @Test
