@@ -84,7 +84,7 @@ public class ReactivationController {
         try {
             String email = TextEncryptionUtils.getDecryptedText(code, encryptionKey);
 
-            if(maintenancePageUtil.displayMaintenancePage(email, model)) {
+            if(maintenancePageUtil.displayMaintenancePageForUser(email, model)) {
                 return "maintenance";
             }
 
