@@ -79,14 +79,14 @@ public class ReactivationController {
     }
 
     @GetMapping
-    public String sendReactivationEmail(@RequestParam String code, HttpServletRequest request, Model model){
-
-        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
-            return "maintenance";
-        }
+    public String sendReactivationEmail(@RequestParam String code, Model model){
 
         try {
             String email = TextEncryptionUtils.getDecryptedText(code, encryptionKey);
+
+            if(maintenancePageUtil.displayMaintenancePage(email, model)) {
+                return "maintenance";
+            }
 
             if(!reactivationService.pendingExistsByEmail(email)){
                 Reactivation reactivation = reactivationService.saveReactivation(email);
