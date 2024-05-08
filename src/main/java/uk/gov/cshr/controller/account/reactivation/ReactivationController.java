@@ -104,12 +104,12 @@ public class ReactivationController {
             @PathVariable(value = "code") String code,
             RedirectAttributes redirectAttributes,
             HttpServletRequest request, Model model) {
+
+        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
+            return "maintenance";
+        }
+
         try {
-
-            if(maintenancePageUtil.displayMaintenancePage(request, model)) {
-                return "maintenance";
-            }
-
             Reactivation reactivation = reactivationService.getReactivationByCodeAndStatus(code, ReactivationStatus.PENDING);
 
             if(reactivationRequestHasExpired(reactivation)){
