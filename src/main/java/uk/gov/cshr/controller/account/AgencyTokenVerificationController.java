@@ -19,7 +19,9 @@ import uk.gov.cshr.service.VerificationCodeDeterminationService;
 import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
+import uk.gov.cshr.utils.MaintenancePageUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @Slf4j
@@ -48,23 +50,32 @@ public class AgencyTokenVerificationController {
 
     private final VerificationCodeDeterminationService verificationCodeDeterminationService;
 
+    private final MaintenancePageUtil maintenancePageUtil;
+
     public AgencyTokenVerificationController(
             EmailUpdateService emailUpdateService,
             CsrsService csrsService,
             AgencyTokenCapacityService agencyTokenCapacityService,
             IdentityService identityService,
             VerificationCodeDeterminationService verificationCodeDeterminationService,
-            ReactivationService reactivationService) {
+            ReactivationService reactivationService,
+            MaintenancePageUtil maintenancePageUtil) {
         this.emailUpdateService = emailUpdateService;
         this.csrsService = csrsService;
         this.agencyTokenCapacityService = agencyTokenCapacityService;
         this.identityService = identityService;
         this.verificationCodeDeterminationService = verificationCodeDeterminationService;
         this.reactivationService = reactivationService;
+        this.maintenancePageUtil = maintenancePageUtil;
     }
 
     @GetMapping(path = "/{code}")
-    public String enterToken(Model model, @PathVariable String code) {
+    public String enterToken(@PathVariable String code, HttpServletRequest request, Model model) {
+
+        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
+            return "maintenance";
+        }
+
         log.info("User accessing token-based verification screen");
 
         if (model.containsAttribute(VERIFY_TOKEN_FORM_TEMPLATE)) {
