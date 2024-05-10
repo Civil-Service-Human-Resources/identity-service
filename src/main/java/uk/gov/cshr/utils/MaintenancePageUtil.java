@@ -20,23 +20,32 @@ public class MaintenancePageUtil {
 
     private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
 
-    @Value("${maintenancePage.enabled}")
-    private boolean maintenancePageEnabled;
+    private final boolean maintenancePageEnabled;
 
-    @Value("${maintenancePage.contentLine1}")
-    private String maintenancePageContentLine1;
+    private final String skipMaintenancePageForUsers;
 
-    @Value("${maintenancePage.contentLine2}")
-    private String maintenancePageContentLine2;
+    private final String maintenancePageContentLine1;
 
-    @Value("${maintenancePage.contentLine3}")
-    private String maintenancePageContentLine3;
+    private final String maintenancePageContentLine2;
 
-    @Value("${maintenancePage.contentLine4}")
-    private String maintenancePageContentLine4;
+    private final String maintenancePageContentLine3;
 
-    @Value("${maintenancePage.skipForUsers}")
-    private String skipMaintenancePageForUsers;
+    private final String maintenancePageContentLine4;
+
+    public MaintenancePageUtil(@Value("${maintenancePage.enabled}") boolean maintenancePageEnabled,
+                               @Value("${maintenancePage.skipForUsers}") String skipMaintenancePageForUsers,
+                               @Value("${maintenancePage.contentLine1}") String maintenancePageContentLine1,
+                               @Value("${maintenancePage.contentLine2}") String maintenancePageContentLine2,
+                               @Value("${maintenancePage.contentLine3}") String maintenancePageContentLine3,
+                               @Value("${maintenancePage.contentLine4}")
+                               String maintenancePageContentLine4) {
+        this.maintenancePageEnabled = maintenancePageEnabled;
+        this.skipMaintenancePageForUsers = skipMaintenancePageForUsers;
+        this.maintenancePageContentLine1 = maintenancePageContentLine1;
+        this.maintenancePageContentLine2 = maintenancePageContentLine2;
+        this.maintenancePageContentLine3 = maintenancePageContentLine3;
+        this.maintenancePageContentLine4 = maintenancePageContentLine4;
+    }
 
     public boolean displayMaintenancePage(HttpServletRequest request, Model model) {
         String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
