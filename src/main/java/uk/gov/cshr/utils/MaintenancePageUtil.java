@@ -37,8 +37,7 @@ public class MaintenancePageUtil {
                                @Value("${maintenancePage.contentLine1}") String maintenancePageContentLine1,
                                @Value("${maintenancePage.contentLine2}") String maintenancePageContentLine2,
                                @Value("${maintenancePage.contentLine3}") String maintenancePageContentLine3,
-                               @Value("${maintenancePage.contentLine4}")
-                               String maintenancePageContentLine4) {
+                               @Value("${maintenancePage.contentLine4}") String maintenancePageContentLine4) {
         this.maintenancePageEnabled = maintenancePageEnabled;
         this.skipMaintenancePageForUsers = skipMaintenancePageForUsers;
         this.maintenancePageContentLine1 = maintenancePageContentLine1;
@@ -53,25 +52,21 @@ public class MaintenancePageUtil {
     }
 
     public boolean displayMaintenancePageForUser(String username, Model model) {
-        boolean displayMaintenancePage = false;
-
         if(maintenancePageEnabled) {
-            displayMaintenancePage = true;
-
-            model.addAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
-            model.addAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
-            model.addAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
-            model.addAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
-
             boolean skipMaintenancePage = isNotBlank(username) &&
                     Arrays.stream(skipMaintenancePageForUsers.split(","))
                             .anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
             if (skipMaintenancePage) {
-                displayMaintenancePage = false;
                 log.info("Maintenance page is skipped for the user: {}", username);
+                return false;
             }
+            model.addAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
+            model.addAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
+            model.addAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
+            model.addAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
+            return true;
         }
-        return displayMaintenancePage;
+        return false;
     }
 
     public void skipMaintenancePageCheck(Authentication authentication) {
