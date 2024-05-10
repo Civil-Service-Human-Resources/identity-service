@@ -17,8 +17,10 @@ import uk.gov.cshr.service.ReactivationService;
 import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
+import uk.gov.cshr.utils.MaintenancePageUtil;
 import uk.gov.cshr.utils.TextEncryptionUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -47,7 +49,9 @@ public class ReactivationController {
 
     private final CsrsService csrsService;
 
-    private NotifyService notifyService;
+    private final NotifyService notifyService;
+
+    private final MaintenancePageUtil maintenancePageUtil;
 
     private final String lpgUiUrl;
 
@@ -64,19 +68,25 @@ public class ReactivationController {
                                   IdentityService identityService,
                                   CsrsService csrsService,
                                   NotifyService notifyService,
+                                  MaintenancePageUtil maintenancePageUtil,
                                   @Value("${lpg.uiUrl}") String lpgUiUrl) {
         this.reactivationService = reactivationService;
         this.identityService = identityService;
         this.csrsService = csrsService;
         this.notifyService = notifyService;
+        this.maintenancePageUtil = maintenancePageUtil;
         this.lpgUiUrl = lpgUiUrl;
     }
 
     @GetMapping
-    public String sendReactivationEmail(@RequestParam String code){
+    public String sendReactivationEmail(@RequestParam String code, Model model){
 
         try {
             String email = TextEncryptionUtils.getDecryptedText(code, encryptionKey);
+
+            if(maintenancePageUtil.displayMaintenancePageForUser(email, model)) {
+                return "maintenance";
+            }
 
             if(!reactivationService.pendingExistsByEmail(email)){
                 Reactivation reactivation = reactivationService.saveReactivation(email);
@@ -92,7 +102,13 @@ public class ReactivationController {
     @GetMapping("/{code}")
     public String reactivateAccount(
             @PathVariable(value = "code") String code,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request, Model model) {
+
+        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
+            return "maintenance";
+        }
+
         try {
             Reactivation reactivation = reactivationService.getReactivationByCodeAndStatus(code, ReactivationStatus.PENDING);
 

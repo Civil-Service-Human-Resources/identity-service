@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import uk.gov.cshr.controller.form.UpdatePasswordForm;
 import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
+import uk.gov.cshr.utils.MaintenancePageUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @Slf4j
@@ -20,13 +22,22 @@ import javax.validation.Valid;
 @RequestMapping("/account/password")
 public class ChangePasswordController {
     private final IdentityService identityService;
+    private final MaintenancePageUtil maintenancePageUtil;
 
-    public ChangePasswordController(IdentityService identityService) {
+    public ChangePasswordController(IdentityService identityService,
+                                    MaintenancePageUtil maintenancePageUtil) {
         this.identityService = identityService;
+        this.maintenancePageUtil = maintenancePageUtil;
     }
 
     @GetMapping
-    public String updatePasswordForm(Model model, @ModelAttribute UpdatePasswordForm form) {
+    public String updatePasswordForm(HttpServletRequest request, Model model,
+                                     @ModelAttribute UpdatePasswordForm form) {
+
+        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
+            return "maintenance";
+        }
+
         model.addAttribute("updatePasswordForm", form);
         return "account/updatePassword";
     }
