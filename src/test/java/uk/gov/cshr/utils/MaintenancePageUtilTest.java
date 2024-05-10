@@ -126,8 +126,8 @@ public class MaintenancePageUtilTest {
 
         try {
             maintenancePageUtil.skipMaintenancePageCheck(authentication);
-        } catch (Exception e) {
-            fail("No exception is thrown");
+        } catch (GenericServerException e) {
+            fail("GenericServerException should not be thrown here.");
         }
     }
 
