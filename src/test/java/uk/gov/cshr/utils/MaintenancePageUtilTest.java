@@ -26,7 +26,7 @@ public class MaintenancePageUtilTest {
     private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
     private final String skipMaintenancePageForUsers = "tester1@domain.com,tester2@domain.com";
     private final String maintenancePageContentLine1 = "The learning website is undergoing scheduled maintenance.";
-    private final String maintenancePageContentLine2 = "It will be unavailable between the hours of 7pm to 9pm on Wednesday 24th February 2021.";
+    private final String maintenancePageContentLine2 = "It will be unavailable between the hours of 6pm to 8pm on Friday 10th May 2024.";
     private final String maintenancePageContentLine3 = "Apologies for the inconvenience.";
     private final String maintenancePageContentLine4 = "If the maintenance period is extended, further information will be provided here.";
 
