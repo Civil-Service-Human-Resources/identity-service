@@ -6,11 +6,18 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
+import uk.gov.cshr.domain.Identity;
+import uk.gov.cshr.exception.GenericServerException;
+import uk.gov.cshr.service.security.IdentityDetails;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.time.Instant;
+
+import static java.util.Collections.emptySet;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -95,16 +102,45 @@ public class MaintenancePageUtilTest {
     }
 
     @Test
-    public void shouldSkipMaintenancePageForLoggedInUserIfMaintenancePageIsDisabled() {
+    public void shouldSkipMaintenancePageOnAuthenticationIfMaintenancePageIsDisabled() {
         MaintenancePageUtil maintenancePageUtil = new MaintenancePageUtil(false,
                 skipMaintenancePageForUsers, maintenancePageContentLine1, maintenancePageContentLine2,
                 maintenancePageContentLine3,maintenancePageContentLine4);
+        try {
+            maintenancePageUtil.skipMaintenancePageCheck(authentication);
+        } catch (Exception e) {
+            fail("No exception is thrown");
+        }
+    }
 
+    @Test
+    public void shouldSkipMaintenancePageOnAuthenticationIfMaintenancePageIsEnabledAndUserIsAllowedToSkipMaintenancePage() {
+        MaintenancePageUtil maintenancePageUtil = new MaintenancePageUtil(true,
+                skipMaintenancePageForUsers, maintenancePageContentLine1, maintenancePageContentLine2,
+                maintenancePageContentLine3,maintenancePageContentLine4);
+
+        Identity basicIdentity = new Identity("uid", "tester1@domain.com", "password", true,
+                false, emptySet(), Instant.now(), false, false);
+        IdentityDetails basicActiveUser = new IdentityDetails(basicIdentity);
+        when(authentication.getPrincipal()).thenReturn(basicActiveUser);
+
+        try {
+            maintenancePageUtil.skipMaintenancePageCheck(authentication);
+        } catch (Exception e) {
+            fail("No exception is thrown");
+        }
+    }
+
+    @Test(expected = GenericServerException.class)
+    public void shouldNotSkipMaintenancePageOnAuthenticationIfMaintenancePageIsEnabledAndUserIsNotAllowedToSkipMaintenancePage() {
+        MaintenancePageUtil maintenancePageUtil = new MaintenancePageUtil(true,
+                skipMaintenancePageForUsers, maintenancePageContentLine1, maintenancePageContentLine2,
+                maintenancePageContentLine3,maintenancePageContentLine4);
+
+        Identity basicIdentity = new Identity("uid", "tester3@domain.com", "password", true,
+                false, emptySet(), Instant.now(), false, false);
+        IdentityDetails basicActiveUser = new IdentityDetails(basicIdentity);
+        when(authentication.getPrincipal()).thenReturn(basicActiveUser);
         maintenancePageUtil.skipMaintenancePageCheck(authentication);
-
-        verify(model, times(0)).addAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
-        verify(model, times(0)).addAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
-        verify(model, times(0)).addAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
-        verify(model, times(0)).addAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
     }
 }
