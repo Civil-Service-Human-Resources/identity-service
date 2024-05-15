@@ -2,6 +2,9 @@ package uk.gov.cshr.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import uk.gov.cshr.exception.GenericServerException;
 import uk.gov.cshr.service.security.IdentityDetails;
@@ -47,16 +50,32 @@ public class MaintenancePageUtil {
         }
 
         String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
+        log.info("MaintenancePageUtil.skipMaintenancePageForUser.username from request param: {}", username);
 
         if(isBlank(username)) {
             Principal principal = request.getUserPrincipal();
+            log.info("MaintenancePageUtil.skipMaintenancePageForUser.principal from request: {}", principal);
+
             if (principal instanceof IdentityDetails) {
                 IdentityDetails identityDetails = (IdentityDetails) principal;
                 username = identityDetails.getIdentity().getEmail();
+                log.info("MaintenancePageUtil.skipMaintenancePageForUser.username identityDetails.getIdentity().getEmail(): {}", username);
+            }
+
+            if (principal instanceof Jwt) {
+                Jwt jwt = (Jwt) principal;
+                log.info("MaintenancePageUtil.skipMaintenancePageForUser.jwt: {}", jwt);
+                String claims = jwt.getClaims();
+                log.info("MaintenancePageUtil.skipMaintenancePageForUser.claims: {}", claims);
             }
         }
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+        log.info("MaintenancePageUtil.skipMaintenancePageForUser.principal from SecurityContextHolder: {}", principal);
+
         if(isBlank(username)) {
+            log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is missing. Returning false.");
             return false;
         }
 
