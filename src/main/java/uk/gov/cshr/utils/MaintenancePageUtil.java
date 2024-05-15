@@ -41,12 +41,6 @@ public class MaintenancePageUtil {
             return true;
         }
 
-        String method = request.getMethod();
-        if(!"GET".equalsIgnoreCase(method)) {
-            log.debug("MaintenancePageUtil.skipMaintenancePageForUser.method is not GET returning true.");
-            return true;
-        }
-
         String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
         log.debug("MaintenancePageUtil.skipMaintenancePageForUser.username from request param: {}", username);
 
@@ -58,14 +52,23 @@ public class MaintenancePageUtil {
 
         if(isBlank(username)) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Object principal = authentication.getPrincipal();
+            Object principal = authentication != null ? authentication.getPrincipal() : null;
             log.debug("MaintenancePageUtil.skipMaintenancePageForUser.principal from SecurityContextHolder: {}", principal);
             username = getUsernameFromPrincipal(principal);
         }
 
         if(isBlank(username)) {
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is missing. Returning false.");
-            return false;
+            log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is missing.");
+            String method = request.getMethod();
+            if("GET".equalsIgnoreCase(method)) {
+                log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is missing and HTTP Method is GET. " +
+                        "Returning false.");
+                return false;
+            } else {
+                log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is missing and HTTP Method is not GET. " +
+                        "Returning true.");
+                return true;
+            }
         }
 
         final String trimmedUsername = username.trim();
