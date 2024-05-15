@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import uk.gov.cshr.exception.GenericServerException;
 import uk.gov.cshr.service.security.IdentityDetails;
 
 import javax.servlet.http.HttpServletRequest;
@@ -82,36 +81,6 @@ public class MaintenancePageUtil {
         return skipMaintenancePageForUser;
     }
 
-    private String getUsernameFromPrincipal(Object principal) {
-        if (principal instanceof IdentityDetails) {
-            IdentityDetails identityDetails = (IdentityDetails) principal;
-            String username = identityDetails.getIdentity().getEmail();
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.username from principal: {}", username);
-            return username;
-        }
-        return null;
-    }
-
-    public void skipMaintenancePageCheck(String email) {
-        if(!maintenancePageEnabled) {
-            return;
-        }
-
-        boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
-                .anyMatch(u -> u.trim().equalsIgnoreCase(email.trim()));
-
-        if(skipMaintenancePage) {
-            log.info("MaintenancePageUtil.skipMaintenancePageCheck.Maintenance page is skipped for the user: {}",
-                    email);
-            return;
-        }
-
-        log.warn("MaintenancePageUtil.skipMaintenancePageCheck." +
-                "User is not allowed to access the website due to maintenance page is enabled. " +
-                "Showing error page to the user: {}", email);
-        throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
-    }
-
     public boolean shouldNotApplyMaintenancePageFilterForURI(HttpServletRequest request) {
         if(!maintenancePageEnabled) {
             return true;
@@ -125,5 +94,15 @@ public class MaintenancePageUtil {
         log.info("MaintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI is: {} for requestURI: {}",
                 shouldNotApplyMaintenancePageFilterForURI, requestURI);
         return shouldNotApplyMaintenancePageFilterForURI;
+    }
+
+    private String getUsernameFromPrincipal(Object principal) {
+        if (principal instanceof IdentityDetails) {
+            IdentityDetails identityDetails = (IdentityDetails) principal;
+            String username = identityDetails.getIdentity().getEmail();
+            log.info("MaintenancePageUtil.skipMaintenancePageForUser.username from principal: {}", username);
+            return username;
+        }
+        return null;
     }
 }

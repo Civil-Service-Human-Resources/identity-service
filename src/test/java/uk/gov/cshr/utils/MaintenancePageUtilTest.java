@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.cshr.exception.GenericServerException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -37,10 +36,6 @@ public class MaintenancePageUtilTest {
     private boolean executeShouldNotApplyMaintenancePageFilterForURI(boolean maintenancePageEnabled, String requestUri) {
         when(request.getRequestURI()).thenReturn(requestUri);
         return createMaintenancePageUtil(maintenancePageEnabled).shouldNotApplyMaintenancePageFilterForURI(request);
-    }
-
-    private void executeSkipMaintenancePageCheck(boolean maintenancePageEnabled, String username) {
-        createMaintenancePageUtil(maintenancePageEnabled).skipMaintenancePageCheck(username);
     }
 
     @Test
@@ -76,28 +71,5 @@ public class MaintenancePageUtilTest {
     @Test
     public void shouldNotSkipMaintenancePageIfMaintenancePageIsEnabledAndRequestURIIsNotAllowedToSkipMaintenancePage() {
         assertFalse(executeShouldNotApplyMaintenancePageFilterForURI(true, "/create"));
-    }
-
-    @Test
-    public void shouldSkipMaintenancePageOnAuthenticationIfMaintenancePageIsDisabled() {
-        try {
-            executeSkipMaintenancePageCheck(false, "tester1@domain.com");
-        } catch (Exception e) {
-            fail("No exception is thrown");
-        }
-    }
-
-    @Test
-    public void shouldSkipMaintenancePageOnAuthenticationIfMaintenancePageIsEnabledAndUserIsAllowedToSkipMaintenancePage() {
-        try {
-            executeSkipMaintenancePageCheck(true, "tester1@domain.com");
-        } catch (GenericServerException e) {
-            fail("GenericServerException should not be thrown here.");
-        }
-    }
-
-    @Test(expected = GenericServerException.class)
-    public void shouldNotSkipMaintenancePageOnAuthenticationIfMaintenancePageIsEnabledAndUserIsNotAllowedToSkipMaintenancePage() {
-        executeSkipMaintenancePageCheck(true, "tester3@domain.com");
     }
 }
