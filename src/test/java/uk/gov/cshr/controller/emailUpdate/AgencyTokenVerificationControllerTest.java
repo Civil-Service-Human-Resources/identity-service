@@ -28,14 +28,12 @@ import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.CsrfRequestPostProcessor;
-import uk.gov.cshr.utils.MaintenancePageUtil;
 import uk.gov.cshr.utils.MockMVCFilterOverrider;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -86,9 +84,6 @@ public class AgencyTokenVerificationControllerTest {
     @MockBean
     private IdentityService identityService;
 
-    @MockBean
-    private MaintenancePageUtil maintenancePageUtil;
-
     private List<OrganisationalUnitDto> organisations;
 
     @Before
@@ -108,21 +103,6 @@ public class AgencyTokenVerificationControllerTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
-    }
-
-    @Test
-    public void shouldDisplayMaintenancePage() throws Exception {
-        when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
-        mockMvc.perform(
-                        get(VERIFY_TOKEN_URL + CODE)
-                                .with(CsrfRequestPostProcessor.csrf())
-                                .flashAttr("uid", IDENTITY_UID)
-                                .flashAttr("email", EMAIL)
-                                .flashAttr("domain", DOMAIN))
-                .andExpect(status().isOk())
-                .andExpect(view().name("maintenance"))
-                .andExpect(content().string(containsString("Maintenance")))
-                .andDo(print());
     }
 
     @Test

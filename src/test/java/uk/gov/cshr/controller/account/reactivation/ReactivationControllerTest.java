@@ -17,15 +17,12 @@ import uk.gov.cshr.service.ReactivationService;
 import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
-import uk.gov.cshr.utils.MaintenancePageUtil;
 import uk.gov.cshr.utils.MockMVCFilterOverrider;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.doThrow;
@@ -55,23 +52,9 @@ public class ReactivationControllerTest {
     @MockBean
     private IdentityService identityService;
 
-    @MockBean
-    private MaintenancePageUtil maintenancePageUtil;
-
     @Before
     public void overridePatternMappingFilterProxyFilter() throws IllegalAccessException {
         MockMVCFilterOverrider.overrideFilterOf(mockMvc, "PatternMappingFilterProxy");
-    }
-
-    @Test
-    public void shouldDisplayMaintenancePage() throws Exception {
-        when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
-        mockMvc.perform(
-                 get("/account/reactivate/" + CODE))
-                .andExpect(status().isOk())
-                .andExpect(view().name("maintenance"))
-                .andExpect(content().string(containsString("Maintenance")))
-                .andDo(print());
     }
 
     @Test
