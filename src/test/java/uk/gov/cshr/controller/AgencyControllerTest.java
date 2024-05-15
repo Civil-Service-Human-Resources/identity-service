@@ -1,6 +1,7 @@
 package uk.gov.cshr.controller;
 
 import com.google.gson.Gson;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.cshr.domain.AgencyTokenCapacityUsedDto;
 import uk.gov.cshr.service.AgencyTokenCapacityService;
+import uk.gov.cshr.utils.MockMVCFilterOverrider;
 
 import java.util.UUID;
 
