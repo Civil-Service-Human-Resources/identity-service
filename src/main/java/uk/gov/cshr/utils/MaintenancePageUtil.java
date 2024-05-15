@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import uk.gov.cshr.exception.GenericServerException;
 import uk.gov.cshr.service.security.IdentityDetails;
@@ -55,37 +54,14 @@ public class MaintenancePageUtil {
         if(isBlank(username)) {
             Principal principal = request.getUserPrincipal();
             log.info("MaintenancePageUtil.skipMaintenancePageForUser.principal from request: {}", principal);
-
-            if (principal instanceof IdentityDetails) {
-                IdentityDetails identityDetails = (IdentityDetails) principal;
-                username = identityDetails.getIdentity().getEmail();
-                log.info("MaintenancePageUtil.skipMaintenancePageForUser.username identityDetails.getIdentity().getEmail(): {}", username);
-            }
-
-            if (principal instanceof Jwt) {
-                Jwt jwt = (Jwt) principal;
-                log.info("MaintenancePageUtil.skipMaintenancePageForUser.jwt: {}", jwt);
-                String claims = jwt.getClaims();
-                log.info("MaintenancePageUtil.skipMaintenancePageForUser.claims: {}", claims);
-            }
+            username = getUsernameFromPrincipal(principal);
         }
 
         if(isBlank(username)) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Object principal = authentication.getPrincipal();
             log.info("MaintenancePageUtil.skipMaintenancePageForUser.principal from SecurityContextHolder: {}", principal);
-            if (principal instanceof IdentityDetails) {
-                IdentityDetails identityDetails = (IdentityDetails) principal;
-                username = identityDetails.getIdentity().getEmail();
-                log.info("MaintenancePageUtil.skipMaintenancePageForUser.username identityDetails.getIdentity().getEmail(): {}", username);
-            }
-
-            if (principal instanceof Jwt) {
-                Jwt jwt = (Jwt) principal;
-                log.info("MaintenancePageUtil.skipMaintenancePageForUser.jwt: {}", jwt);
-                String claims = jwt.getClaims();
-                log.info("MaintenancePageUtil.skipMaintenancePageForUser.claims: {}", claims);
-            }
+            username = getUsernameFromPrincipal(principal);
         }
 
         if(isBlank(username)) {
@@ -104,6 +80,16 @@ public class MaintenancePageUtil {
         }
 
         return skipMaintenancePageForUser;
+    }
+
+    private String getUsernameFromPrincipal(Object principal) {
+        if (principal instanceof IdentityDetails) {
+            IdentityDetails identityDetails = (IdentityDetails) principal;
+            String username = identityDetails.getIdentity().getEmail();
+            log.info("MaintenancePageUtil.skipMaintenancePageForUser.username from principal: {}", username);
+            return username;
+        }
+        return null;
     }
 
     public void skipMaintenancePageCheck(String email) {
