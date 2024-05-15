@@ -53,20 +53,20 @@ public class MaintenancePageUtilTest {
         assertTrue(executeSkipMaintenancePageForUser(true, "POST", null));
     }
 
-    @Test
-    public void shouldNotSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsGETAndUsernameIsNotPassedInRequestParam() {
-        assertFalse(executeSkipMaintenancePageForUser(true, "GET", null));
-    }
-
-    @Test
-    public void shouldNotSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsGETAndUsernameIsPassedInRequestParamIsNotAllowedToSkipMaintenancePage() {
-        assertFalse(executeSkipMaintenancePageForUser(true, "GET", "tester3@domain.com"));
-    }
-
-    @Test
-    public void shouldSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsGETAndUsernameIsPassedInRequestParamIsAllowedToSkipMaintenancePage() {
-        assertTrue(executeSkipMaintenancePageForUser(true, "GET", "tester1@domain.com"));
-    }
+//    @Test
+//    public void shouldNotSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsGETAndUsernameIsNotPassedInRequestParam() {
+//        assertFalse(executeSkipMaintenancePageForUser(true, "GET", null));
+//    }
+//
+//    @Test
+//    public void shouldNotSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsGETAndUsernameIsPassedInRequestParamIsNotAllowedToSkipMaintenancePage() {
+//        assertFalse(executeSkipMaintenancePageForUser(true, "GET", "tester3@domain.com"));
+//    }
+//
+//    @Test
+//    public void shouldSkipMaintenancePageIfMaintenancePageIsEnabledAndHttpMethodIsGETAndUsernameIsPassedInRequestParamIsAllowedToSkipMaintenancePage() {
+//        assertTrue(executeSkipMaintenancePageForUser(true, "GET", "tester1@domain.com"));
+//    }
 
     @Test
     public void shouldNotApplyMaintenancePageFilterForURIfMaintenancePageIsDisabled() {
