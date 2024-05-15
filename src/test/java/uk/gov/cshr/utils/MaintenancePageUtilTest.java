@@ -8,7 +8,8 @@ import uk.gov.cshr.exception.GenericServerException;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
