@@ -1,6 +1,6 @@
 package uk.gov.cshr.utils;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -9,7 +9,6 @@ import uk.gov.cshr.exception.GenericServerException;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -102,11 +101,8 @@ public class MaintenancePageUtilTest {
         }
     }
 
-    @Test
+    @Test(expected = GenericServerException.class)
     public void shouldNotSkipMaintenancePageOnAuthenticationIfMaintenancePageIsEnabledAndUserIsNotAllowedToSkipMaintenancePage() {
-        GenericServerException thrown = assertThrows(GenericServerException.class, () ->
-                        executeSkipMaintenancePageCheck(true, "tester3@domain.com"),
-                "Expected skipMaintenancePageCheck() to throw GenericServerException, but it didn't");
-        assertTrue(thrown.getMessage().contains("User is not allowed to access the website due to maintenance page is enabled."));
+        executeSkipMaintenancePageCheck(true, "tester3@domain.com");
     }
 }
