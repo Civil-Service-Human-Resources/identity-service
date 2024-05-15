@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import uk.gov.cshr.domain.Identity;
+import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.utils.MaintenancePageUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +31,12 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) {
         this.setDefaultTargetUrl(lpgUiUrl);
-        maintenancePageUtil.skipMaintenancePageCheck(authentication);
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof IdentityDetails) {
+            IdentityDetails identityDetails = (IdentityDetails) principal;
+            Identity identity = identityDetails.getIdentity();
+            maintenancePageUtil.skipMaintenancePageCheck(identity.getEmail());
+        }
         super.onAuthenticationSuccess(request, response, authentication);
     }
 }
