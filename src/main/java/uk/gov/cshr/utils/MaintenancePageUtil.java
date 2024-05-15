@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.Arrays;
 
+import static java.util.Locale.ROOT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.logging.log4j.util.Strings.isBlank;
 
@@ -100,7 +101,8 @@ public class MaintenancePageUtil {
         String requestURI = request.getRequestURI();
         boolean shouldNotApplyMaintenancePageFilterForURI = isNotBlank(requestURI)
                 && Arrays.stream(skipMaintenancePageForUris.split(","))
-                .anyMatch(u -> u.trim().equalsIgnoreCase(requestURI.trim()));
+                .anyMatch(u -> requestURI.trim().toLowerCase(ROOT)
+                        .contains(u.toLowerCase(ROOT)));
         log.info("MaintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI is: {} for requestURI: {}",
                 shouldNotApplyMaintenancePageFilterForURI, requestURI);
         return shouldNotApplyMaintenancePageFilterForURI;

@@ -21,8 +21,8 @@ public class MaintenancePageUtilTest {
 
     private MaintenancePageUtil createMaintenancePageUtil(boolean maintenancePageEnabled) {
         String skipMaintenancePageForUsers = "tester1@domain.com,tester2@domain.com";
-        String skipMaintenancePageForUris = "/health,/info,/maintenance,/error,/cookies,/privacy," +
-                "/accessibility-statement,/contact-us,/webjars,/assets,/css,/img,/favicon.ico";
+        String skipMaintenancePageForUris = "/oauth/check_token,/oauth/token,/oauth/resolve," +
+                "/oauth/logout,/health,/maintenance,/error,/webjars,/css,/img,/js";
         return new MaintenancePageUtil(maintenancePageEnabled, skipMaintenancePageForUsers,
                 skipMaintenancePageForUris);
     }
@@ -75,7 +75,7 @@ public class MaintenancePageUtilTest {
 
     @Test
     public void shouldSkipMaintenancePageIfMaintenancePageIsEnabledAndRequestURIIsAllowedToSkipMaintenancePage() {
-        assertTrue(executeShouldNotApplyMaintenancePageFilterForURI(true, "/health"));
+        assertTrue(executeShouldNotApplyMaintenancePageFilterForURI(true, "/assets/css/main.css"));
     }
 
     @Test
