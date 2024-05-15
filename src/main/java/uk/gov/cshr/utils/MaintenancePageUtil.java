@@ -70,9 +70,23 @@ public class MaintenancePageUtil {
             }
         }
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-        log.info("MaintenancePageUtil.skipMaintenancePageForUser.principal from SecurityContextHolder: {}", principal);
+        if(isBlank(username)) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Object principal = authentication.getPrincipal();
+            log.info("MaintenancePageUtil.skipMaintenancePageForUser.principal from SecurityContextHolder: {}", principal);
+            if (principal instanceof IdentityDetails) {
+                IdentityDetails identityDetails = (IdentityDetails) principal;
+                username = identityDetails.getIdentity().getEmail();
+                log.info("MaintenancePageUtil.skipMaintenancePageForUser.username identityDetails.getIdentity().getEmail(): {}", username);
+            }
+
+            if (principal instanceof Jwt) {
+                Jwt jwt = (Jwt) principal;
+                log.info("MaintenancePageUtil.skipMaintenancePageForUser.jwt: {}", jwt);
+                String claims = jwt.getClaims();
+                log.info("MaintenancePageUtil.skipMaintenancePageForUser.claims: {}", claims);
+            }
+        }
 
         if(isBlank(username)) {
             log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is missing. Returning false.");
