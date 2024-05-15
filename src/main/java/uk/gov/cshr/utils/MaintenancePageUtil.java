@@ -43,23 +43,23 @@ public class MaintenancePageUtil {
 
         String method = request.getMethod();
         if(!"GET".equalsIgnoreCase(method)) {
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.method is not GET returning true.");
+            log.debug("MaintenancePageUtil.skipMaintenancePageForUser.method is not GET returning true.");
             return true;
         }
 
         String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-        log.info("MaintenancePageUtil.skipMaintenancePageForUser.username from request param: {}", username);
+        log.debug("MaintenancePageUtil.skipMaintenancePageForUser.username from request param: {}", username);
 
         if(isBlank(username)) {
             Principal principal = request.getUserPrincipal();
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.principal from request: {}", principal);
+            log.debug("MaintenancePageUtil.skipMaintenancePageForUser.principal from request: {}", principal);
             username = getUsernameFromPrincipal(principal);
         }
 
         if(isBlank(username)) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Object principal = authentication.getPrincipal();
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.principal from SecurityContextHolder: {}", principal);
+            log.debug("MaintenancePageUtil.skipMaintenancePageForUser.principal from SecurityContextHolder: {}", principal);
             username = getUsernameFromPrincipal(principal);
         }
 
@@ -75,6 +75,9 @@ public class MaintenancePageUtil {
 
         if(skipMaintenancePageForUser) {
             log.info("MaintenancePageUtil.skipMaintenancePageForUser.Maintenance page is skipped for the user: {}",
+                    username);
+        } else {
+            log.info("MaintenancePageUtil.skipMaintenancePageForUser.User {} is not allowed to skip the Maintenance page.",
                     username);
         }
 
