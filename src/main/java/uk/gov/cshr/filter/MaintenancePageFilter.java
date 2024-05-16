@@ -20,8 +20,8 @@ public class MaintenancePageFilter extends OncePerRequestFilter {
 	private final MaintenancePageUtil maintenancePageUtil;
 
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-									FilterChain filterChain) throws ServletException, IOException {
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
 		if(!maintenancePageUtil.skipMaintenancePageForUser(request)) {
 			response.sendRedirect("/maintenance");
 			return;
@@ -30,7 +30,7 @@ public class MaintenancePageFilter extends OncePerRequestFilter {
 	}
 
 	@Override
-	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+	protected boolean shouldNotFilter(HttpServletRequest request) {
 		return maintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI(request);
 	}
 }

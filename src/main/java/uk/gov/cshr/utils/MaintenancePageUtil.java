@@ -53,8 +53,7 @@ public class MaintenancePageUtil {
         String requestURI = request.getRequestURI();
 
         if(isBlank(username)) {
-            String method = request.getMethod();
-            if("GET".equalsIgnoreCase(method)) {
+            if("GET".equalsIgnoreCase(request.getMethod())) {
                 log.info("MaintenancePageUtil: username is missing and HTTP Method is GET. " +
                         "Returning false for skipMaintenancePageForUser for requestURI {}", requestURI);
                 return false;
