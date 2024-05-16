@@ -34,8 +34,8 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         if(!skipMaintenancePage) {
             log.info("CustomAuthenticationSuccessHandler.onAuthenticationSuccess. " +
                     "User is not allowed to access the website due to maintenance page is enabled. " +
-                    "Redirecting user to logout.");
-            response.sendRedirect("/oauth/logout");
+                    "Redirecting user to maintenance.");
+            response.sendRedirect("/maintenance");
             return;
         }
         super.onAuthenticationSuccess(request, response, authentication);
