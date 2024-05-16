@@ -78,10 +78,10 @@ public class MaintenancePageUtil {
                 .anyMatch(u -> u.trim().equalsIgnoreCase(trimmedUsername));
 
         if(skipMaintenancePageForUser) {
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.Maintenance page is skipped for the user {} for requestURI {}",
+            log.info("MaintenancePageUtil.skipMaintenancePageForUser.Maintenance page is skipped for the username {} for requestURI {}",
                     username, requestURI);
         } else {
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.User {} is not allowed to skip the Maintenance page for requestURI {}",
+            log.info("MaintenancePageUtil.skipMaintenancePageForUser.username {} is not allowed to skip the Maintenance page for requestURI {}",
                     username, requestURI);
         }
 
