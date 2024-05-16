@@ -99,7 +99,7 @@ public class MaintenancePageUtil {
         if (principal instanceof IdentityDetails) {
             IdentityDetails identityDetails = (IdentityDetails) principal;
             String username = identityDetails.getIdentity().getEmail();
-            log.info("MaintenancePageUtil: username is {} from principal", username);
+            log.info("MaintenancePageUtil: username from Authentication principal is {}", username);
             return username;
         }
         return null;
