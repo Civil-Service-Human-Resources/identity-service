@@ -31,6 +31,8 @@ import java.util.Optional;
 @RequestMapping("/signup")
 public class SignupController {
 
+    private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
+
     private static final String ENTER_TOKEN_TEMPLATE = "enterToken";
     private static final String CHOOSE_ORGANISATION_TEMPLATE = "chooseOrganisation";
     private static final String REQUEST_INVITE_TEMPLATE = "requestInvite";
@@ -347,7 +349,7 @@ public class SignupController {
 
                     log.info("Enter token form has passed domain, token, organisation validation");
 
-                    return REDIRECT_SIGNUP + code;
+                    return REDIRECT_SIGNUP + code + "?" + SKIP_MAINTENANCE_PAGE_PARAM_NAME + "=" + invite.getForEmail();
                 }).orElseGet(() -> {
                     log.info("Enter token form has failed domain, token, organisation validation");
                     redirectAttributes.addFlashAttribute(ApplicationConstants.STATUS_ATTRIBUTE, ApplicationConstants.ENTER_TOKEN_ERROR_MESSAGE);

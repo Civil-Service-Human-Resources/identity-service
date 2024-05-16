@@ -33,7 +33,6 @@ import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -42,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockUser(username = "user")
 public class SignupControllerTest {
 
+    private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
     private static final String STATUS_ATTRIBUTE = "status";
 
     @Autowired
@@ -570,7 +570,8 @@ public class SignupControllerTest {
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                         .param("token", token))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/" + GENERIC_CODE));
+                .andExpect(redirectedUrl("/signup/" + GENERIC_CODE
+                        + "?" + SKIP_MAINTENANCE_PAGE_PARAM_NAME + "=" + GENERIC_EMAIL));
     }
 
     @Test
