@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.cshr.service.security.IdentityDetails;
 
 import javax.servlet.http.HttpServletRequest;
-import java.security.Principal;
 import java.util.Arrays;
 
 import static java.util.Locale.ROOT;
@@ -42,18 +41,12 @@ public class MaintenancePageUtil {
         }
 
         String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-        log.info("MaintenancePageUtil.skipMaintenancePageForUser.username from request param: {}", username);
-
-        if(isBlank(username)) {
-            Principal principal = request.getUserPrincipal();
-            log.debug("MaintenancePageUtil.skipMaintenancePageForUser.principal from request: {}", principal);
-            username = getUsernameFromPrincipal(principal);
-        }
+        log.info("MaintenancePageUtil: username from request param: {}", username);
 
         if(isBlank(username)) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             Object principal = authentication != null ? authentication.getPrincipal() : null;
-            log.debug("MaintenancePageUtil.skipMaintenancePageForUser.principal from SecurityContextHolder: {}", principal);
+            log.debug("MaintenancePageUtil: Authentication principal from SecurityContextHolder: {}", principal);
             username = getUsernameFromPrincipal(principal);
         }
 
@@ -62,12 +55,12 @@ public class MaintenancePageUtil {
         if(isBlank(username)) {
             String method = request.getMethod();
             if("GET".equalsIgnoreCase(method)) {
-                log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is missing and HTTP Method is GET. " +
-                        "Returning false for requestURI {}", requestURI);
+                log.info("MaintenancePageUtil: username is missing and HTTP Method is GET. " +
+                        "Returning false for skipMaintenancePageForUser for requestURI {}", requestURI);
                 return false;
             } else {
-                log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is missing and HTTP Method is not GET. " +
-                        "Returning true for requestURI {}", requestURI);
+                log.info("MaintenancePageUtil: username is missing and HTTP Method is not GET. " +
+                        "Returning true for skipMaintenancePageForUser for requestURI {}", requestURI);
                 return true;
             }
         }
@@ -78,10 +71,10 @@ public class MaintenancePageUtil {
                 .anyMatch(u -> u.trim().equalsIgnoreCase(trimmedUsername));
 
         if(skipMaintenancePageForUser) {
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.Maintenance page is skipped for the username {} for requestURI {}",
+            log.info("MaintenancePageUtil: Maintenance page is skipped for the username {} for requestURI {}",
                     username, requestURI);
         } else {
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.username {} is not allowed to skip the Maintenance page for requestURI {}",
+            log.info("MaintenancePageUtil: username {} is not allowed to skip the Maintenance page for requestURI {}",
                     username, requestURI);
         }
 
@@ -98,7 +91,7 @@ public class MaintenancePageUtil {
                 && Arrays.stream(skipMaintenancePageForUris.split(","))
                 .anyMatch(u -> requestURI.trim().toLowerCase(ROOT)
                         .contains(u.toLowerCase(ROOT)));
-        log.debug("MaintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI is: {} for requestURI: {}",
+        log.debug("MaintenancePageUtil: shouldNotApplyMaintenancePageFilterForURI is {} for requestURI {}",
                 shouldNotApplyMaintenancePageFilterForURI, requestURI);
         return shouldNotApplyMaintenancePageFilterForURI;
     }
@@ -107,7 +100,7 @@ public class MaintenancePageUtil {
         if (principal instanceof IdentityDetails) {
             IdentityDetails identityDetails = (IdentityDetails) principal;
             String username = identityDetails.getIdentity().getEmail();
-            log.info("MaintenancePageUtil.getUsernameFromPrincipal.username from principal: {}", username);
+            log.info("MaintenancePageUtil: username is {} from principal", username);
             return username;
         }
         return null;

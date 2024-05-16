@@ -73,7 +73,7 @@ public class ReactivationController {
     }
 
     @GetMapping
-    public String sendReactivationEmail(@RequestParam String code){
+    public String sendReactivationEmail(@RequestParam String code) {
 
         try {
             String email = TextEncryptionUtils.getDecryptedText(code, encryptionKey);
@@ -90,9 +90,7 @@ public class ReactivationController {
     }
 
     @GetMapping("/{code}")
-    public String reactivateAccount(
-            @PathVariable(value = "code") String code,
-            RedirectAttributes redirectAttributes) {
+    public String reactivateAccount(@PathVariable(value = "code") String code, RedirectAttributes redirectAttributes) {
         try {
             Reactivation reactivation = reactivationService.getReactivationByCodeAndStatus(code, ReactivationStatus.PENDING);
 

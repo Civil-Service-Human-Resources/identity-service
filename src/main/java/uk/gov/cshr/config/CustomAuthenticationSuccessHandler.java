@@ -29,12 +29,8 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) {
         this.setDefaultTargetUrl(lpgUiUrl);
-        log.debug("CustomAuthenticationSuccessHandler.authentication: {}", authentication);
         boolean skipMaintenancePage = maintenancePageUtil.skipMaintenancePageForUser(request);
         if(!skipMaintenancePage) {
-            log.info("CustomAuthenticationSuccessHandler.onAuthenticationSuccess. " +
-                    "User is not allowed to access the website due to maintenance page is enabled. " +
-                    "Redirecting user to maintenance.");
             response.sendRedirect("/maintenance");
             return;
         }

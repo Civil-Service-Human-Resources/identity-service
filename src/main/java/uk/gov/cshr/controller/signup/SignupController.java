@@ -149,8 +149,7 @@ public class SignupController {
     }
 
     @GetMapping("/{code}")
-    public String signup(Model model, @PathVariable(value = "code") String code,
-                         RedirectAttributes redirectAttributes) {
+    public String signup(Model model, @PathVariable(value = "code") String code, RedirectAttributes redirectAttributes) {
         Invite invite = inviteService.findByCode(code);
         if (invite == null) {
             log.info("Signup code for invite is not valid - redirecting to signup");
