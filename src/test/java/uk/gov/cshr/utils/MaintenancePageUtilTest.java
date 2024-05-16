@@ -22,7 +22,7 @@ public class MaintenancePageUtilTest {
         String skipMaintenancePageForUsers = "tester1@domain.com,tester2@domain.com";
         String skipMaintenancePageForUris = "/health,/maintenance,/error,/logout,/webjars,/css,/img,/js,/favicon.ico," +
                 "/oauth/revoke,/oauth/resolve,/oauth/token,/oauth/check_token," +
-                "/api/identities,/signup/chooseOrganisation,/signup/enterToken";
+                "/api/identities,/signup/chooseOrganisation,/signup/enterToken,/account/verify/agency";
         return new MaintenancePageUtil(maintenancePageEnabled, skipMaintenancePageForUsers,
                 skipMaintenancePageForUris);
     }
