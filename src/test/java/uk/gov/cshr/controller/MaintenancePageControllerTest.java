@@ -18,7 +18,6 @@ import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.utils.MockMVCFilterOverrider;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -32,7 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 public class MaintenancePageControllerTest {
 
-    private static final String MAINTENANCE_TEMPLATE = "maintenance";
     private static final String IDENTITY_UID = "a9cc9b0c-d257-4fa6-a760-950c09143e37";
 
     @Autowired
@@ -56,14 +54,12 @@ public class MaintenancePageControllerTest {
 
     @Test
     public void shouldDisplayMaintenancePage() throws Exception {
+        String lpgUiUrl = "http://localhost:3001";
         mockMvc.perform(get("/maintenance")
                         .with(csrf())
                 )
-                .andExpect(status().isOk())
-                .andExpect(view().name(MAINTENANCE_TEMPLATE))
-                .andExpect(content().string(containsString("Maintenance")))
-                .andExpect(content().string(containsString("The learning website is undergoing scheduled maintenance.")))
-                .andExpect(content().string(containsString("Apologies for the inconvenience.")))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(lpgUiUrl))
                 .andDo(print());
     }
 }
