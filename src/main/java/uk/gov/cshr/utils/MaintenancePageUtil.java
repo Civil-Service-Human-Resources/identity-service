@@ -57,16 +57,18 @@ public class MaintenancePageUtil {
             username = getUsernameFromPrincipal(principal);
         }
 
+        String requestURI = request.getRequestURI();
+
         if(isBlank(username)) {
             log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is missing.");
             String method = request.getMethod();
             if("GET".equalsIgnoreCase(method)) {
                 log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is missing and HTTP Method is GET. " +
-                        "Returning false.");
+                        "Returning false for requestURI {}", requestURI);
                 return false;
             } else {
                 log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is missing and HTTP Method is not GET. " +
-                        "Returning true.");
+                        "Returning true for requestURI {}", requestURI);
                 return true;
             }
         }
@@ -77,11 +79,11 @@ public class MaintenancePageUtil {
                 .anyMatch(u -> u.trim().equalsIgnoreCase(trimmedUsername));
 
         if(skipMaintenancePageForUser) {
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.Maintenance page is skipped for the user: {}",
-                    username);
+            log.info("MaintenancePageUtil.skipMaintenancePageForUser.Maintenance page is skipped for the user {} for requestURI {}",
+                    username, requestURI);
         } else {
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.User {} is not allowed to skip the Maintenance page.",
-                    username);
+            log.info("MaintenancePageUtil.skipMaintenancePageForUser.User {} is not allowed to skip the Maintenance page for requestURI {}",
+                    username, requestURI);
         }
 
         return skipMaintenancePageForUser;
