@@ -42,7 +42,7 @@ public class MaintenancePageUtil {
         }
 
         String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-        log.debug("MaintenancePageUtil.skipMaintenancePageForUser.username from request param: {}", username);
+        log.info("MaintenancePageUtil.skipMaintenancePageForUser.username from request param: {}", username);
 
         if(isBlank(username)) {
             Principal principal = request.getUserPrincipal();
