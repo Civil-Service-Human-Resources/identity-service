@@ -60,7 +60,6 @@ public class MaintenancePageUtil {
         String requestURI = request.getRequestURI();
 
         if(isBlank(username)) {
-            log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is missing.");
             String method = request.getMethod();
             if("GET".equalsIgnoreCase(method)) {
                 log.info("MaintenancePageUtil.skipMaintenancePageForUser.username is missing and HTTP Method is GET. " +
@@ -99,7 +98,7 @@ public class MaintenancePageUtil {
                 && Arrays.stream(skipMaintenancePageForUris.split(","))
                 .anyMatch(u -> requestURI.trim().toLowerCase(ROOT)
                         .contains(u.toLowerCase(ROOT)));
-        log.info("MaintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI is: {} for requestURI: {}",
+        log.debug("MaintenancePageUtil.shouldNotApplyMaintenancePageFilterForURI is: {} for requestURI: {}",
                 shouldNotApplyMaintenancePageFilterForURI, requestURI);
         return shouldNotApplyMaintenancePageFilterForURI;
     }
