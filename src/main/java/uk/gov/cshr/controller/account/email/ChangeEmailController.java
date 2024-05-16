@@ -90,9 +90,7 @@ public class ChangeEmailController {
     }
 
     @GetMapping("/verify/{code}")
-    public String verifyEmail(@PathVariable String code,
-                              Authentication authentication,
-                              RedirectAttributes redirectAttributes) {
+    public String verifyEmail(@PathVariable String code, Authentication authentication, RedirectAttributes redirectAttributes) {
         log.debug("Attempting update email verification with code: {}", code);
 
         Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
