@@ -20,7 +20,6 @@ import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
 import uk.gov.cshr.utils.CsrfRequestPostProcessor;
-import uk.gov.cshr.utils.MaintenancePageUtil;
 import uk.gov.cshr.utils.MockMVCFilterOverrider;
 
 import java.util.Collections;
@@ -29,14 +28,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -45,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WithMockUser(username = "user")
 public class SignupControllerTest {
 
+    private static final String SKIP_MAINTENANCE_PAGE_PARAM_NAME = "username";
     private static final String STATUS_ATTRIBUTE = "status";
 
     @Autowired
@@ -61,9 +58,6 @@ public class SignupControllerTest {
 
     @MockBean
     private AgencyTokenCapacityService agencyTokenCapacityService;
-
-    @MockBean
-    private MaintenancePageUtil maintenancePageUtil;
 
     private final String GENERIC_EMAIL = "email@domain.com";
     private final String GENERIC_DOMAIN = "domain.com";
@@ -93,19 +87,6 @@ public class SignupControllerTest {
         AgencyTokenDTO agencyTokenDTO = new AgencyTokenDTO();
         agencyTokenDTO.setAgencyDomains(Collections.singletonList(new Domain(1L, GENERIC_DOMAIN)));
         return agencyTokenDTO;
-    }
-
-    @Test
-    public void shouldDisplayMaintenancePage() throws Exception {
-        when(maintenancePageUtil.displayMaintenancePage(any(), any())).thenReturn(true);
-        mockMvc.perform(
-                        get("/signup/request")
-                                .with(CsrfRequestPostProcessor.csrf())
-                )
-                .andExpect(status().isOk())
-                .andExpect(view().name("maintenance"))
-                .andExpect(content().string(containsString("Maintenance")))
-                .andDo(print());
     }
 
     @Test
@@ -589,7 +570,8 @@ public class SignupControllerTest {
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                         .param("token", token))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/signup/" + GENERIC_CODE));
+                .andExpect(redirectedUrl("/signup/" + GENERIC_CODE
+                        + "?" + SKIP_MAINTENANCE_PAGE_PARAM_NAME + "=" + GENERIC_EMAIL));
     }
 
     @Test

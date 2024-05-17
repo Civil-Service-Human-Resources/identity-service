@@ -29,7 +29,10 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) {
         this.setDefaultTargetUrl(lpgUiUrl);
-        maintenancePageUtil.skipMaintenancePageCheck(authentication);
+        if(!maintenancePageUtil.skipMaintenancePageForUser(request)) {
+            response.sendRedirect("/maintenance");
+            return;
+        }
         super.onAuthenticationSuccess(request, response, authentication);
     }
 }

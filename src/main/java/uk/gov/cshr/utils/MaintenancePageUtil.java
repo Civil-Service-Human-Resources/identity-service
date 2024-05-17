@@ -3,16 +3,16 @@ package uk.gov.cshr.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.ui.Model;
-import uk.gov.cshr.domain.Identity;
-import uk.gov.cshr.exception.GenericServerException;
 import uk.gov.cshr.service.security.IdentityDetails;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 
+import static java.util.Locale.ROOT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.logging.log4j.util.Strings.isBlank;
 
 @Slf4j
 @Component
@@ -24,65 +24,84 @@ public class MaintenancePageUtil {
 
     private final String skipMaintenancePageForUsers;
 
-    private final String maintenancePageContentLine1;
+    private final String skipMaintenancePageForUris;
 
-    private final String maintenancePageContentLine2;
-
-    private final String maintenancePageContentLine3;
-
-    private final String maintenancePageContentLine4;
-
-    public MaintenancePageUtil(@Value("${maintenancePage.enabled}") boolean maintenancePageEnabled,
-                               @Value("${maintenancePage.skipForUsers}") String skipMaintenancePageForUsers,
-                               @Value("${maintenancePage.contentLine1}") String maintenancePageContentLine1,
-                               @Value("${maintenancePage.contentLine2}") String maintenancePageContentLine2,
-                               @Value("${maintenancePage.contentLine3}") String maintenancePageContentLine3,
-                               @Value("${maintenancePage.contentLine4}") String maintenancePageContentLine4) {
+    public MaintenancePageUtil(
+            @Value("${maintenancePage.enabled}") boolean maintenancePageEnabled,
+            @Value("${maintenancePage.skipForUsers}") String skipMaintenancePageForUsers,
+            @Value("${maintenancePage.skipForUris}") String skipMaintenancePageForUris) {
         this.maintenancePageEnabled = maintenancePageEnabled;
         this.skipMaintenancePageForUsers = skipMaintenancePageForUsers;
-        this.maintenancePageContentLine1 = maintenancePageContentLine1;
-        this.maintenancePageContentLine2 = maintenancePageContentLine2;
-        this.maintenancePageContentLine3 = maintenancePageContentLine3;
-        this.maintenancePageContentLine4 = maintenancePageContentLine4;
+        this.skipMaintenancePageForUris = skipMaintenancePageForUris;
     }
 
-    public boolean displayMaintenancePage(HttpServletRequest request, Model model) {
-        String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
-        return displayMaintenancePageForUser(username, model);
-    }
-
-    public boolean displayMaintenancePageForUser(String username, Model model) {
-        if(maintenancePageEnabled) {
-            boolean skipMaintenancePage = isNotBlank(username) &&
-                    Arrays.stream(skipMaintenancePageForUsers.split(","))
-                            .anyMatch(u -> u.trim().equalsIgnoreCase(username.trim()));
-            if (skipMaintenancePage) {
-                log.info("Maintenance page is skipped for the user: {}", username);
-                return false;
-            }
-            model.addAttribute("maintenancePageContentLine1", maintenancePageContentLine1);
-            model.addAttribute("maintenancePageContentLine2", maintenancePageContentLine2);
-            model.addAttribute("maintenancePageContentLine3", maintenancePageContentLine3);
-            model.addAttribute("maintenancePageContentLine4", maintenancePageContentLine4);
+    public boolean skipMaintenancePageForUser(HttpServletRequest request) {
+        if(!maintenancePageEnabled) {
             return true;
         }
-        return false;
-    }
 
-    public void skipMaintenancePageCheck(Authentication authentication) {
-        Object principal = authentication.getPrincipal();
-        if (maintenancePageEnabled && principal instanceof IdentityDetails) {
-            IdentityDetails identityDetails = (IdentityDetails)principal;
-            Identity identity = identityDetails.getIdentity();
-            String email = identity.getEmail();
-            boolean skipMaintenancePage = Arrays.stream(skipMaintenancePageForUsers.split(","))
-                    .anyMatch(u -> u.trim().equalsIgnoreCase(email.trim()));
-            if(skipMaintenancePage) {
-                log.info("Maintenance page is skipped for the user: {}", email);
+        String username = request.getParameter(SKIP_MAINTENANCE_PAGE_PARAM_NAME);
+        log.info("MaintenancePageUtil: username from request param: {}", username);
+
+        if(isBlank(username)) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Object principal = authentication != null ? authentication.getPrincipal() : null;
+            log.debug("MaintenancePageUtil: Authentication principal from SecurityContextHolder: {}", principal);
+            username = getUsernameFromPrincipal(principal);
+        }
+
+        String requestURI = request.getRequestURI();
+
+        if(isBlank(username)) {
+            if("GET".equalsIgnoreCase(request.getMethod())) {
+                log.info("MaintenancePageUtil: username is missing and HTTP Method is GET. " +
+                        "Returning false for skipMaintenancePageForUser for requestURI {}", requestURI);
+                return false;
             } else {
-                log.warn("User is not allowed to access the website due to maintenance page is enabled. Showing error page for the user: {}", email);
-                throw new GenericServerException("User is not allowed to access the website due to maintenance page is enabled.");
+                log.info("MaintenancePageUtil: username is missing and HTTP Method is not GET. " +
+                        "Returning true for skipMaintenancePageForUser for requestURI {}", requestURI);
+                return true;
             }
         }
+
+        final String trimmedUsername = username.trim();
+
+        boolean skipMaintenancePageForUser = Arrays.stream(skipMaintenancePageForUsers.split(","))
+                .anyMatch(u -> u.trim().equalsIgnoreCase(trimmedUsername));
+
+        if(skipMaintenancePageForUser) {
+            log.info("MaintenancePageUtil: Maintenance page is skipped for the username {} for requestURI {}",
+                    username, requestURI);
+        } else {
+            log.info("MaintenancePageUtil: username {} is not allowed to skip the Maintenance page for requestURI {}",
+                    username, requestURI);
+        }
+
+        return skipMaintenancePageForUser;
+    }
+
+    public boolean shouldNotApplyMaintenancePageFilterForURI(HttpServletRequest request) {
+        if(!maintenancePageEnabled) {
+            return true;
+        }
+
+        String requestURI = request.getRequestURI();
+        boolean shouldNotApplyMaintenancePageFilterForURI = isNotBlank(requestURI)
+                && Arrays.stream(skipMaintenancePageForUris.split(","))
+                .anyMatch(u -> requestURI.trim().toLowerCase(ROOT)
+                        .contains(u.toLowerCase(ROOT)));
+        log.debug("MaintenancePageUtil: shouldNotApplyMaintenancePageFilterForURI is {} for requestURI {}",
+                shouldNotApplyMaintenancePageFilterForURI, requestURI);
+        return shouldNotApplyMaintenancePageFilterForURI;
+    }
+
+    private String getUsernameFromPrincipal(Object principal) {
+        if (principal instanceof IdentityDetails) {
+            IdentityDetails identityDetails = (IdentityDetails) principal;
+            String username = identityDetails.getIdentity().getEmail();
+            log.info("MaintenancePageUtil: username from Authentication principal is {}", username);
+            return username;
+        }
+        return null;
     }
 }

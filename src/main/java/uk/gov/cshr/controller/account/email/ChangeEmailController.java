@@ -17,9 +17,7 @@ import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
-import uk.gov.cshr.utils.MaintenancePageUtil;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Map;
 
@@ -45,28 +43,20 @@ public class ChangeEmailController {
     private final IdentityService identityService;
     private final EmailUpdateService emailUpdateService;
     private final CsrsService csrsService;
-    private final MaintenancePageUtil maintenancePageUtil;
     private final String lpgUiUrl;
 
     public ChangeEmailController(IdentityService identityService,
                                  EmailUpdateService emailUpdateService,
                                  CsrsService csrsService,
-                                 MaintenancePageUtil maintenancePageUtil,
                                  @Value("${lpg.uiUrl}") String lpgUiUrl) {
         this.identityService = identityService;
         this.emailUpdateService = emailUpdateService;
         this.csrsService = csrsService;
-        this.maintenancePageUtil = maintenancePageUtil;
         this.lpgUiUrl = lpgUiUrl;
     }
 
     @GetMapping
-    public String updateEmailForm(HttpServletRequest request, Model model, @ModelAttribute UpdateEmailForm form) {
-
-        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
-            return "maintenance";
-        }
-
+    public String updateEmailForm(Model model, @ModelAttribute UpdateEmailForm form) {
         log.debug("Getting update email form");
         model.addAttribute(LPG_UI_URL_ATTRIBUTE, lpgUiUrl);
         model.addAttribute(UPDATE_EMAIL_FORM, form);
@@ -100,15 +90,7 @@ public class ChangeEmailController {
     }
 
     @GetMapping("/verify/{code}")
-    public String verifyEmail(@PathVariable String code,
-                              Authentication authentication,
-                              RedirectAttributes redirectAttributes,
-                              HttpServletRequest request, Model model) {
-
-        if(maintenancePageUtil.displayMaintenancePage(request, model)) {
-            return "maintenance";
-        }
-
+    public String verifyEmail(@PathVariable String code, Authentication authentication, RedirectAttributes redirectAttributes) {
         log.debug("Attempting update email verification with code: {}", code);
 
         Identity identity = ((IdentityDetails) authentication.getPrincipal()).getIdentity();
