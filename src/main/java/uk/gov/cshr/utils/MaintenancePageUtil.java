@@ -13,6 +13,7 @@ import java.util.Arrays;
 import static java.util.Locale.ROOT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.logging.log4j.util.Strings.isBlank;
+import static uk.gov.cshr.utils.TextEncryptionUtils.getDecryptedText;
 
 @Slf4j
 @Component
@@ -26,13 +27,17 @@ public class MaintenancePageUtil {
 
     private final String skipMaintenancePageForUris;
 
+    private final String encryptionKey;
+
     public MaintenancePageUtil(
             @Value("${maintenancePage.enabled}") boolean maintenancePageEnabled,
             @Value("${maintenancePage.skipForUsers}") String skipMaintenancePageForUsers,
-            @Value("${maintenancePage.skipForUris}") String skipMaintenancePageForUris) {
+            @Value("${maintenancePage.skipForUris}") String skipMaintenancePageForUris,
+            @Value("${textEncryption.encryptionKey}") String encryptionKey) {
         this.maintenancePageEnabled = maintenancePageEnabled;
         this.skipMaintenancePageForUsers = skipMaintenancePageForUsers;
         this.skipMaintenancePageForUris = skipMaintenancePageForUris;
+        this.encryptionKey = encryptionKey;
     }
 
     public boolean skipMaintenancePageForUser(HttpServletRequest request) {
@@ -68,6 +73,18 @@ public class MaintenancePageUtil {
 
         boolean skipMaintenancePageForUser = Arrays.stream(skipMaintenancePageForUsers.split(","))
                 .anyMatch(u -> u.trim().equalsIgnoreCase(trimmedUsername));
+
+        if(!skipMaintenancePageForUser) {
+            //Below try catch block is for the deactivated account scenario
+            try {
+                final String decryptedUsername = getDecryptedText(username, encryptionKey);
+                skipMaintenancePageForUser = Arrays.stream(skipMaintenancePageForUsers.split(","))
+                        .anyMatch(u -> u.trim().equalsIgnoreCase(decryptedUsername));
+                username = decryptedUsername; //For logging in the subsequent code below
+            } catch (Exception e) {
+                log.debug("MaintenancePageUtil: trimmedUsername is not encrypted.");
+            }
+        }
 
         if(skipMaintenancePageForUser) {
             log.info("MaintenancePageUtil: Maintenance page is skipped for the username {} for requestURI {}",
