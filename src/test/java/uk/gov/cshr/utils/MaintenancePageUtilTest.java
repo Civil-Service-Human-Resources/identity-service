@@ -23,9 +23,10 @@ public class MaintenancePageUtilTest {
         String skipMaintenancePageForUris = "/health,/maintenance,/error,/logout,/webjars,/css,/img,/js,/favicon.ico," +
                 "/oauth/revoke,/oauth/resolve,/oauth/token,/oauth/check_token," +
                 "/api/identities,/signup/chooseOrganisation,/signup/enterToken," +
-                "/account/verify/agency,/account/reactivate/updated";
+                "/account/verify/agency,/account/reactivate/updated,/account/email/updated";
+        String encryptionKey = "0123456789abcdef0123456789abcdef";
         return new MaintenancePageUtil(maintenancePageEnabled, skipMaintenancePageForUsers,
-                skipMaintenancePageForUris);
+                skipMaintenancePageForUris, encryptionKey);
     }
 
     private boolean executeSkipMaintenancePageForUser(boolean maintenancePageEnabled,
