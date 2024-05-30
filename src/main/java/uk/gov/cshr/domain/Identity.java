@@ -161,6 +161,11 @@ public class Identity implements Serializable {
         this.agencyTokenUid = agencyTokenUid;
     }
 
+    @JsonIgnore
+    public String getDomain() {
+        return email.substring(email.indexOf('@') + 1);
+    }
+
     @Override
     public String toString() {
         return "Identity{" +

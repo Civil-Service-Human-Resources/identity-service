@@ -9,7 +9,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -20,7 +19,6 @@ import uk.gov.cshr.domain.ResetStatus;
 import uk.gov.cshr.domain.Role;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.ResetRepository;
-import uk.gov.cshr.service.NotifyService;
 import uk.gov.cshr.service.ResetService;
 
 import javax.transaction.Transactional;
@@ -35,8 +33,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -50,7 +47,7 @@ public class ResetControllerTest {
     private static final Boolean ACTIVE = true;
     private static final Boolean LOCKED = false;
     private static final String PASSWORD = "password";
-    private static final Set<Role> ROLES = new HashSet();
+    private static final Set<Role> ROLES = new HashSet<>();
 
     @Autowired
     private MockMvc mockMvc;
@@ -66,12 +63,6 @@ public class ResetControllerTest {
 
     @Mock
     private ResetService resetService;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @Mock
-    private NotifyService notifyService;
 
     @Before
     public void setup() {

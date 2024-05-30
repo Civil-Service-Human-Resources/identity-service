@@ -14,12 +14,17 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.cshr.domain.*;
+import uk.gov.cshr.domain.Identity;
+import uk.gov.cshr.domain.Invite;
+import uk.gov.cshr.domain.Role;
+import uk.gov.cshr.domain.TokenRequest;
+import uk.gov.cshr.dto.AgencyTokenDTO;
 import uk.gov.cshr.dto.BatchProcessResponse;
 import uk.gov.cshr.exception.*;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.*;
+import uk.gov.cshr.service.csrs.CsrsService;
 
 import java.time.Instant;
 import java.util.*;
@@ -102,7 +107,7 @@ public class IdentityService implements UserDetailsService {
 
         String agencyTokenUid = null;
         if (requestHasTokenData(tokenRequest)) {
-            Optional<AgencyToken> agencyTokenForDomainTokenOrganisation = csrsService.getAgencyTokenForDomainTokenOrganisation(tokenRequest.getDomain(), tokenRequest.getToken(), tokenRequest.getOrg());
+            Optional<AgencyTokenDTO> agencyTokenForDomainTokenOrganisation = csrsService.getAgencyTokenForDomainTokenOrganisation(tokenRequest.getDomain(), tokenRequest.getToken(), tokenRequest.getOrg());
 
             agencyTokenUid = agencyTokenForDomainTokenOrganisation
                     .map(agencyToken -> {
@@ -115,7 +120,7 @@ public class IdentityService implements UserDetailsService {
                     .orElseThrow(ResourceNotFoundException::new);
 
             log.info("Identity request has agency uid = {}", agencyTokenUid);
-        } else if (!isAllowlistedDomain(domain) && !isEmailInvitedViaIDM(invite.getForEmail())) {
+        } else if (!csrsService.isDomainAllowlisted(domain) && !isEmailInvitedViaIDM(invite.getForEmail())) {
             log.info("Invited request neither agency, nor allowlisted, nor invited via IDM: {}", invite);
             throw new ResourceNotFoundException();
         }
@@ -150,7 +155,7 @@ public class IdentityService implements UserDetailsService {
         identityRepository.save(identity);
     }
 
-    public void reactivateIdentity(Identity identity, AgencyToken agencyToken) {
+    public void reactivateIdentity(Identity identity, AgencyTokenDTO agencyToken) {
         identity.setActive(true);
 
         if (agencyToken != null && agencyToken.getUid() != null) {
@@ -186,11 +191,15 @@ public class IdentityService implements UserDetailsService {
         return identityRepository.save(identity);
     }
 
-    public BatchProcessResponse removeReportingRoles(List<String> uids) {
-        log.info(String.format("Removing reporting access from the following users: %s", uids));
+    public BatchProcessResponse removeRoles(List<String> uids, CompoundRole compoundRole) {
+        return removeRoles(uids, Collections.singletonList(compoundRole));
+    }
+
+    public BatchProcessResponse removeRoles(List<String> uids, List<CompoundRole> compoundRoles) {
+        log.info(String.format("Removing %s access from the following users: %s", compoundRoles, uids));
         BatchProcessResponse response = new BatchProcessResponse();
         List<Identity> identities = identityRepository.findIdentitiesByUids(uids);
-        Collection<String> reportingRoles = compoundRoleRepository.getReportingRoles();
+        Collection<String> reportingRoles = compoundRoles.stream().flatMap(cr -> compoundRoleRepository.getRoles(cr).stream()).collect(Collectors.toList());
         List<Identity> identitiesToSave = new ArrayList<>();
         identities.forEach(i -> {
             if (i.hasAnyRole(reportingRoles)) {
@@ -199,14 +208,18 @@ public class IdentityService implements UserDetailsService {
             }
         });
         if (!identitiesToSave.isEmpty()) {
-            log.info(String.format("Reporting access removed from the following users: %s", uids));
+            log.info(String.format("%s access removed from the following users: %s", compoundRoles, uids));
             identityRepository.saveAll(identitiesToSave);
             response.setSuccessfulIds(identitiesToSave.stream().map(Identity::getUid).collect(Collectors.toList()));
         }
         return response;
     }
 
-    public void updateEmailAddress(Identity identity, String email, AgencyToken newAgencyToken) {
+    public BatchProcessResponse removeReportingRoles(List<String> uids) {
+        return removeRoles(uids, CompoundRole.REPORTER);
+    }
+
+    public void updateEmailAddress(Identity identity, String email, AgencyTokenDTO newAgencyToken) {
         if (newAgencyToken != null && newAgencyToken.getUid() != null) {
             log.debug("Updating agency token for user: oldAgencyToken = {}, newAgencyToken = {}", identity.getAgencyTokenUid(), newAgencyToken.getUid());
             identity.setAgencyTokenUid(newAgencyToken.getUid());
@@ -215,7 +228,10 @@ public class IdentityService implements UserDetailsService {
             identity.setAgencyTokenUid(null);
         }
         identity.setEmail(email);
-        identity.removeRoles(compoundRoleRepository.getReportingRoles());
+        identity.removeRoles(compoundRoleRepository.getRoles(Arrays.asList(
+                CompoundRole.REPORTER,
+                CompoundRole.UNRESTRICTED_ORGANISATION
+        )));
         identityRepository.save(identity);
     }
 
@@ -225,7 +241,7 @@ public class IdentityService implements UserDetailsService {
 
     public boolean checkValidEmail(String email) {
         final String domain = getDomainFromEmailAddress(email);
-        return (isAllowlistedDomain(domain) || csrsService.isDomainInAgency(domain));
+        return csrsService.isDomainValid(domain);
     }
 
     private boolean requestHasTokenData(TokenRequest tokenRequest) {
@@ -250,7 +266,4 @@ public class IdentityService implements UserDetailsService {
         return inviteService.isEmailInvited(email);
     }
 
-    public boolean isAllowlistedDomain(String domain) {
-        return csrsService.getAllowlist().contains(domain.toLowerCase());
-    }
 }

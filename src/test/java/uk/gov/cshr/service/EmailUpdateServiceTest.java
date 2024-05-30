@@ -12,11 +12,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.cshr.domain.AgencyToken;
 import uk.gov.cshr.domain.EmailUpdate;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Role;
+import uk.gov.cshr.dto.AgencyTokenDTO;
 import uk.gov.cshr.repository.EmailUpdateRepository;
+import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityService;
 
 import java.time.Instant;
@@ -135,7 +136,7 @@ public class EmailUpdateServiceTest {
         emailUpdate.setEmail(NEW_EMAIL_ADDRESS);
         emailUpdate.setIdentity(identity);
 
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(UID);
 
         when(identityService.getIdentityByEmail(EMAIL)).thenReturn(identity);

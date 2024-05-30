@@ -28,7 +28,8 @@ logging:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
   level:
     root: ${ROOT_LOGGING_LEVEL:INFO}
-    org.apache.http: WARN
+    uk.gov.cshr: ${CSHR_LOGGING_LEVEL:INFO}
+    org.apache.http: INFO
 
 templates:
   assetCdn: ${ASSET_CDN:}
@@ -73,6 +74,8 @@ maintenancePage:
   contentLine2: ${MAINTENANCE_PAGE_CONTENT_LINE_2:It will be unavailable between the hours of 7pm to 9pm on Wednesday 24th February 2021.}
   contentLine3: ${MAINTENANCE_PAGE_CONTENT_LINE_3:Apologies for the inconvenience.}
   contentLine4: ${MAINTENANCE_PAGE_CONTENT_LINE_4:If the maintenance period is extended, further information will be provided here.}
+  skipForUsers: ${MAINTENANCE_PAGE_SKIP_FOR_USERS:tester1@domain.com,tester2@domain.com}
+  skipForUris: ${MAINTENANCE_PAGE_SKIP_FOR_URIS:/health,/maintenance,/error,/logout,/webjars,/css,/img,/js,/favicon.ico,/oauth/revoke,/oauth/resolve,/oauth/token,/oauth/check_token,/api/identities,/signup/chooseOrganisation,/signup/enterToken,/account/verify/agency,/account/reactivate/updated,/account/email/updated}
 
 lpg:
   uiUrl: ${LPG_UI_URL:http://localhost:3001}
@@ -80,14 +83,14 @@ lpg:
 
 registry:
   serviceUrl: ${REGISTRY_SERVICE_URL:http://localhost:9002}
-  agencyTokensFormat: "${registry.serviceUrl}/agencyTokens?domain=%s&token=%s&code=%s"
-  agencyTokensByDomainFormat: "${registry.serviceUrl}/agencyTokens?domain=%s"
-  agencyTokensByDomainAndOrganisationFormat: "${registry.serviceUrl}/agencyTokens?domain=%s&code=%s"
   civilServantUrl: "${registry.serviceUrl}/civilServants"
+  getOrganisationsMaxPageSize: ${REGISTRY_MAXIMUM_ORGANISATION_PAGE_SIZE:200}
+  organisationalUnitsFlatUrl: "${registry.serviceUrl}/v2/organisationalUnits"
+  agencyTokensUrl: "${registry.serviceUrl}/agencyTokens"
   domainsUrl: "${registry.serviceUrl}/domains"
-  organisationalUnitsFlatUrl: "${registry.serviceUrl}/organisationalUnits/flat"
   cache:
-    allowlistTTL: ${ALLOWLIST_TTL:10800000}
+    allowlistTTLSeconds: ${ALLOWLIST_TTL:100000}
+    organisationsTTLSeconds: ${ORGANISATIONS_TTL:100000}
 
 identity:
   identityBaseUrl: ${IDENTITY_BASE_URL:http://identity:8080}
@@ -115,8 +118,8 @@ spring:
     check-template: true
   datasource:
     url: ${DATASOURCE_URL:${database.host}/${database.name}?useSSL=${database.use-ssl}&requireSSL=false}
-    username: ${DATASOURCE_USERNAME:username}
-    password: ${DATASOURCE_PASSWORD:password}
+    username: ${DATASOURCE_USERNAME:root}
+    password: ${DATASOURCE_PASSWORD:my-secret-pw}
     platform: mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
@@ -130,7 +133,7 @@ spring:
         enabled: false
   redis:
     host: ${REDIS_HOST:localhost}
-    password: ${REDIS_PASSWORD:redispassword}
+    password: ${REDIS_PASSWORD:}
     port: ${REDIS_PORT:6379}
   session:
     redis:

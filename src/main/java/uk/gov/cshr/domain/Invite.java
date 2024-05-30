@@ -1,5 +1,6 @@
 package uk.gov.cshr.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -41,4 +42,10 @@ public class Invite implements Serializable {
     private Set<Role> forRoles;
 
     private boolean isAuthorisedInvite = true;
+
+    @JsonIgnore
+    public String getDomain() {
+        return forEmail.substring(forEmail.indexOf('@') + 1);
+    }
+    
 }

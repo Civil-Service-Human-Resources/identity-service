@@ -16,8 +16,6 @@ import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.service.security.UserDetailsChecker;
 import uk.gov.cshr.service.security.WebSecurityExpressionHandler;
 
-import javax.servlet.http.HttpServletResponse;
-
 import static uk.gov.cshr.config.SecurityConfig.forPort;
 
 @Configuration
@@ -35,6 +33,9 @@ public class UserSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+
+    @Autowired
+    CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     @Value("${server.port}")
     private int serverPort;
@@ -58,10 +59,13 @@ public class UserSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/account/passwordUpdated",
                         "/account/reactivate/**",
                         "/account/verify/agency/**",
-                        "/health").permitAll()
+                        "/health",
+                        "/maintenance",
+                        "/error").permitAll()
                 .anyRequest().authenticated().and()
                 .formLogin()
                 .loginPage("/login").defaultSuccessUrl(lpgUiUrl)
+                .successHandler(customAuthenticationSuccessHandler)
                 .failureHandler(customAuthenticationFailureHandler)
                 .and()
                 .logout()

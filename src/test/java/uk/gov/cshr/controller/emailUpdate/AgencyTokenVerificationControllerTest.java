@@ -15,17 +15,23 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.cshr.config.SpringSecurityTestConfig;
-import uk.gov.cshr.controller.account.AgencyTokenVerificationController;
 import uk.gov.cshr.controller.form.VerifyTokenForm;
 import uk.gov.cshr.domain.*;
+import uk.gov.cshr.dto.AgencyTokenDTO;
 import uk.gov.cshr.exception.NotEnoughSpaceAvailableException;
 import uk.gov.cshr.exception.ResourceNotFoundException;
-import uk.gov.cshr.service.*;
+import uk.gov.cshr.service.AgencyTokenCapacityService;
+import uk.gov.cshr.service.EmailUpdateService;
+import uk.gov.cshr.service.ReactivationService;
+import uk.gov.cshr.service.VerificationCodeDeterminationService;
+import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityDetails;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.CsrfRequestPostProcessor;
 import uk.gov.cshr.utils.MockMVCFilterOverrider;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -55,7 +61,7 @@ public class AgencyTokenVerificationControllerTest {
     private static final String EMAIL = "test@example.com";
     private static final String ERROR_TEXT = "There was a problem with this agency token, please try again later";
     private static final String NO_SPACE_AVAIL_TEXT = "No spaces available for this token. Please contact your line manager";
-    private static final String INCORRECT_ORG_TOKEN_TEXT = "Incorrect organisation or token";
+    private static final String INCORRECT_ORG_TOKEN_TEXT = "Incorrect token";
     @Autowired
     private MockMvc mockMvc;
 
@@ -77,25 +83,15 @@ public class AgencyTokenVerificationControllerTest {
     @MockBean
     private IdentityService identityService;
 
-    private AgencyTokenVerificationController agencyTokenVerificationController;
-
-    private OrganisationalUnitDto[] organisations;
+    private List<OrganisationalUnitDto> organisations;
 
     @Before
     public void setup() throws IllegalAccessException {
         MockMVCFilterOverrider.overrideFilterOf(mockMvc, "PatternMappingFilterProxy");
 
-        agencyTokenVerificationController = new AgencyTokenVerificationController(
-                emailUpdateService,
-                csrsService,
-                agencyTokenCapacityService,
-                identityService,
-                verificationCodeDeterminationService,
-                reactivationService);
-
-        organisations = new OrganisationalUnitDto[1];
-        organisations[0] = new OrganisationalUnitDto();
-        when(csrsService.getOrganisationalUnitsFormatted()).thenReturn(organisations);
+        organisations = new ArrayList<>();
+        organisations.add(new OrganisationalUnitDto());
+        when(csrsService.getAllOrganisations()).thenReturn(organisations);
 
         Authentication authentication = mock(Authentication.class);
 
@@ -149,7 +145,7 @@ public class AgencyTokenVerificationControllerTest {
 
     @Test
     public void shouldUpdateEmail() throws Exception {
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         when(identityService.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
@@ -179,7 +175,7 @@ public class AgencyTokenVerificationControllerTest {
 
     @Test
     public void shouldUpdateReactivation() throws Exception {
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         when(identityService.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
@@ -209,7 +205,7 @@ public class AgencyTokenVerificationControllerTest {
 
     @Test
     public void givenAValidTokenForm_whenCheckTokenAndNoSpacesAvailable_thenShouldRedirect() throws Exception {
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         when(identityService.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
@@ -235,7 +231,7 @@ public class AgencyTokenVerificationControllerTest {
 
     @Test
     public void shouldRedirectToVerifyTokenIfResourceNotFound() throws Exception {
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         when(identityService.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
@@ -250,7 +246,7 @@ public class AgencyTokenVerificationControllerTest {
         when(emailUpdateService.getEmailUpdateByCode(CODE)).thenReturn(emailUpdate);
         when(emailUpdateService.getEmailUpdateByCode(CODE)).thenReturn(emailUpdate);
 
-        doThrow(new ResourceNotFoundException()).when(emailUpdateService).updateEmailAddress(any(EmailUpdate.class), any(AgencyToken.class));
+        doThrow(new ResourceNotFoundException()).when(emailUpdateService).updateEmailAddress(any(EmailUpdate.class), any(AgencyTokenDTO.class));
 
         mockMvc.perform(
                 post(VERIFY_TOKEN_URL + CODE)
@@ -266,7 +262,7 @@ public class AgencyTokenVerificationControllerTest {
 
     @Test
     public void shouldRedirectToVerifyTokenIfNoSpaceAvailable() throws Exception {
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, VerificationCodeType.EMAIL_UPDATE);
@@ -290,7 +286,7 @@ public class AgencyTokenVerificationControllerTest {
 
     @Test
     public void shouldRedirectToLoginIfExceptionOccurs() throws Exception {
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         when(identityService.getDomainFromEmailAddress(EMAIL)).thenReturn(DOMAIN);
@@ -303,7 +299,7 @@ public class AgencyTokenVerificationControllerTest {
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, VerificationCodeType.EMAIL_UPDATE);
         when(verificationCodeDeterminationService.getCodeType(CODE)).thenReturn(verificationCodeDetermination);
         when(emailUpdateService.getEmailUpdateByCode(CODE)).thenReturn(emailUpdate);
-        doThrow(new NullPointerException()).when(emailUpdateService).updateEmailAddress(any(EmailUpdate.class), any(AgencyToken.class));
+        doThrow(new NullPointerException()).when(emailUpdateService).updateEmailAddress(any(EmailUpdate.class), any(AgencyTokenDTO.class));
 
         mockMvc.perform(
                 post(VERIFY_TOKEN_URL + CODE)
@@ -319,7 +315,7 @@ public class AgencyTokenVerificationControllerTest {
 
     @Test
     public void shouldBuildGenericErrorModelIfErrorOccurs() throws Exception {
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(AGENCY_TOKEN_UID);
 
         VerificationCodeDetermination verificationCodeDetermination = new VerificationCodeDetermination(EMAIL, VerificationCodeType.EMAIL_UPDATE);
