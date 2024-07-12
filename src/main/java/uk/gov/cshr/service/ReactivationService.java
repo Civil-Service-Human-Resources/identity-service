@@ -3,16 +3,15 @@ package uk.gov.cshr.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.cshr.domain.AgencyToken;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Reactivation;
 import uk.gov.cshr.domain.ReactivationStatus;
+import uk.gov.cshr.dto.AgencyTokenDTO;
 import uk.gov.cshr.exception.IdentityNotFoundException;
 import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.repository.ReactivationRepository;
 import uk.gov.cshr.service.security.IdentityService;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -50,7 +49,7 @@ public class ReactivationService {
         reactivateIdentity(reactivation, null);
     }
 
-    public void reactivateIdentity(Reactivation reactivation, AgencyToken agencyToken) throws IdentityNotFoundException {
+    public void reactivateIdentity(Reactivation reactivation, AgencyTokenDTO agencyToken) throws IdentityNotFoundException {
         Identity identity = identityService.getIdentityByEmailAndActiveFalse(reactivation.getEmail());
         identityService.reactivateIdentity(identity, agencyToken);
 

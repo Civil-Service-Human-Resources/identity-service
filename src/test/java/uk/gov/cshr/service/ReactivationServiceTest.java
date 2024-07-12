@@ -7,22 +7,16 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.modules.junit4.PowerMockRunner;
-import uk.gov.cshr.domain.AgencyToken;
 import uk.gov.cshr.domain.Identity;
 import uk.gov.cshr.domain.Reactivation;
 import uk.gov.cshr.domain.ReactivationStatus;
+import uk.gov.cshr.dto.AgencyTokenDTO;
 import uk.gov.cshr.exception.IdentityNotFoundException;
 import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.repository.ReactivationRepository;
 import uk.gov.cshr.service.security.IdentityService;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -52,7 +46,7 @@ public class ReactivationServiceTest {
         reactivation.setEmail(EMAIL);
         reactivation.setCode(CODE);
 
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(UID);
 
         Identity identity = new Identity();
@@ -76,7 +70,7 @@ public class ReactivationServiceTest {
         reactivation.setEmail(EMAIL);
         reactivation.setCode(CODE);
 
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(UID);
 
         Identity identity = new Identity();

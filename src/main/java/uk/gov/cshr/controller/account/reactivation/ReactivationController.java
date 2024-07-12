@@ -11,25 +11,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cshr.domain.Reactivation;
 import uk.gov.cshr.domain.ReactivationStatus;
-import uk.gov.cshr.exception.ReactivationRequestExpiredException;
 import uk.gov.cshr.exception.ResourceNotFoundException;
-import uk.gov.cshr.service.*;
+import uk.gov.cshr.service.NotifyService;
+import uk.gov.cshr.service.ReactivationService;
+import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
 import uk.gov.cshr.utils.TextEncryptionUtils;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,9 +45,9 @@ public class ReactivationController {
 
     private final IdentityService identityService;
 
-    private final AgencyTokenService agencyTokenService;
+    private final CsrsService csrsService;
 
-    private NotifyService notifyService;
+    private final NotifyService notifyService;
 
     private final String lpgUiUrl;
 
@@ -70,18 +62,18 @@ public class ReactivationController {
 
     public ReactivationController(ReactivationService reactivationService,
                                   IdentityService identityService,
-                                  AgencyTokenService agencyTokenService,
+                                  CsrsService csrsService,
                                   NotifyService notifyService,
                                   @Value("${lpg.uiUrl}") String lpgUiUrl) {
         this.reactivationService = reactivationService;
         this.identityService = identityService;
-        this.agencyTokenService = agencyTokenService;
+        this.csrsService = csrsService;
         this.notifyService = notifyService;
         this.lpgUiUrl = lpgUiUrl;
     }
 
     @GetMapping
-    public String sendReactivationEmail(@RequestParam String code){
+    public String sendReactivationEmail(@RequestParam String code) {
 
         try {
             String email = TextEncryptionUtils.getDecryptedText(code, encryptionKey);
@@ -98,9 +90,7 @@ public class ReactivationController {
     }
 
     @GetMapping("/{code}")
-    public String reactivateAccount(
-            @PathVariable(value = "code") String code,
-            RedirectAttributes redirectAttributes) {
+    public String reactivateAccount(@PathVariable(value = "code") String code, RedirectAttributes redirectAttributes) {
         try {
             Reactivation reactivation = reactivationService.getReactivationByCodeAndStatus(code, ReactivationStatus.PENDING);
 
@@ -113,7 +103,7 @@ public class ReactivationController {
 
             log.debug("Reactivating account using Reactivation: {}", reactivation);
 
-            if (isDomainInAgency(domain)) {
+            if (csrsService.isDomainInAgency(domain)) {
                 log.info("Account reactivation is agency, requires token validation for Reactivation: {}", reactivation);
                 return REDIRECT_ACCOUNT_REACTIVATE_AGENCY + code;
             } else {
@@ -140,9 +130,6 @@ public class ReactivationController {
         return ACCOUNT_REACTIVATED_TEMPLATE;
     }
 
-    private boolean isDomainInAgency(String newDomain) {
-        return agencyTokenService.isDomainInAgencyToken(newDomain);
-    }
     private void notifyUserByEmail(Reactivation reactivation){
         String learnerName = reactivation.getEmail();
 

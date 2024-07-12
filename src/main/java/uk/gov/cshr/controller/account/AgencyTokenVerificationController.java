@@ -8,10 +8,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import uk.gov.cshr.controller.form.VerifyTokenForm;
 import uk.gov.cshr.domain.*;
+import uk.gov.cshr.dto.AgencyTokenDTO;
 import uk.gov.cshr.exception.NotEnoughSpaceAvailableException;
 import uk.gov.cshr.exception.ResourceNotFoundException;
 import uk.gov.cshr.exception.VerificationCodeTypeNotFound;
-import uk.gov.cshr.service.*;
+import uk.gov.cshr.service.AgencyTokenCapacityService;
+import uk.gov.cshr.service.EmailUpdateService;
+import uk.gov.cshr.service.ReactivationService;
+import uk.gov.cshr.service.VerificationCodeDeterminationService;
+import uk.gov.cshr.service.csrs.CsrsService;
 import uk.gov.cshr.service.security.IdentityService;
 import uk.gov.cshr.utils.ApplicationConstants;
 
@@ -98,7 +103,7 @@ public class AgencyTokenVerificationController {
             VerificationCodeDetermination verificationCodeDetermination = verificationCodeDeterminationService.getCodeType(code);
             String domainFromEmailAddress = identityService.getDomainFromEmailAddress(verificationCodeDetermination.getEmail());
 
-            AgencyToken agencyToken = csrsService.getAgencyTokenForDomainTokenOrganisation(domainFromEmailAddress, token, organisation)
+            AgencyTokenDTO agencyToken = csrsService.getAgencyTokenForDomainTokenOrganisation(domainFromEmailAddress, token, organisation)
                     .orElseThrow(ResourceNotFoundException::new);
 
             if (!agencyTokenCapacityService.hasSpaceAvailable(agencyToken)) {
@@ -153,6 +158,6 @@ public class AgencyTokenVerificationController {
     }
 
     private void addOrganisationsToModel(Model model) {
-        model.addAttribute("organisations", csrsService.getOrganisationalUnitsFormatted());
+        model.addAttribute("organisations", csrsService.getAllOrganisations());
     }
 }

@@ -13,24 +13,25 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import uk.gov.cshr.domain.*;
+import uk.gov.cshr.dto.AgencyTokenDTO;
+import uk.gov.cshr.dto.BatchProcessResponse;
 import uk.gov.cshr.exception.AccountDeactivatedException;
 import uk.gov.cshr.exception.IdentityNotFoundException;
 import uk.gov.cshr.exception.PendingReactivationExistsException;
 import uk.gov.cshr.repository.IdentityRepository;
 import uk.gov.cshr.repository.TokenRepository;
 import uk.gov.cshr.service.*;
+import uk.gov.cshr.service.csrs.CsrsService;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+import static uk.gov.cshr.utils.DataUtils.createIdentity;
 
 @RunWith(MockitoJUnitRunner.class)
 public class IdentityServiceTest {
@@ -44,7 +45,6 @@ public class IdentityServiceTest {
     private static final Set<Role> ROLES = new HashSet();
     private static Identity IDENTITY = new Identity(UID, EMAIL, PASSWORD, ACTIVE, LOCKED, ROLES, Instant.now(), false, false);
     private final String updatePasswordEmailTemplateId = "template-id";
-    private final String[] whitelistedDomains = new String[]{"whitelisted.gov.uk", "example.com"};
     private final String orgCode = "AB";
     private MockHttpServletRequest request;
 
@@ -85,16 +85,14 @@ public class IdentityServiceTest {
         identityService = new IdentityService(
                 updatePasswordEmailTemplateId,
                 identityRepository,
-                passwordEncoder,
+                new CompoundRoleRepositoryImpl(), passwordEncoder,
                 tokenServices,
                 tokenRepository,
                 notifyService,
                 csrsService,
-                whitelistedDomains,
                 agencyTokenCapacityService,
                 reactivationService
         );
-
         request = new MockHttpServletRequest();
     }
 
@@ -173,7 +171,7 @@ public class IdentityServiceTest {
     }
 
     @Test
-    public void createIdentityFromInviteCodeWithoutAgencyButIsWhitelisted() {
+    public void createIdentityFromInviteCodeWithoutAgencyButIsallowlisted() {
         final String code = "123abc";
         final String email = "test@example.com";
         Role role = new Role();
@@ -190,7 +188,7 @@ public class IdentityServiceTest {
         TokenRequest tokenRequest = new TokenRequest();
 
         when(inviteService.findByCode(code)).thenReturn(invite);
-
+        when(csrsService.isDomainAllowlisted("example.com")).thenReturn(true);
         when(passwordEncoder.encode("password")).thenReturn("password");
 
         identityService.setInviteService(inviteService);
@@ -232,7 +230,7 @@ public class IdentityServiceTest {
         tokenRequest.setToken(tokenToken);
 
         String uid = "UID";
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(uid);
 
         when(inviteService.findByCode(code)).thenReturn(invite);
@@ -333,32 +331,20 @@ public class IdentityServiceTest {
         verify(notifyService).notify(email, updatePasswordEmailTemplateId);
     }
 
-    @Test(expected = IdentityNotFoundException.class)
-    public void identityRepositoryShouldThrowExceptionIfNotFound() {
-        when(identityRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        Identity identityParam = new Identity();
-        identityParam.setId(new Long(123l));
-
-        identityService.updateEmailAddress(identityParam, "mynewemail@whitelisted.gov.uk", null);
-    }
-
     @Test
-    public void givenAValidIdentityWithAWhitelistedDomain_whenUpdateEmailAddress_shouldReturnSuccessfully(){
+    public void givenAValidIdentityWithAallowlistedDomain_whenUpdateEmailAddress_shouldReturnSuccessfully(){
         // given
-        Optional<Identity> optionalIdentity = Optional.of(IDENTITY);
-        when(identityRepository.findById(anyLong())).thenReturn(optionalIdentity);
+        Identity identityParam = new Identity();
+        identityParam.setRoles(new HashSet<>());
+        identityParam.setId(new Long(123l));
         when(identityRepository.save(identityArgumentCaptor.capture())).thenReturn(new Identity());
 
-        Identity identityParam = new Identity();
-        identityParam.setId(new Long(123l));
 
         // when
-        identityService.updateEmailAddress(identityParam, "mynewemail@whitelisted.gov.uk", null);
+        identityService.updateEmailAddress(identityParam, "mynewemail@allowlisted.gov.uk", null);
 
         // then
-        verify(identityRepository, times(1)).findById(anyLong());
-        verify(identityRepository, times(1)).save(optionalIdentity.get());
+        verify(identityRepository, times(1)).save(identityParam);
         Identity actualSavedIdentity = identityArgumentCaptor.getValue();
         assertThat(actualSavedIdentity.getAgencyTokenUid(), equalTo(null));
     }
@@ -366,37 +352,20 @@ public class IdentityServiceTest {
     @Test
     public void givenAValidIdentityWithAnAgencyDomain_whenUpdateEmailAddress_shouldReturnSuccessfully() {
         // given
-        Optional<Identity> optionalIdentity = Optional.of(IDENTITY);
-        when(identityRepository.findById(anyLong())).thenReturn(optionalIdentity);
-        when(identityRepository.save(identityArgumentCaptor.capture())).thenReturn(new Identity());
-
         Identity identityParam = new Identity();
         identityParam.setId(new Long(123l));
-
-        AgencyToken agencyToken = new AgencyToken();
+        identityParam.setRoles(new HashSet<>());
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(UID);
+        when(identityRepository.save(identityArgumentCaptor.capture())).thenReturn(new Identity());
 
         // when
-        identityService.updateEmailAddress(identityParam, "mynewemail@whitelisted.gov.uk", agencyToken);
+        identityService.updateEmailAddress(identityParam, "mynewemail@allowlisted.gov.uk", agencyToken);
 
         // then
-        verify(identityRepository, times(1)).findById(anyLong());
-        verify(identityRepository, times(1)).save(optionalIdentity.get());
+        verify(identityRepository, times(1)).save(identityParam);
         Identity actualSavedIdentity = identityArgumentCaptor.getValue();
         assertThat(actualSavedIdentity.getAgencyTokenUid(), equalTo(UID));
-    }
-
-    @Test
-    public void givenAValidWhitelistedEmail_whenCheckValidEmail_shouldReturnTrue(){
-        // given
-        // whitelisted.gov.uk which is whitelisted
-
-        // when
-        boolean actual = identityService.checkValidEmail("someone@whitelisted.gov.uk");
-
-        // then
-        assertTrue(actual);
-        verifyZeroInteractions(csrsService);
     }
 
     @Test
@@ -404,13 +373,13 @@ public class IdentityServiceTest {
         String email = "someone@badger.gov.uk";
         String domain = "badger.gov.uk";
 
-        when(csrsService.isDomainInAgency(domain)).thenReturn(true);
+        when(csrsService.isDomainValid(domain)).thenReturn(true);
 
         boolean actual = identityService.checkValidEmail(email);
 
         // then
         assertTrue(actual);
-        verify(csrsService, times(1)).isDomainInAgency(eq("badger.gov.uk"));
+        verify(csrsService, times(1)).isDomainValid(eq("badger.gov.uk"));
     }
 
     @Test
@@ -418,18 +387,18 @@ public class IdentityServiceTest {
         String email = "someone@foo.com";
         String domain = "foo.com";
 
-        when(csrsService.isDomainInAgency(domain)).thenReturn(false);
+        when(csrsService.isDomainValid(domain)).thenReturn(false);
 
         boolean actual = identityService.checkValidEmail(email);
 
         assertFalse(actual);
-        verify(csrsService, times(1)).isDomainInAgency(eq("foo.com"));
+        verify(csrsService, times(1)).isDomainValid(eq("foo.com"));
     }
 
     @Test
     public void shouldReactivateIdentity() {
         Identity identity = new Identity();
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(UID);
 
         identityService.reactivateIdentity(identity, agencyToken);
@@ -464,24 +433,27 @@ public class IdentityServiceTest {
     }
 
     @Test
-    public void testIsWhitelistedDomainMixedCase(){
-        boolean validDomain = identityService.isWhitelistedDomain("ExAmPlE.cOm");
+    public void shouldRemoveReportingRoles() {
+        Role orgReporter = new Role("ORGANISATION_REPORTER", "");
+        Role professionReporter = new Role("PROFESSION_REPORTER", "");
+        Role learner = new Role("LEARNER", "");
 
-        assertTrue(validDomain);
-    }
+        Identity reporter = createIdentity("uid123", "reporter@email.com", null);
+        reporter.setRoles(new HashSet<>(Arrays.asList(learner, orgReporter)));
 
-    @Test
-    public void testIsWhitelistedDomainLowerCase(){
-        boolean validDomain = identityService.isWhitelistedDomain("example.com");
+        Identity reporter1 = createIdentity("uid456", "reporter1@email.com", null);
+        reporter1.setRoles(new HashSet<>(Arrays.asList(learner, orgReporter, professionReporter)));
 
-        assertTrue(validDomain);
-    }
+        Identity user = createIdentity("uid789", "user@email.com", null);
+        user.setRoles(new HashSet<>(Collections.singletonList(learner)));
+        List<Identity> identities = Arrays.asList(reporter, reporter1, user);
 
-    @Test
-    public void testIsWhitelistedDomainUpperCase(){
-        boolean validDomain = identityService.isWhitelistedDomain("EXAMPLE.COM");
-
-        assertTrue(validDomain);
+        when(identityRepository.findIdentitiesByUids(Arrays.asList("uid123", "uid456", "uid789"))).thenReturn(identities);
+        BatchProcessResponse resp = identityService.removeReportingRoles(Arrays.asList("uid123", "uid456", "uid789"));
+        List<String> successfulIds = resp.getSuccessfulIds();
+        assertEquals(2, successfulIds.size());
+        assertEquals("uid123", successfulIds.get(0));
+        assertEquals("uid456", successfulIds.get(1));
     }
 
 }

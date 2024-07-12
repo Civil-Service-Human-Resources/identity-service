@@ -17,14 +17,12 @@ import java.util.UUID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
+import static uk.gov.cshr.utils.DataUtils.createIdentity;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
 public class IdentityRepositoryTest {
-
-    public static final String EMAIL_TEMPLATE = "%s@example.org";
-    public static final String PASSWORD = "password123";
 
     @Autowired
     private IdentityRepository identityRepository;
@@ -169,15 +167,4 @@ public class IdentityRepositoryTest {
         assertEquals(0, result5.size());
     }
 
-    private Identity createIdentity() {
-        return createIdentity(null);
-    }
-
-    private Identity createIdentity(String agencyTokenUid) {
-        return createIdentity(UUID.randomUUID().toString(), UUID.randomUUID().toString(), agencyTokenUid);
-    }
-
-    private Identity createIdentity(String uid, String emailPrefix, String agencyTokenUid) {
-        return new Identity(uid, String.format(EMAIL_TEMPLATE, emailPrefix), PASSWORD, true, false, null, Instant.now(), false, false, agencyTokenUid);
-    }
 }

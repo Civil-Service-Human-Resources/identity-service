@@ -5,8 +5,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.cshr.domain.AgencyToken;
 import uk.gov.cshr.domain.AgencyTokenCapacityUsedDto;
+import uk.gov.cshr.dto.AgencyTokenDTO;
 import uk.gov.cshr.repository.IdentityRepository;
 
 import java.util.UUID;
@@ -27,7 +27,7 @@ public class AgencyTokenCapacityServiceTest {
 
     @Test
     public void shouldReturnTrueIfManySpacesAvailable() {
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(UID);
         agencyToken.setCapacity(100);
 
@@ -38,7 +38,7 @@ public class AgencyTokenCapacityServiceTest {
 
     @Test
     public void shouldReturnTrueIfOneSpaceAvailable() {
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(UID);
         agencyToken.setCapacity(100);
 
@@ -49,7 +49,7 @@ public class AgencyTokenCapacityServiceTest {
 
     @Test
     public void shouldReturnFalseIfNoSpaceAvailable() {
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(UID);
         agencyToken.setCapacity(100);
 
@@ -60,7 +60,7 @@ public class AgencyTokenCapacityServiceTest {
 
     @Test
     public void shouldReturnFalseIfNoSpaceAvailableWhereCapacityReduced() {
-        AgencyToken agencyToken = new AgencyToken();
+        AgencyTokenDTO agencyToken = new AgencyTokenDTO();
         agencyToken.setUid(UID);
         agencyToken.setCapacity(100);
 
