@@ -14,7 +14,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: false
+    show-sql: ${JPA_SHOW_SQL:false}
 
 server:
   servlet:
