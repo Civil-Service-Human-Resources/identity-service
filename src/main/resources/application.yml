@@ -1,4 +1,15 @@
+database:
+  host: ${DATABASE_HOST:jdbc:mysql://localhost:3306}
+  name: ${DATABASE_NAME:identity}
+  use-ssl: ${DATABASE_USESSL:false}
+
 spring:
+  datasource:
+    url: ${DATASOURCE_URL:${database.host}/${database.name}?useSSL=${database.use-ssl}&requireSSL=false}
+    username: ${DATASOURCE_USERNAME:root}
+    password: ${DATASOURCE_PASSWORD:my-secret-pw}
+    platform: mysql
+    driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
       repositories:
@@ -35,11 +46,11 @@ templates:
   assetCdn: ${ASSET_CDN:}
 
 accessToken:
-  jwtKey: ${jwt_key}
+  jwtKey: ${jwt_key:dummy}
   validityInSeconds: ${ACCESS_TOKEN_VALIDITY:86400}
 
 govNotify:
-  key: ${GOV_NOTIFY_API_KEY:key}
+  key: ${GOV_NOTIFY_API_KEY:test-22877568-4bca-40f9-8f54-8bf7922583cf-e2f80f22-e3de-4007-9ce2-b50a2b5785b7}
   template:
     invite: ${GOV_NOTIFY_INVITE_TEMPLATE_ID:7ef048a3-5c82-40fd-be4c-a238ce328fea}
     reset: ${GOV_NOTIFY_RESET_TEMPLATE_ID:d29b056c-349b-42fc-a453-920cfb58a906}
@@ -78,7 +89,7 @@ maintenancePage:
   skipForUris: ${MAINTENANCE_PAGE_SKIP_FOR_URIS:/health,/maintenance,/error,/logout,/webjars,/css,/img,/js,/favicon.ico,/oauth/revoke,/oauth/resolve,/oauth/token,/oauth/check_token,/api/identities,/signup/chooseOrganisation,/signup/enterToken,/account/verify/agency,/account/reactivate/updated,/account/email/updated}
 
 lpg:
-  uiUrl: ${LPG_UI_URL:http://localhost:3001}
+  uiUrl: ${LPG_UI_URL:http://develop.learn.civilservice.gov.uk:3001}
   identity: ${OAUTH_SERVICE_URL:http://localhost:8080}
 
 registry:
